@@ -14,6 +14,7 @@ interface AuthorizeResponseBody {
 interface TokenRequestBody {
   grant_type?: string;
   code?: string;
+  refresh_token?: string;
   client_id?: string;
   redirect_uri?: string;
   code_verifier?: string;
@@ -51,7 +52,7 @@ export const tokenHandler = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const result = await oidcService.exchangeAuthorizationCode(request.body);
+    const result = await oidcService.exchangeToken(request.body);
     response.status(200).json(result);
   } catch (error: unknown) {
     next(error);
