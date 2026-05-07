@@ -150,3 +150,8 @@ export type TokenIntrospectionResponse =
   | InactiveTokenIntrospectionResponse
   | ActiveRefreshTokenIntrospectionResponse
   | ActiveAccessTokenIntrospectionResponse;
+
+export type {
+  OidcSessionRecord as OidcSessionEntity,
+  OidcSessionStatus,
+} from './oidc-session.model.js';

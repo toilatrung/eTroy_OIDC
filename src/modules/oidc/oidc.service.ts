@@ -10,6 +10,7 @@ import { toOidcUserIdentity } from './claims.mapper.js';
 import { JwtAccessTokenProvider } from './access-token.provider.js';
 import { AuthorizationCodeRepository } from './authorization-code.repository.js';
 import { JwtIdTokenProvider } from './id-token.provider.js';
+import { OidcSessionService, type OidcSessionCookieDescriptor } from './oidc-session.service.js';
 import { RefreshTokenService } from './refresh-token.service.js';
 import type {
   AccessTokenProvider,
@@ -53,6 +54,7 @@ const AUTHORIZATION_CODE_PATTERN = /^[A-Za-z0-9_-]{43,128}$/u;
 
 export interface AuthorizeContinueResult {
   redirectTo: string;
+  sessionCookie: OidcSessionCookieDescriptor;
 }
 
 export interface TokenExchangeResponse {
@@ -64,6 +66,17 @@ export interface TokenExchangeResponse {
 }
 
 type SupportedTokenTypeHint = 'refresh_token' | 'access_token';
+
+export type AuthorizeHandlerResult =
+  | {
+      kind: 'authentication_required';
+      context: AuthorizeRequestContext;
+      clearSessionCookie: boolean;
+    }
+  | {
+      kind: 'redirect';
+      redirectTo: string;
+    };
 
 const invalidInput = (message: string): BaseError =>
   new BaseError(message, {
@@ -285,6 +298,20 @@ const resolveOidcUserIdentity = async (
   }
 };
 
+const buildAuthorizeRedirectUrl = (
+  redirectUri: string,
+  authorizationCode: string,
+  state?: string,
+): string => {
+  const redirectUrl = new URL(redirectUri);
+  redirectUrl.searchParams.set('code', authorizationCode);
+  if (state !== undefined) {
+    redirectUrl.searchParams.set('state', state);
+  }
+
+  return redirectUrl.toString();
+};
+
 export class OidcService {
   constructor(
     private readonly clients: readonly OidcClient[] = config.oidc.clients,
@@ -294,8 +321,44 @@ export class OidcService {
     private readonly accessTokenProvider: AccessTokenProvider = new JwtAccessTokenProvider(),
     private readonly idTokenProvider: IdTokenProvider = new JwtIdTokenProvider(),
     private readonly refreshTokenService: RefreshTokenService = new RefreshTokenService(),
+    private readonly oidcSessionService: OidcSessionService = new OidcSessionService(),
     private readonly getNow: () => Date = () => new Date(),
   ) {}
+
+  async authorize(
+    query: unknown,
+    cookieHeader: string | undefined,
+  ): Promise<AuthorizeHandlerResult> {
+    const context = this.validateAuthorizeRequest(query);
+    const validatedSession = await this.oidcSessionService.validateSessionCookie(cookieHeader);
+
+    if (validatedSession.status !== 'active') {
+      return {
+        kind: 'authentication_required',
+        context,
+        clearSessionCookie: validatedSession.status !== 'missing',
+      };
+    }
+
+    await this.oidcSessionService.touchSessionForAuthorize(
+      validatedSession.session.sessionId,
+      context.client.clientId,
+    );
+
+    const issuedAuthorizationCode = await this.issueAuthorizationCode(
+      context,
+      validatedSession.session.subject,
+    );
+
+    return {
+      kind: 'redirect',
+      redirectTo: buildAuthorizeRedirectUrl(
+        context.redirectUri,
+        issuedAuthorizationCode.rawCode,
+        context.state,
+      ),
+    };
+  }
 
   validateAuthorizeRequest(query: unknown): AuthorizeRequestContext {
     const queryRecord = toQueryRecord(query);
@@ -343,15 +406,18 @@ export class OidcService {
     const context = this.validateAuthorizeRequest(inputRecord);
     const identity = await this.authBridge.validateCredentials(email, password);
     const issuedAuthorizationCode = await this.issueAuthorizationCode(context, identity.sub);
-
-    const redirectUrl = new URL(context.redirectUri);
-    redirectUrl.searchParams.set('code', issuedAuthorizationCode.rawCode);
-    if (context.state !== undefined) {
-      redirectUrl.searchParams.set('state', context.state);
-    }
+    const createdSession = await this.oidcSessionService.createSession({
+      subject: identity.sub,
+      clientId: context.client.clientId,
+    });
 
     return {
-      redirectTo: redirectUrl.toString(),
+      redirectTo: buildAuthorizeRedirectUrl(
+        context.redirectUri,
+        issuedAuthorizationCode.rawCode,
+        context.state,
+      ),
+      sessionCookie: createdSession.cookie,
     };
   }
 
@@ -411,6 +477,14 @@ export class OidcService {
       clientId,
       tokenTypeHint: resolvedHint,
     });
+  }
+
+  getClearSessionCookieDescriptor(): OidcSessionCookieDescriptor {
+    return this.oidcSessionService.buildClearCookieDescriptor();
+  }
+
+  async invalidateSession(sessionId: string): Promise<void> {
+    await this.oidcSessionService.invalidateSession(sessionId);
   }
 
   private async exchangeAuthorizationCodeGrant(

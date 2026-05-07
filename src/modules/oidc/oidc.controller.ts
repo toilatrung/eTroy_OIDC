@@ -2,10 +2,12 @@ import type { NextFunction, Request, Response } from 'express';
 
 import {
   oidcService,
+  type AuthorizeHandlerResult,
   type AuthorizeContinueResult,
   type AuthorizeRequestContext,
   type TokenExchangeResponse,
 } from './oidc.service.js';
+import type { OidcSessionCookieDescriptor } from './oidc-session.service.js';
 import type { TokenIntrospectionResponse } from './oidc.types.js';
 
 interface AuthorizeResponseBody {
@@ -33,14 +35,46 @@ interface IntrospectRequestBody {
   client_id?: string;
 }
 
-export const authorizeHandler = (
+const setSessionCookie = (response: Response, cookie: OidcSessionCookieDescriptor): void => {
+  response.cookie(cookie.name, cookie.value, {
+    path: cookie.path,
+    httpOnly: cookie.httpOnly,
+    sameSite: cookie.sameSite,
+    secure: cookie.secure,
+    maxAge: cookie.maxAgeMs,
+  });
+};
+
+const clearSessionCookie = (response: Response, cookie: OidcSessionCookieDescriptor): void => {
+  response.clearCookie(cookie.name, {
+    path: cookie.path,
+    httpOnly: cookie.httpOnly,
+    sameSite: cookie.sameSite,
+    secure: cookie.secure,
+  });
+};
+
+export const authorizeHandler = async (
   request: Request,
   response: Response<AuthorizeResponseBody>,
   next: NextFunction,
-): void => {
+): Promise<void> => {
   try {
-    const result = oidcService.validateAuthorizeRequest(request.query);
-    response.status(200).json({ data: result });
+    const result: AuthorizeHandlerResult = await oidcService.authorize(
+      request.query,
+      request.headers.cookie,
+    );
+
+    if (result.kind === 'redirect') {
+      response.redirect(302, result.redirectTo);
+      return;
+    }
+
+    if (result.clearSessionCookie) {
+      clearSessionCookie(response, oidcService.getClearSessionCookieDescriptor());
+    }
+
+    response.status(200).json({ data: result.context });
   } catch (error: unknown) {
     next(error);
   }
@@ -53,6 +87,7 @@ export const authorizeContinueHandler = async (
 ): Promise<void> => {
   try {
     const result: AuthorizeContinueResult = await oidcService.continueAuthorize(request.body);
+    setSessionCookie(response, result.sessionCookie);
     response.redirect(302, result.redirectTo);
   } catch (error: unknown) {
     next(error);
