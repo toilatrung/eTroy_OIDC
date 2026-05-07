@@ -589,3 +589,27 @@ It records meaningful state transitions and approved outcomes only.
 - Open items:
   - begin Phase 05 planning and implementation
   - handle repo-wide formatting baseline cleanup later as a separate repository-wide cleanup item
+
+### 2026-05-07 / PHASE05-SPRINT12-MERGE-001
+
+- Completed:
+  - Sprint 12 PR #38 merged
+  - Sprint 12 refresh token rotation/reuse detection implemented
+  - Sprint 12 report completed
+- Approved:
+  - OIDC remains owner of refresh token lifecycle
+  - `auth`, `users`, and `token-lifecycle` boundaries preserved
+  - hash-only refresh token persistence preserved
+  - duplicate concurrent loser policy: `invalid_grant` + family compromise
+- Validation evidence:
+  - `npm.cmd run lint`: PASS
+  - `npm.cmd run typecheck`: PASS
+  - `npm.cmd run build`: PASS
+  - scoped Prettier check: PASS
+  - boundary scans: PASS
+  - runtime/manual scenarios: PASS
+  - JWKS verification: PASS
+- Known condition:
+  - global format check drift remains external and deferred
+- Open items:
+  - prepare Sprint 13 revoke/introspection contract and assignment before coding

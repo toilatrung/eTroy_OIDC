@@ -7,6 +7,12 @@ export interface RefreshTokenDocument {
   subject: string;
   clientId: string;
   scope: string;
+  familyId: string;
+  parentTokenId: string | null;
+  replacedByTokenId: string | null;
+  status: 'active' | 'consumed' | 'revoked' | 'compromised';
+  compromisedAt: Date | null;
+  compromiseReason: 'reuse_detected' | null;
   issuedAt: Date;
   expiresAt: Date;
   consumedAt: Date | null;
@@ -38,6 +44,33 @@ const refreshTokenSchema = new Schema<RefreshTokenDocument>(
       required: true,
       trim: true,
     },
+    familyId: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    parentTokenId: {
+      type: String,
+      default: null,
+    },
+    replacedByTokenId: {
+      type: String,
+      default: null,
+    },
+    status: {
+      type: String,
+      enum: ['active', 'consumed', 'revoked', 'compromised'],
+      required: true,
+      default: 'active',
+    },
+    compromisedAt: {
+      type: Date,
+      default: null,
+    },
+    compromiseReason: {
+      type: String,
+      default: null,
+    },
     issuedAt: {
       type: Date,
       required: true,
@@ -62,6 +95,8 @@ const refreshTokenSchema = new Schema<RefreshTokenDocument>(
 
 refreshTokenSchema.index({ expiresAt: 1 });
 refreshTokenSchema.index({ subject: 1, clientId: 1 });
+refreshTokenSchema.index({ familyId: 1 });
+refreshTokenSchema.index({ familyId: 1, status: 1 });
 
 export const RefreshTokenModel =
   (models.OidcRefreshToken as Model<RefreshTokenDocument> | undefined) ??
