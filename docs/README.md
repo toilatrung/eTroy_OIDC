@@ -98,8 +98,9 @@ Load in this sequence:
 - `phase-05-token-session-management.md` -> Phase 05 closed scope and boundary baseline
 - `phase-05-consolidated-report.md` -> Phase 05 closure and merge/validation evidence
 - `phase-06-platform-governance-hardening.md` -> Phase 06 approved contract-backed execution plan (runtime not started)
-- `phase-02-sprint-04.md` -> historical sprint assignment
-- `phase-06-sprint-16.md` -> Sprint 16 assignment (Draft for approval; runtime blocked until contract + assignment approval)
+- `docs/planning/assignments/` -> sprint-level assignment documents defining execution scope and task contracts
+- `docs/planning/reports/` -> sprint/phase execution evidence, validation results, and handoff context
+- `phase-06-sprint-16.md` -> next sprint assignment (Draft for approval; runtime blocked until audit contract + assignment approval)
 - `docs/contracts/oidc/jwt-token-contract.md` -> JWT Token Contract (Phase 04 / Sprint 10)
 - `docs/contracts/oidc/refresh-token-contract.md` -> Refresh Token Foundation Contract (Phase 05 / Sprint 11)
 - `docs/contracts/oidc/refresh-token-rotation-contract.md` -> Refresh Token Rotation Contract (Phase 05 / Sprint 12)
@@ -107,7 +108,6 @@ Load in this sequence:
 - `docs/contracts/oidc/session-sso-contract.md` -> Session and SSO Contract (Phase 05 / Sprint 14)
 - `docs/contracts/oidc/logout-hardening-contract.md` -> Logout Hardening Contract (Phase 05 / Sprint 15)
 - `docs/contracts/audit/audit-event-contract.md` -> Audit Event Contract (Draft for approval)
-- sprint reports under `docs/planning/reports/` -> sprint execution evidence
 - governance documents -> repository control and merge discipline
 - `anti-patterns.md` -> merge-blocking anti-pattern reference aligned with architecture and governance
 
