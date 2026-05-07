@@ -733,3 +733,22 @@ It records meaningful state transitions and approved outcomes only.
   - `docs/planning/phases/phase-05-token-session-management.md`
 - Open items:
   - start Phase 06 planning and assignment drafting under contract-first workflow
+
+### 2026-05-07 / PHASE05-CLOSURE-SOURCE-SYNC-003
+
+- Completed:
+  - synchronized authoritative navigation/context docs for Phase 05 closure state
+  - aligned source-of-truth and README document maps with existing Phase 05 contracts/planning/report references
+  - aligned current context to explicit Phase 01-05 CLOSED and Phase 06 planning-ready-only status
+- Approved:
+  - Phase 06 runtime implementation remains not started
+  - no new Phase 06 contract files or assignment files were created in this sync
+  - no `src/` runtime changes were made
+- Source-of-truth documents changed:
+  - `docs/source-of-truth-index.md`
+  - `docs/README.md`
+- Agent files changed:
+  - `agent/current-context.md`
+  - `agent/session-history.md`
+- Open items:
+  - prepare and approve future Phase 06 planning/contracts/assignments before runtime implementation

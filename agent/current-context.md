@@ -8,6 +8,9 @@ It summarizes approved state and next actions without redefining architecture.
 ## II. Current Project State
 
 - Documentation authority model is active: `docs/` is authoritative, `agent/` is support only.
+- Phase 01 - Environment and Infrastructure Foundation: CLOSED.
+- Phase 02 - Identity Core: CLOSED.
+- Phase 03 - Account Lifecycle: CLOSED.
 - Phase 04 - OIDC Core: CLOSED.
 - Sprint 08: CLOSED - authorize endpoint validation baseline.
 - Sprint 09: CLOSED - token endpoint and authorization-code exchange baseline.
@@ -22,7 +25,7 @@ It summarizes approved state and next actions without redefining architecture.
   - PR: `#44`
   - runtime commit: `c26403b`
   - merge commit: `128944c`
-  - `origin/main` head at verification: `128944c`
+  - `origin/main` head at closure-sync baseline: `57530e8`
 
 ## III. Phase Boundary Notes
 
@@ -55,4 +58,6 @@ It summarizes approved state and next actions without redefining architecture.
 
 ## VI. Next Recommended Step
 
-- Begin Phase 06 planning only under approved contracts/assignments (no runtime implementation yet).
+- Phase 06 is planning-ready only; runtime implementation is not started.
+- Keep Phase 06 planning high-level in this state: audit logging, admin controls, client management, observability, key rotation, and security hardening.
+- Prepare and approve future Phase 06 planning/contracts/assignments before any runtime implementation.
