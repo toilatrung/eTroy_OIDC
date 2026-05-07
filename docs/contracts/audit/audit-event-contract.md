@@ -10,9 +10,9 @@
 - Owner Module: `src/modules/audit`
 - Primary Assignment: `docs/planning/assignments/phase-06-sprint-16.md`
 - Contract Path: `docs/contracts/audit/audit-event-contract.md`
-- Status: Draft for approval
+- Status: Approved (in this PR)
 - Sprint 16 runtime status: NOT STARTED
-- Sprint 16 runtime gate: BLOCKED UNTIL this contract and `docs/planning/assignments/phase-06-sprint-16.md` are both approved
+- Sprint 16 runtime gate: will be unblocked after this PR is merged; runtime implementation remains not started and must occur on a separate Sprint 16 feature branch.
 
 ---
 
@@ -22,7 +22,7 @@ This contract defines the audit event model, persistence rules, recording bounda
 
 The contract exists to ensure security-relevant system activity can be recorded consistently without leaking secrets, duplicating business logic, mutating domain state, or violating module boundaries.
 
-This contract and the Sprint 16 assignment are required before Sprint 16 runtime implementation begins.
+This contract and the Sprint 16 assignment are approved in this PR, but Sprint 16 runtime implementation remains not started and may begin only after this PR is merged on a separate Sprint 16 feature branch.
 
 ---
 

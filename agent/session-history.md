@@ -776,3 +776,26 @@ It records meaningful state transitions and approved outcomes only.
   - `agent/session-history.md`
 - Open items:
   - approve audit contract and Sprint 16 assignment before starting Sprint 16 runtime implementation
+
+### 2026-05-07 / PHASE06-PR-APPROVAL-STATE-SYNC-005
+
+- Completed:
+  - synchronized Phase 06 approval-state wording across source-of-truth and agent context for current PR branch state
+  - marked audit contract and Sprint 16 assignment as approved in this PR
+  - preserved Sprint 16 runtime as NOT STARTED
+- Approved:
+  - Sprint 16 runtime execution is allowed only after this PR is merged into `main`
+  - runtime implementation must occur on a separate Sprint 16 feature branch
+  - no runtime code changes and no Sprint 16 report creation were included
+- Source-of-truth documents changed:
+  - `docs/contracts/audit/audit-event-contract.md`
+  - `docs/planning/assignments/phase-06-sprint-16.md`
+  - `docs/source-of-truth-index.md`
+  - `docs/README.md`
+  - `docs/planning/master-execution-plan.md`
+  - `docs/planning/phases/phase-06-platform-governance-hardening.md`
+- Agent files changed:
+  - `agent/current-context.md`
+  - `agent/session-history.md`
+- Open items:
+  - merge this PR, then start Sprint 16 runtime on a dedicated Sprint 16 feature branch
