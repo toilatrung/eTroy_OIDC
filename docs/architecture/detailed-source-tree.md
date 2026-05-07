@@ -172,14 +172,9 @@ docs/
 |  |  |- phase-01-environment-bootstrap.md
 |  |  \- phase-02-identity-core.md
 |  |- assignments/
-|  |  |- phase-01-sprint-01.md
-|  |  |- phase-01-sprint-02.md
-|  |  |- phase-01-sprint-03.md
-|  |  \- phase-02-sprint-04.md
+|  |  \- phase-<nn>-sprint-<nn>.md (sprint-level assignment contracts by phase/sprint)
 |  \- reports/
-|     |- phase-01-sprint-01-report.md
-|     |- phase-01-sprint-02-report.md
-|     \- phase-01-sprint-03-report.md
+|     \- phase-<nn>-sprint-<nn>-report.md / phase-<nn>-consolidated-report.md (execution evidence and handoff context)
 \- governance/
    |- git-rules.md
    |- pr-template.md

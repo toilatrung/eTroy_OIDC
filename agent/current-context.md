@@ -21,6 +21,10 @@ It summarizes approved state and next actions without redefining architecture.
 - Sprint 13 - Revoke + Introspection: MERGED / CLOSED / PRESENT IN `main`.
 - Sprint 14 - Session + SSO: MERGED / CLOSED / PRESENT IN `main`.
 - Sprint 15 - Logout Hardening: MERGED / CLOSED / PRESENT IN `main`.
+- Phase 06 - Platform and Governance Hardening: APPROVED FOR CONTRACT-BACKED EXECUTION.
+- Phase 06 runtime implementation: NOT STARTED.
+- Next sprint: Sprint 16 - Audit Logging Foundation (not started).
+- Sprint 16 runtime gate: BLOCKED UNTIL `docs/contracts/audit/audit-event-contract.md` and `docs/planning/assignments/phase-06-sprint-16.md` are approved.
 - Sprint 15 merge evidence:
   - PR: `#44`
   - runtime commit: `c26403b`
@@ -58,6 +62,6 @@ It summarizes approved state and next actions without redefining architecture.
 
 ## VI. Next Recommended Step
 
-- Phase 06 is planning-ready only; runtime implementation is not started.
-- Keep Phase 06 planning high-level in this state: audit logging, admin controls, client management, observability, key rotation, and security hardening.
-- Prepare and approve future Phase 06 planning/contracts/assignments before any runtime implementation.
+- Keep Phase 06 runtime NOT STARTED until Sprint 16 gate conditions are met.
+- Approve `docs/contracts/audit/audit-event-contract.md` and `docs/planning/assignments/phase-06-sprint-16.md`.
+- Start Sprint 16 runtime only after both approvals are recorded in source-of-truth docs.
