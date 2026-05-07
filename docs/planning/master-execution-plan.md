@@ -380,10 +380,11 @@ It is the operational control layer that keeps implementation aligned with appro
 - Phase 02 - Identity Core: CLOSED
 - Phase 03 - Account Lifecycle: CLOSED
 - Phase 04 - OIDC Core: CLOSED
-- Current next phase: Phase 05 - Token and Session Management
+- Phase 05 - Token and Session Management: CLOSED
+- Current next phase: Phase 06 - Platform and Governance Hardening
 
 ---
 
 ## Next Step
 
-Proceed with Phase 05 planning and implementation for secure token and session lifecycle management while preserving Phase 04 boundaries and source-of-truth governance.
+Proceed with Phase 06 planning only under contract-first governance. Do not begin Phase 06 runtime implementation until Phase 06 assignments/contracts are approved.

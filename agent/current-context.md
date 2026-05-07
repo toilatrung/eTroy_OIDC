@@ -12,17 +12,17 @@ It summarizes approved state and next actions without redefining architecture.
 - Sprint 08: CLOSED - authorize endpoint validation baseline.
 - Sprint 09: CLOSED - token endpoint and authorization-code exchange baseline.
 - Sprint 10: CLOSED - JWT access token, ID Token, claims mapper, and `/userinfo`.
-- Phase 05 is active.
+- Phase 05 - Token and Session Management: CLOSED.
 - Sprint 11 - Refresh Token Foundation: MERGED / CLOSED / PRESENT IN `main`.
 - Sprint 12 - Refresh Token Rotation + Reuse Detection: MERGED / CLOSED / PRESENT IN `main`.
 - Sprint 13 - Revoke + Introspection: MERGED / CLOSED / PRESENT IN `main`.
-- Sprint 14 - Session + SSO:
-  - MERGED / CLOSED / PRESENT IN `main`
-  - runtime commit: `53139b0e08f708d8e5fed3cafdcfb412f45d61a0`
-  - status: COMPLETE WITH ACCEPTED EXTERNAL FORMAT CONDITION
-- Sprint 15 - Logout Hardening:
-  - implementation completed on branch `feature/oidc-sprint15-logout-hardening`
-  - pending PR review/merge
+- Sprint 14 - Session + SSO: MERGED / CLOSED / PRESENT IN `main`.
+- Sprint 15 - Logout Hardening: MERGED / CLOSED / PRESENT IN `main`.
+- Sprint 15 merge evidence:
+  - PR: `#44`
+  - runtime commit: `c26403b`
+  - merge commit: `128944c`
+  - `origin/main` head at verification: `128944c`
 
 ## III. Phase Boundary Notes
 
@@ -38,21 +38,21 @@ It summarizes approved state and next actions without redefining architecture.
   - logout hardening if approved by Phase 05 planning
 - Do not move refresh token lifecycle, rotation, revoke, introspection, session, SSO, or logout hardening into Phase 04.
 
-## IV. Sprint 14 Validation Summary
+## IV. Phase 05 Validation Summary
 
-- Validation status:
+- Sprint 11-15 validation posture:
   - `npm.cmd run lint`: PASS
   - `npm.cmd run typecheck`: PASS
   - `npm.cmd run build`: PASS
-  - `npm.cmd run format:check`: FAIL due accepted external repository-wide formatting baseline drift outside Sprint 14 touched files
-  - scoped Sprint 14 touched-file Prettier check: PASS
+  - `npm.cmd run format:check`: FAIL due accepted external repository-wide formatting baseline drift outside sprint-scoped touched files
+  - scoped touched-file Prettier checks: PASS
   - boundary scans: PASS / PASS WITH REVIEW
-  - `SPRINT14_RUNTIME_HARNESS=PASS`
+  - runtime/manual harnesses: PASS
 
 ## V. Known Condition
 
-- Global `npm.cmd run format:check` remains failing due accepted external repository-wide formatting baseline drift outside Sprint 14 touched files.
+- Global `npm.cmd run format:check` remains failing due accepted external repository-wide formatting baseline drift outside Sprint 11-15 touched files.
 
 ## VI. Next Recommended Step
 
-- Open Sprint 15 PR with validation evidence and contract references; do not merge directly to `main`.
+- Begin Phase 06 planning only under approved contracts/assignments (no runtime implementation yet).

@@ -34,9 +34,22 @@ Phase 05 must preserve all Phase 04 OIDC boundaries and must not move token/sess
 
 ## II. Status
 
-- Status: PLANNED
+- Status: CLOSED
 - Implementation range: Sprint 11 - Sprint 15
 - Previous phase: Phase 04 - OIDC Core
+- Closure verification basis:
+  - Sprint 11 report: `docs/planning/reports/phase-05-sprint-11-report.md`
+  - Sprint 12 report: `docs/planning/reports/phase-05-sprint-12-report.md`
+  - Sprint 13 report: `docs/planning/reports/phase-05-sprint-13-report.md`
+  - Sprint 14 report: `docs/planning/reports/phase-05-sprint-14-report.md`
+  - Sprint 15 report: `docs/planning/reports/phase-05-sprint-15-report.md`
+  - Consolidated closure report: `docs/planning/reports/phase-05-consolidated-report.md`
+  - Merge evidence on `main`:
+    - Sprint 11 merge commit: `ebd0c6d`
+    - Sprint 12 merge commit: `41044f9`
+    - Sprint 13 merge commit: `472d347`
+    - Sprint 14 merge commit: `56084b6`
+    - Sprint 15 merge commit: `128944c`
 - Phase 04 closure basis:
   - Sprint 08 completed `/authorize` validation baseline.
   - Sprint 09 completed `/token` and authorization-code exchange baseline.
@@ -275,13 +288,13 @@ Mandatory:
 
 ## VIII. Sprint Breakdown
 
-| Sprint | Scope |
-| --- | --- |
-| Sprint 11 | Refresh Token Foundation |
+| Sprint    | Scope                                    |
+| --------- | ---------------------------------------- |
+| Sprint 11 | Refresh Token Foundation                 |
 | Sprint 12 | Refresh Token Rotation + Reuse Detection |
-| Sprint 13 | Revoke + Introspection |
-| Sprint 14 | Session + SSO |
-| Sprint 15 | Logout Hardening |
+| Sprint 13 | Revoke + Introspection                   |
+| Sprint 14 | Session + SSO                            |
+| Sprint 15 | Logout Hardening                         |
 
 ---
 
