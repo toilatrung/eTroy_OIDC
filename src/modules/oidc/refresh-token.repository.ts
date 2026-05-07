@@ -19,6 +19,8 @@ const toEntity = (document: HydratedDocument<RefreshTokenDocument>): RefreshToke
   expiresAt: document.expiresAt,
   consumedAt: document.consumedAt ?? null,
   revokedAt: document.revokedAt ?? null,
+  revokedReason: document.revokedReason ?? null,
+  revokedByClientId: document.revokedByClientId ?? null,
   createdAt: document.createdAt,
   updatedAt: document.updatedAt,
 });
@@ -34,6 +36,20 @@ export interface MarkFamilyCompromisedInput {
   compromisedAt: Date;
 }
 
+export interface RevokeTokenInput {
+  tokenId: string;
+  revokedAt: Date;
+  revokedReason: string;
+  revokedByClientId: string;
+}
+
+export interface RevokeFamilyActiveTokensInput {
+  familyId: string;
+  revokedAt: Date;
+  revokedReason: string;
+  revokedByClientId: string;
+}
+
 export interface RefreshTokenRepositoryPort {
   createRefreshTokenRecord(input: CreateRefreshTokenInput): Promise<RefreshTokenEntity>;
   findByTokenHash(tokenHash: string): Promise<RefreshTokenEntity | null>;
@@ -42,6 +58,10 @@ export interface RefreshTokenRepositoryPort {
   ): Promise<RefreshTokenEntity | null>;
   setReplacementToken(parentTokenId: string, replacementTokenId: string): Promise<void>;
   markFamilyCompromised(input: MarkFamilyCompromisedInput): Promise<void>;
+  revokeToken(input: RevokeTokenInput): Promise<void>;
+  revokeFamilyActiveTokens(input: RevokeFamilyActiveTokensInput): Promise<void>;
+  isFamilyCompromised(familyId: string): Promise<boolean>;
+  isFamilyRevoked(familyId: string): Promise<boolean>;
 }
 
 export class RefreshTokenRepository implements RefreshTokenRepositoryPort {
@@ -61,6 +81,8 @@ export class RefreshTokenRepository implements RefreshTokenRepositoryPort {
       expiresAt: input.expiresAt,
       consumedAt: input.consumedAt ?? null,
       revokedAt: input.revokedAt ?? null,
+      revokedReason: input.revokedReason ?? null,
+      revokedByClientId: input.revokedByClientId ?? null,
     });
 
     return toEntity(created);
@@ -117,5 +139,51 @@ export class RefreshTokenRepository implements RefreshTokenRepositoryPort {
         },
       },
     ).exec();
+  }
+
+  async revokeToken(input: RevokeTokenInput): Promise<void> {
+    await RefreshTokenModel.updateOne(
+      { _id: input.tokenId, status: { $ne: 'compromised' } },
+      {
+        $set: {
+          status: 'revoked',
+          revokedAt: input.revokedAt,
+          revokedReason: input.revokedReason,
+          revokedByClientId: input.revokedByClientId,
+        },
+      },
+    ).exec();
+  }
+
+  async revokeFamilyActiveTokens(input: RevokeFamilyActiveTokensInput): Promise<void> {
+    await RefreshTokenModel.updateMany(
+      { familyId: input.familyId, status: 'active' },
+      {
+        $set: {
+          status: 'revoked',
+          revokedAt: input.revokedAt,
+          revokedReason: input.revokedReason,
+          revokedByClientId: input.revokedByClientId,
+        },
+      },
+    ).exec();
+  }
+
+  async isFamilyCompromised(familyId: string): Promise<boolean> {
+    const record = await RefreshTokenModel.findOne({ familyId, status: 'compromised' })
+      .select({ _id: 1 })
+      .lean()
+      .exec();
+
+    return record !== null;
+  }
+
+  async isFamilyRevoked(familyId: string): Promise<boolean> {
+    const record = await RefreshTokenModel.findOne({ familyId, status: 'revoked' })
+      .select({ _id: 1 })
+      .lean()
+      .exec();
+
+    return record !== null;
   }
 }

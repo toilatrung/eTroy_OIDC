@@ -1,5 +1,6 @@
 import { config, type OidcClient } from '../../config/config.js';
 import { hashValue } from '../../infrastructure/crypto/index.js';
+import { verifyJwtRs256 } from '../../infrastructure/crypto/index.js';
 import { BaseError } from '../../shared/errors/index.js';
 import { authService, type AuthenticatedIdentity } from '../auth/auth.service.js';
 import { userService, type UserService } from '../users/user.service.js';
@@ -13,8 +14,10 @@ import { RefreshTokenService } from './refresh-token.service.js';
 import type {
   AccessTokenProvider,
   AuthorizationCodeEntity,
+  IntrospectTokenInput,
   IdTokenProvider,
   OidcUserIdentity,
+  TokenIntrospectionResponse,
 } from './oidc.types.js';
 
 export interface AuthorizeRequestContext {
@@ -60,6 +63,8 @@ export interface TokenExchangeResponse {
   refresh_token?: string;
 }
 
+type SupportedTokenTypeHint = 'refresh_token' | 'access_token';
+
 const invalidInput = (message: string): BaseError =>
   new BaseError(message, {
     code: 'INVALID_INPUT',
@@ -71,6 +76,8 @@ const invalidGrant = (): BaseError =>
     code: 'INVALID_GRANT',
     statusCode: 400,
   });
+
+const inactiveIntrospection = (): TokenIntrospectionResponse => ({ active: false });
 
 const readSingleString = (
   source: Record<string, unknown>,
@@ -107,6 +114,22 @@ const readOptionalString = (source: Record<string, unknown>, field: string): str
   }
 
   return normalized;
+};
+
+const readTokenTypeHint = (
+  source: Record<string, unknown>,
+  field: string,
+): SupportedTokenTypeHint | undefined => {
+  const value = readOptionalString(source, field);
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (value !== 'refresh_token' && value !== 'access_token') {
+    throw invalidInput(`${field} is not supported.`);
+  }
+
+  return value;
 };
 
 const assertOpenIdScope = (scope: string): void => {
@@ -155,6 +178,57 @@ const toQueryRecord = (query: unknown): Record<string, unknown> => {
   }
 
   return query as Record<string, unknown>;
+};
+
+const inferTokenTypeHint = (token: string): SupportedTokenTypeHint =>
+  token.split('.').length === 3 ? 'access_token' : 'refresh_token';
+
+const toEpochSeconds = (value: Date): number => Math.floor(value.getTime() / 1000);
+
+const asStringClaim = (payload: Record<string, unknown>, claim: string): string | null => {
+  const value = payload[claim];
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const normalized = value.trim();
+  return normalized.length === 0 ? null : normalized;
+};
+
+const asNumberClaim = (payload: Record<string, unknown>, claim: string): number | null => {
+  const value = payload[claim];
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return null;
+  }
+
+  return value;
+};
+
+const toAudienceList = (audienceClaim: unknown): string[] | null => {
+  if (typeof audienceClaim === 'string') {
+    const normalized = audienceClaim.trim();
+    return normalized.length === 0 ? null : [normalized];
+  }
+
+  if (!Array.isArray(audienceClaim) || audienceClaim.length === 0) {
+    return null;
+  }
+
+  const audiences: string[] = [];
+  for (const entry of audienceClaim) {
+    if (typeof entry !== 'string') {
+      return null;
+    }
+
+    const normalized = entry.trim();
+    if (normalized.length === 0) {
+      return null;
+    }
+
+    audiences.push(normalized);
+  }
+
+  return audiences;
 };
 
 const ensureUnconsumed = (authorizationCode: AuthorizationCodeEntity): void => {
@@ -296,6 +370,49 @@ export class OidcService {
     throw invalidInput('grant_type is not supported.');
   }
 
+  async revokeToken(input: unknown): Promise<Record<string, never>> {
+    const inputRecord = toQueryRecord(input);
+    const token = readSingleString(inputRecord, 'token');
+    const clientId = readSingleString(inputRecord, 'client_id');
+    const tokenTypeHint = readTokenTypeHint(inputRecord, 'token_type_hint');
+
+    findClient(this.clients, clientId);
+    if (tokenTypeHint !== undefined && tokenTypeHint !== 'refresh_token') {
+      throw invalidInput('token_type_hint is not supported.');
+    }
+
+    await this.refreshTokenService.revokeRefreshToken({
+      refreshToken: token,
+      clientId,
+      revokedReason: 'client_request',
+    });
+
+    return {};
+  }
+
+  async introspectToken(input: unknown): Promise<TokenIntrospectionResponse> {
+    const inputRecord = toQueryRecord(input);
+    const token = readSingleString(inputRecord, 'token');
+    const clientId = readSingleString(inputRecord, 'client_id');
+    const tokenTypeHint = readTokenTypeHint(inputRecord, 'token_type_hint');
+
+    findClient(this.clients, clientId);
+    const resolvedHint = tokenTypeHint ?? inferTokenTypeHint(token);
+
+    if (resolvedHint === 'refresh_token') {
+      return this.refreshTokenService.introspectRefreshToken({
+        refreshToken: token,
+        clientId,
+      });
+    }
+
+    return this.introspectAccessToken({
+      token,
+      clientId,
+      tokenTypeHint: resolvedHint,
+    });
+  }
+
   private async exchangeAuthorizationCodeGrant(
     inputRecord: Record<string, unknown>,
   ): Promise<TokenExchangeResponse> {
@@ -381,6 +498,55 @@ export class OidcService {
       expires_in: issuedAccessToken.expiresIn,
       refresh_token: rotatedRefreshToken.refreshToken,
     };
+  }
+
+  private introspectAccessToken(input: IntrospectTokenInput): TokenIntrospectionResponse {
+    try {
+      const { payload } = verifyJwtRs256(input.token);
+      const issuer = asStringClaim(payload, 'iss');
+      const subject = asStringClaim(payload, 'sub');
+      const scope = asStringClaim(payload, 'scope');
+      const issuedAt = asNumberClaim(payload, 'iat');
+      const expiresAt = asNumberClaim(payload, 'exp');
+      const audiences = toAudienceList(payload.aud);
+
+      if (
+        issuer === null ||
+        subject === null ||
+        scope === null ||
+        issuedAt === null ||
+        expiresAt === null ||
+        audiences === null
+      ) {
+        return inactiveIntrospection();
+      }
+
+      if (issuer !== config.app.baseUrl) {
+        return inactiveIntrospection();
+      }
+
+      if (!audiences.includes(input.clientId)) {
+        return inactiveIntrospection();
+      }
+
+      const nowSeconds = toEpochSeconds(this.getNow());
+      if (expiresAt <= nowSeconds || expiresAt <= issuedAt) {
+        return inactiveIntrospection();
+      }
+
+      return {
+        active: true,
+        token_type: 'access_token',
+        client_id: input.clientId,
+        sub: subject,
+        scope,
+        exp: expiresAt,
+        iat: issuedAt,
+        iss: issuer,
+      };
+    } catch {
+      return inactiveIntrospection();
+    }
   }
 
   private async issueAuthorizationCode(
