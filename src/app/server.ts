@@ -1,4 +1,4 @@
-import express, { type NextFunction, type Request, type Response } from 'express';
+import express, { type Express, type NextFunction, type Request, type Response } from 'express';
 
 import { config } from '../config/config.js';
 import {
@@ -18,7 +18,7 @@ interface ErrorResponseBody {
   };
 }
 
-export const createServer = () => {
+export const createServer = (): Express => {
   const app = express();
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
