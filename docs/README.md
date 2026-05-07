@@ -97,13 +97,16 @@ Load in this sequence:
 - `phase-04-oidc-core.md` -> OIDC core phase breakdown
 - `phase-05-token-session-management.md` -> Phase 05 closed scope and boundary baseline
 - `phase-05-consolidated-report.md` -> Phase 05 closure and merge/validation evidence
+- `phase-06-platform-governance-hardening.md` -> Phase 06 approved contract-backed execution plan (runtime not started)
 - `phase-02-sprint-04.md` -> historical sprint assignment
+- `phase-06-sprint-16.md` -> Sprint 16 assignment (Draft for approval; runtime blocked until contract + assignment approval)
 - `docs/contracts/oidc/jwt-token-contract.md` -> JWT Token Contract (Phase 04 / Sprint 10)
 - `docs/contracts/oidc/refresh-token-contract.md` -> Refresh Token Foundation Contract (Phase 05 / Sprint 11)
 - `docs/contracts/oidc/refresh-token-rotation-contract.md` -> Refresh Token Rotation Contract (Phase 05 / Sprint 12)
 - `docs/contracts/oidc/token-revoke-introspection-contract.md` -> Revoke and Introspection Contract (Phase 05 / Sprint 13)
 - `docs/contracts/oidc/session-sso-contract.md` -> Session and SSO Contract (Phase 05 / Sprint 14)
 - `docs/contracts/oidc/logout-hardening-contract.md` -> Logout Hardening Contract (Phase 05 / Sprint 15)
+- `docs/contracts/audit/audit-event-contract.md` -> Audit Event Contract (Draft for approval)
 - sprint reports under `docs/planning/reports/` -> sprint execution evidence
 - governance documents -> repository control and merge discipline
 - `anti-patterns.md` -> merge-blocking anti-pattern reference aligned with architecture and governance
@@ -116,9 +119,11 @@ Current planning status:
 - Phase 04: CLOSED
 - Phase 05: CLOSED
 - Current next phase: Phase 06 - Platform and Governance Hardening
-- Phase 06 status: planning-ready only
-- Phase 06 runtime implementation: not started
-- Next step: prepare and approve future Phase 06 planning/contracts/assignments before runtime implementation
+- Phase 06 status: APPROVED FOR CONTRACT-BACKED EXECUTION
+- Phase 06 runtime implementation: NOT STARTED
+- Next sprint: Sprint 16 - Audit Logging Foundation
+- Sprint 16 runtime gate: BLOCKED UNTIL `docs/contracts/audit/audit-event-contract.md` and `docs/planning/assignments/phase-06-sprint-16.md` are approved
+- Next step: approve audit contract and Sprint 16 assignment, then start Sprint 16 runtime on a dedicated runtime branch
 - Phase 06 planning themes (high-level only): audit logging, admin controls, client management, observability, key rotation, security hardening
 
 ## VI. Maintenance Rules

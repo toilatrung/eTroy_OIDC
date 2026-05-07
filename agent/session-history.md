@@ -752,3 +752,27 @@ It records meaningful state transitions and approved outcomes only.
   - `agent/session-history.md`
 - Open items:
   - prepare and approve future Phase 06 planning/contracts/assignments before runtime implementation
+
+### 2026-05-07 / PHASE06-CONTRACT-BACKED-APPROVAL-SYNC-004
+
+- Completed:
+  - canonicalized Phase 06 phase-plan path to `docs/planning/phases/phase-06-platform-governance-hardening.md`
+  - synchronized source-of-truth/navigation docs to mark Phase 06 as APPROVED FOR CONTRACT-BACKED EXECUTION
+  - synchronized operational context for Sprint 16 next-sprint state with runtime gate intact
+- Approved:
+  - Phase 01-05 remain CLOSED
+  - Phase 06 runtime implementation remains NOT STARTED
+  - Sprint 16 remains blocked until audit contract and Sprint 16 assignment are approved
+  - no runtime or `src/` changes were made
+- Source-of-truth documents changed:
+  - `docs/source-of-truth-index.md`
+  - `docs/README.md`
+  - `docs/planning/master-execution-plan.md`
+  - `docs/planning/phases/phase-06-platform-governance-hardening.md`
+  - `docs/contracts/audit/audit-event-contract.md`
+  - `docs/planning/assignments/phase-06-sprint-16.md`
+- Agent files changed:
+  - `agent/current-context.md`
+  - `agent/session-history.md`
+- Open items:
+  - approve audit contract and Sprint 16 assignment before starting Sprint 16 runtime implementation
