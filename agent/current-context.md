@@ -13,11 +13,12 @@ It summarizes approved state and next actions without redefining architecture.
 - Sprint 09: CLOSED - token endpoint and authorization-code exchange baseline.
 - Sprint 10: CLOSED - JWT access token, ID Token, claims mapper, and `/userinfo`.
 - Phase 05 is active.
-- Sprint 11 - Refresh Token Foundation: MERGED / CLOSED.
-- Sprint 12 - Refresh Token Rotation + Reuse Detection: MERGED / CLOSED.
+- Sprint 11 - Refresh Token Foundation: MERGED / CLOSED / PRESENT IN `main`.
+- Sprint 12 - Refresh Token Rotation + Reuse Detection: MERGED / CLOSED / PRESENT IN `main`.
 - Sprint 12 PR #38 was merged.
 - Sprint 12 branch: `feature/oidc-sprint12-refresh-token-rotation`.
 - Sprint 12 was stacked on Sprint 11 branch because Sprint 11 was not yet in `main` when Sprint 12 PR was opened.
+- Sprint 11 and Sprint 12 resulting commits are now both present in `origin/main`.
 
 ## III. Phase Boundary Notes
 
