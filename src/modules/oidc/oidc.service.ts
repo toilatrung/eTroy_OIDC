@@ -9,6 +9,7 @@ import { toOidcUserIdentity } from './claims.mapper.js';
 import { JwtAccessTokenProvider } from './access-token.provider.js';
 import { AuthorizationCodeRepository } from './authorization-code.repository.js';
 import { JwtIdTokenProvider } from './id-token.provider.js';
+import { RefreshTokenService } from './refresh-token.service.js';
 import type {
   AccessTokenProvider,
   AuthorizationCodeEntity,
@@ -55,7 +56,8 @@ export interface TokenExchangeResponse {
   access_token: string;
   token_type: 'Bearer';
   expires_in: number;
-  id_token: string;
+  id_token?: string;
+  refresh_token?: string;
 }
 
 const invalidInput = (message: string): BaseError =>
@@ -217,6 +219,7 @@ export class OidcService {
     private readonly users: UserIdentityReader = userService,
     private readonly accessTokenProvider: AccessTokenProvider = new JwtAccessTokenProvider(),
     private readonly idTokenProvider: IdTokenProvider = new JwtIdTokenProvider(),
+    private readonly refreshTokenService: RefreshTokenService = new RefreshTokenService(),
     private readonly getNow: () => Date = () => new Date(),
   ) {}
 
@@ -278,13 +281,24 @@ export class OidcService {
     };
   }
 
-  async exchangeAuthorizationCode(input: unknown): Promise<TokenExchangeResponse> {
+  async exchangeToken(input: unknown): Promise<TokenExchangeResponse> {
     const inputRecord = toQueryRecord(input);
     const grantType = readSingleString(inputRecord, 'grant_type');
-    if (grantType !== 'authorization_code') {
-      throw invalidInput('grant_type must be authorization_code.');
+
+    if (grantType === 'authorization_code') {
+      return this.exchangeAuthorizationCodeGrant(inputRecord);
     }
 
+    if (grantType === 'refresh_token') {
+      return this.exchangeRefreshTokenGrant(inputRecord);
+    }
+
+    throw invalidInput('grant_type is not supported.');
+  }
+
+  private async exchangeAuthorizationCodeGrant(
+    inputRecord: Record<string, unknown>,
+  ): Promise<TokenExchangeResponse> {
     const rawAuthorizationCode = readSingleString(inputRecord, 'code');
     const clientId = readSingleString(inputRecord, 'client_id');
     const redirectUri = readSingleString(inputRecord, 'redirect_uri');
@@ -327,12 +341,44 @@ export class OidcService {
       scope: authorizationCode.scope,
       user: userIdentity,
     });
+    const issuedRefreshToken = await this.refreshTokenService.issueRefreshToken({
+      subject: userIdentity.sub,
+      clientId,
+      scope: authorizationCode.scope,
+    });
 
     return {
       access_token: issuedAccessToken.accessToken,
       token_type: issuedAccessToken.tokenType,
       expires_in: issuedAccessToken.expiresIn,
       id_token: issuedIdToken.idToken,
+      refresh_token: issuedRefreshToken.refreshToken,
+    };
+  }
+
+  private async exchangeRefreshTokenGrant(
+    inputRecord: Record<string, unknown>,
+  ): Promise<TokenExchangeResponse> {
+    const rawRefreshToken = readSingleString(inputRecord, 'refresh_token');
+    const clientId = readSingleString(inputRecord, 'client_id');
+
+    findClient(this.clients, clientId);
+
+    const validatedRefreshToken = await this.refreshTokenService.validateRefreshToken({
+      refreshToken: rawRefreshToken,
+      clientId,
+    });
+    const userIdentity = await resolveOidcUserIdentity(this.users, validatedRefreshToken.subject);
+    const issuedAccessToken = this.accessTokenProvider.issueAccessToken({
+      subject: userIdentity.sub,
+      audience: validatedRefreshToken.clientId,
+      scope: validatedRefreshToken.scope,
+    });
+
+    return {
+      access_token: issuedAccessToken.accessToken,
+      token_type: issuedAccessToken.tokenType,
+      expires_in: issuedAccessToken.expiresIn,
     };
   }
 

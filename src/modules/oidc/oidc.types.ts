@@ -67,3 +67,26 @@ export interface CreateAuthorizationCodeInput {
   codeChallengeMethod: 'S256';
   expiresAt: Date;
 }
+
+export interface RefreshTokenEntity {
+  id: string;
+  tokenHash: string;
+  subject: string;
+  clientId: string;
+  scope: string;
+  issuedAt: Date;
+  expiresAt: Date;
+  consumedAt: Date | null;
+  revokedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateRefreshTokenInput {
+  tokenHash: string;
+  subject: string;
+  clientId: string;
+  scope: string;
+  issuedAt: Date;
+  expiresAt: Date;
+}
