@@ -74,6 +74,12 @@ export interface RefreshTokenEntity {
   subject: string;
   clientId: string;
   scope: string;
+  familyId: string;
+  parentTokenId: string | null;
+  replacedByTokenId: string | null;
+  status: 'active' | 'consumed' | 'revoked' | 'compromised';
+  compromisedAt: Date | null;
+  compromiseReason: 'reuse_detected' | null;
   issuedAt: Date;
   expiresAt: Date;
   consumedAt: Date | null;
@@ -87,6 +93,14 @@ export interface CreateRefreshTokenInput {
   subject: string;
   clientId: string;
   scope: string;
+  familyId: string;
+  parentTokenId: string | null;
   issuedAt: Date;
   expiresAt: Date;
+  consumedAt?: Date | null;
+  revokedAt?: Date | null;
+  replacedByTokenId?: string | null;
+  status?: 'active' | 'consumed' | 'revoked' | 'compromised';
+  compromisedAt?: Date | null;
+  compromiseReason?: 'reuse_detected' | null;
 }
