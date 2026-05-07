@@ -24,7 +24,9 @@ It summarizes approved state and next actions without redefining architecture.
 - Phase 06 - Platform and Governance Hardening: APPROVED FOR CONTRACT-BACKED EXECUTION.
 - Phase 06 runtime implementation: NOT STARTED.
 - Next sprint: Sprint 16 - Audit Logging Foundation (not started).
-- Sprint 16 runtime gate: BLOCKED UNTIL `docs/contracts/audit/audit-event-contract.md` and `docs/planning/assignments/phase-06-sprint-16.md` are approved.
+- Audit Event Contract: Approved in this PR.
+- Sprint 16 Assignment: Approved in this PR.
+- Sprint 16 runtime gate: will be unblocked after this PR is merged; runtime implementation remains not started and must occur on a separate Sprint 16 feature branch.
 - Sprint 15 merge evidence:
   - PR: `#44`
   - runtime commit: `c26403b`
@@ -62,6 +64,6 @@ It summarizes approved state and next actions without redefining architecture.
 
 ## VI. Next Recommended Step
 
-- Keep Phase 06 runtime NOT STARTED until Sprint 16 gate conditions are met.
-- Approve `docs/contracts/audit/audit-event-contract.md` and `docs/planning/assignments/phase-06-sprint-16.md`.
-- Start Sprint 16 runtime only after both approvals are recorded in source-of-truth docs.
+- Keep Phase 06 runtime NOT STARTED in this PR state.
+- Merge this PR to unblock Sprint 16 runtime execution.
+- Start Sprint 16 runtime only on a dedicated Sprint 16 feature branch after merge.

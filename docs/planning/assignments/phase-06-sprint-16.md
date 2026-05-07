@@ -21,11 +21,11 @@
 
 - Branch Name: `feature/audit-sprint16-foundation`
 
-- Status: Draft for approval
+- Status: Approved (in this PR)
 
 - Sprint 16 runtime status: NOT STARTED
 
-- Sprint 16 runtime gate: BLOCKED UNTIL `docs/contracts/audit/audit-event-contract.md` and this assignment are approved
+- Sprint 16 runtime gate: will be unblocked after this PR is merged; runtime implementation remains not started and must occur on a separate Sprint 16 feature branch.
 
 ---
 
@@ -86,8 +86,8 @@ Sprint 16 may start implementation only after:
 - Active branch is created from `main` or an approved baseline containing the Phase 05 closure state.
 - The implementation packet confirms included scope, excluded scope, deliverables, allowed dependencies, forbidden dependencies, validation commands, and manual validation checks.
 
-If `audit-event-contract.md` is missing, incomplete, or not approved, stop before coding.
-If this assignment is not approved, stop before coding.
+If `audit-event-contract.md` is missing, incomplete, or not approved on the merged baseline, stop before coding.
+If this assignment is not approved on the merged baseline, stop before coding.
 
 ---
 

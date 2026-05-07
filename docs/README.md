@@ -100,14 +100,14 @@ Load in this sequence:
 - `phase-06-platform-governance-hardening.md` -> Phase 06 approved contract-backed execution plan (runtime not started)
 - `docs/planning/assignments/` -> sprint-level assignment documents defining execution scope and task contracts
 - `docs/planning/reports/` -> sprint/phase execution evidence, validation results, and handoff context
-- `phase-06-sprint-16.md` -> next sprint assignment (Draft for approval; runtime blocked until audit contract + assignment approval)
+- `phase-06-sprint-16.md` -> next sprint assignment (Approved in this PR; runtime remains not started)
 - `docs/contracts/oidc/jwt-token-contract.md` -> JWT Token Contract (Phase 04 / Sprint 10)
 - `docs/contracts/oidc/refresh-token-contract.md` -> Refresh Token Foundation Contract (Phase 05 / Sprint 11)
 - `docs/contracts/oidc/refresh-token-rotation-contract.md` -> Refresh Token Rotation Contract (Phase 05 / Sprint 12)
 - `docs/contracts/oidc/token-revoke-introspection-contract.md` -> Revoke and Introspection Contract (Phase 05 / Sprint 13)
 - `docs/contracts/oidc/session-sso-contract.md` -> Session and SSO Contract (Phase 05 / Sprint 14)
 - `docs/contracts/oidc/logout-hardening-contract.md` -> Logout Hardening Contract (Phase 05 / Sprint 15)
-- `docs/contracts/audit/audit-event-contract.md` -> Audit Event Contract (Draft for approval)
+- `docs/contracts/audit/audit-event-contract.md` -> Audit Event Contract (Approved in this PR)
 - governance documents -> repository control and merge discipline
 - `anti-patterns.md` -> merge-blocking anti-pattern reference aligned with architecture and governance
 
@@ -122,8 +122,10 @@ Current planning status:
 - Phase 06 status: APPROVED FOR CONTRACT-BACKED EXECUTION
 - Phase 06 runtime implementation: NOT STARTED
 - Next sprint: Sprint 16 - Audit Logging Foundation
-- Sprint 16 runtime gate: BLOCKED UNTIL `docs/contracts/audit/audit-event-contract.md` and `docs/planning/assignments/phase-06-sprint-16.md` are approved
-- Next step: approve audit contract and Sprint 16 assignment, then start Sprint 16 runtime on a dedicated runtime branch
+- Audit Event Contract: Approved in this PR
+- Sprint 16 Assignment: Approved in this PR
+- Sprint 16 runtime gate: will be unblocked after this PR is merged; runtime implementation remains not started and must occur on a separate Sprint 16 feature branch.
+- Next step: merge this PR, then start Sprint 16 runtime on a dedicated Sprint 16 feature branch
 - Phase 06 planning themes (high-level only): audit logging, admin controls, client management, observability, key rotation, security hardening
 
 ## VI. Maintenance Rules

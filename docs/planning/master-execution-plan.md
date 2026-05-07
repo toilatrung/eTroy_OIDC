@@ -385,9 +385,11 @@ It is the operational control layer that keeps implementation aligned with appro
 - Phase 06 status: APPROVED FOR CONTRACT-BACKED EXECUTION
 - Phase 06 runtime implementation: NOT STARTED
 - Next sprint: Sprint 16 - Audit Logging Foundation
+- Audit Event Contract: Approved in this PR
+- Sprint 16 Assignment: Approved in this PR
 
 ---
 
 ## Next Step
 
-Proceed with contract-first Phase 06 execution sequencing. Sprint 16 runtime implementation is BLOCKED UNTIL `docs/contracts/audit/audit-event-contract.md` and `docs/planning/assignments/phase-06-sprint-16.md` are approved.
+Proceed with contract-first Phase 06 execution sequencing. Sprint 16 runtime gate: will be unblocked after this PR is merged; runtime implementation remains not started and must occur on a separate Sprint 16 feature branch.
