@@ -613,3 +613,41 @@ It records meaningful state transitions and approved outcomes only.
   - global format check drift remains external and deferred
 - Open items:
   - prepare Sprint 13 revoke/introspection contract and assignment before coding
+
+### 2026-05-07 / PHASE05-SPRINT13-REVOKE-INTROSPECTION-READY-001
+
+- Completed:
+  - executed Sprint 13 docs-first gate and runtime implementation on `feature/oidc-sprint13-revoke-introspection`
+  - committed Sprint 13 contract/assignment docs gate:
+    - `67fd737`
+  - committed Sprint 13 runtime/report implementation:
+    - `e39ecba`
+  - pushed branch to origin:
+    - `origin/feature/oidc-sprint13-revoke-introspection`
+  - prepared PR title/body for:
+    - `feat(oidc): implement Sprint 13 revoke and introspection`
+- Approved:
+  - Sprint 13 status is COMPLETE WITH ACCEPTED EXTERNAL FORMAT CONDITION
+  - refresh-token revocation and family revocation are implemented
+  - `POST /revoke` and `POST /introspect` are implemented
+  - refresh-token introspection is implemented
+  - access-token introspection is implemented as stateless JWT validation only
+  - Sprint 12 rotation, reuse detection, family compromise, and concurrent refresh guarantees are preserved
+- Validation evidence:
+  - `npm.cmd run lint`: PASS
+  - `npm.cmd run typecheck`: PASS
+  - `npm.cmd run build`: PASS
+  - `npm.cmd run format:check`: FAIL due accepted external repository-wide formatting baseline drift outside Sprint 13 scope
+  - scoped Sprint 13 touched-file Prettier check: PASS
+  - required boundary scans: PASS / PASS WITH REVIEW
+  - runtime/manual Sprint 13 scenarios 1-19: PASS
+- Source-of-truth documents changed:
+  - `docs/contracts/oidc/token-revoke-introspection-contract.md`
+  - `docs/planning/assignments/phase-05-sprint-13.md`
+  - `docs/planning/reports/phase-05-sprint-13-report.md`
+- Agent files changed:
+  - `agent/current-context.md`
+  - `agent/session-history.md`
+- Open items:
+  - create/review/merge Sprint 13 PR
+  - after Sprint 13 merge, start Sprint 14 planning only from approved Sprint 14 assignment/contract

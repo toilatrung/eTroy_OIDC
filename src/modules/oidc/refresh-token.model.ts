@@ -17,6 +17,8 @@ export interface RefreshTokenDocument {
   expiresAt: Date;
   consumedAt: Date | null;
   revokedAt: Date | null;
+  revokedReason: string | null;
+  revokedByClientId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -85,6 +87,14 @@ const refreshTokenSchema = new Schema<RefreshTokenDocument>(
     },
     revokedAt: {
       type: Date,
+      default: null,
+    },
+    revokedReason: {
+      type: String,
+      default: null,
+    },
+    revokedByClientId: {
+      type: String,
       default: null,
     },
   },

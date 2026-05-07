@@ -4,6 +4,8 @@ import { config } from '../config/config.js';
 import {
   authorizeContinueHandler,
   authorizeHandler,
+  introspectHandler,
+  revokeHandler,
   tokenHandler,
 } from '../modules/oidc/oidc.controller.js';
 import { userInfoHandler } from '../modules/oidc/userinfo.controller.js';
@@ -24,6 +26,8 @@ export const createServer = () => {
   app.get('/authorize', authorizeHandler);
   app.post('/authorize/continue', authorizeContinueHandler);
   app.post('/token', tokenHandler);
+  app.post('/revoke', revokeHandler);
+  app.post('/introspect', introspectHandler);
   app.get('/userinfo', userInfoHandler);
 
   app.use(

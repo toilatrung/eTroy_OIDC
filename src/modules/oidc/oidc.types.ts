@@ -84,6 +84,8 @@ export interface RefreshTokenEntity {
   expiresAt: Date;
   consumedAt: Date | null;
   revokedAt: Date | null;
+  revokedReason: string | null;
+  revokedByClientId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -99,8 +101,52 @@ export interface CreateRefreshTokenInput {
   expiresAt: Date;
   consumedAt?: Date | null;
   revokedAt?: Date | null;
+  revokedReason?: string | null;
+  revokedByClientId?: string | null;
   replacedByTokenId?: string | null;
   status?: 'active' | 'consumed' | 'revoked' | 'compromised';
   compromisedAt?: Date | null;
   compromiseReason?: 'reuse_detected' | null;
 }
+
+export interface RevokeTokenInput {
+  token: string;
+  tokenTypeHint?: string;
+  clientId: string;
+}
+
+export interface IntrospectTokenInput {
+  token: string;
+  tokenTypeHint?: string;
+  clientId: string;
+}
+
+export interface InactiveTokenIntrospectionResponse {
+  active: false;
+}
+
+export interface ActiveRefreshTokenIntrospectionResponse {
+  active: true;
+  token_type: 'refresh_token';
+  client_id: string;
+  sub: string;
+  scope: string;
+  exp: number;
+  iat: number;
+}
+
+export interface ActiveAccessTokenIntrospectionResponse {
+  active: true;
+  token_type: 'access_token';
+  client_id: string;
+  sub: string;
+  scope: string;
+  exp: number;
+  iat: number;
+  iss: string;
+}
+
+export type TokenIntrospectionResponse =
+  | InactiveTokenIntrospectionResponse
+  | ActiveRefreshTokenIntrospectionResponse
+  | ActiveAccessTokenIntrospectionResponse;
