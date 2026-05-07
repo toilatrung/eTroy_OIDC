@@ -5,6 +5,7 @@ import {
   authorizeContinueHandler,
   authorizeHandler,
   introspectHandler,
+  logoutHandler,
   revokeHandler,
   tokenHandler,
 } from '../modules/oidc/oidc.controller.js';
@@ -28,6 +29,7 @@ export const createServer = (): Express => {
   app.post('/token', tokenHandler);
   app.post('/revoke', revokeHandler);
   app.post('/introspect', introspectHandler);
+  app.post('/logout', logoutHandler);
   app.get('/userinfo', userInfoHandler);
 
   app.use(

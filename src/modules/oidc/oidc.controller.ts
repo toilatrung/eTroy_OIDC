@@ -5,9 +5,14 @@ import {
   type AuthorizeHandlerResult,
   type AuthorizeContinueResult,
   type AuthorizeRequestContext,
+  type LogoutResult,
+  type LogoutSuccessResponse,
   type TokenExchangeResponse,
 } from './oidc.service.js';
-import type { OidcSessionCookieDescriptor } from './oidc-session.service.js';
+import type {
+  OidcCsrfCookieDescriptor,
+  OidcSessionCookieDescriptor,
+} from './oidc-session.service.js';
 import type { TokenIntrospectionResponse } from './oidc.types.js';
 
 interface AuthorizeResponseBody {
@@ -35,7 +40,16 @@ interface IntrospectRequestBody {
   client_id?: string;
 }
 
-const setSessionCookie = (response: Response, cookie: OidcSessionCookieDescriptor): void => {
+interface LogoutRequestBody {
+  post_logout_redirect_uri?: string;
+  client_id?: string;
+  state?: string;
+  csrf_token?: string;
+}
+
+type OidcCookieDescriptor = OidcSessionCookieDescriptor | OidcCsrfCookieDescriptor;
+
+const setCookie = (response: Response, cookie: OidcCookieDescriptor): void => {
   response.cookie(cookie.name, cookie.value, {
     path: cookie.path,
     httpOnly: cookie.httpOnly,
@@ -45,7 +59,7 @@ const setSessionCookie = (response: Response, cookie: OidcSessionCookieDescripto
   });
 };
 
-const clearSessionCookie = (response: Response, cookie: OidcSessionCookieDescriptor): void => {
+const clearCookie = (response: Response, cookie: OidcCookieDescriptor): void => {
   response.clearCookie(cookie.name, {
     path: cookie.path,
     httpOnly: cookie.httpOnly,
@@ -71,7 +85,8 @@ export const authorizeHandler = async (
     }
 
     if (result.clearSessionCookie) {
-      clearSessionCookie(response, oidcService.getClearSessionCookieDescriptor());
+      clearCookie(response, oidcService.getClearSessionCookieDescriptor());
+      clearCookie(response, oidcService.getClearCsrfCookieDescriptor());
     }
 
     response.status(200).json({ data: result.context });
@@ -87,7 +102,8 @@ export const authorizeContinueHandler = async (
 ): Promise<void> => {
   try {
     const result: AuthorizeContinueResult = await oidcService.continueAuthorize(request.body);
-    setSessionCookie(response, result.sessionCookie);
+    setCookie(response, result.sessionCookie);
+    setCookie(response, result.csrfCookie);
     response.redirect(302, result.redirectTo);
   } catch (error: unknown) {
     next(error);
@@ -128,6 +144,38 @@ export const introspectHandler = async (
   try {
     const result = await oidcService.introspectToken(request.body);
     response.status(200).json(result);
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+export const logoutHandler = async (
+  request: Request<Record<string, never>, LogoutSuccessResponse, LogoutRequestBody>,
+  response: Response<LogoutSuccessResponse>,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const csrfHeader = request.header('x-oidc-csrf-token');
+    const result: LogoutResult = await oidcService.logout({
+      body: request.body ?? {},
+      cookieHeader: request.headers.cookie,
+      csrfToken: csrfHeader === undefined ? undefined : csrfHeader.trim(),
+    });
+
+    if (result.clearSessionCookie) {
+      clearCookie(response, oidcService.getClearSessionCookieDescriptor());
+    }
+
+    if (result.clearCsrfCookie) {
+      clearCookie(response, oidcService.getClearCsrfCookieDescriptor());
+    }
+
+    if (result.kind === 'redirect') {
+      response.redirect(302, result.location);
+      return;
+    }
+
+    response.status(200).json(result.body);
   } catch (error: unknown) {
     next(error);
   }

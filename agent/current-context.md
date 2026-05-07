@@ -20,6 +20,9 @@ It summarizes approved state and next actions without redefining architecture.
   - MERGED / CLOSED / PRESENT IN `main`
   - runtime commit: `53139b0e08f708d8e5fed3cafdcfb412f45d61a0`
   - status: COMPLETE WITH ACCEPTED EXTERNAL FORMAT CONDITION
+- Sprint 15 - Logout Hardening:
+  - implementation completed on branch `feature/oidc-sprint15-logout-hardening`
+  - pending PR review/merge
 
 ## III. Phase Boundary Notes
 
@@ -52,4 +55,4 @@ It summarizes approved state and next actions without redefining architecture.
 
 ## VI. Next Recommended Step
 
-- Begin Sprint 15 planning only after an approved Sprint 15 assignment/contract exists.
+- Open Sprint 15 PR with validation evidence and contract references; do not merge directly to `main`.

@@ -24,6 +24,7 @@ export interface CreateOidcSessionInput {
   lastSeenAt: Date;
   status: OidcSessionStatus;
   invalidatedAt?: Date | null;
+  csrfTokenHash?: string | null;
 }
 
 export interface TouchOidcSessionInput {
@@ -62,6 +63,7 @@ export class OidcSessionRepository implements OidcSessionRepositoryPort {
       lastSeenAt: input.lastSeenAt,
       status: input.status,
       invalidatedAt: input.invalidatedAt ?? null,
+      csrfTokenHash: input.csrfTokenHash ?? null,
     };
 
     await this.writeRecord(record);
@@ -158,6 +160,7 @@ export class InMemoryOidcSessionRepository implements OidcSessionRepositoryPort 
       lastSeenAt: new Date(input.lastSeenAt),
       status: input.status,
       invalidatedAt: input.invalidatedAt ?? null,
+      csrfTokenHash: input.csrfTokenHash ?? null,
     };
 
     this.records.set(record.sessionId, record);
