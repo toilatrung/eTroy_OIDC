@@ -39,7 +39,23 @@
 - `agent/current-context.md`
 - `agent/session-history.md`
 
-## III. Completed Work
+## III. Merge Status
+
+- Merge status: MERGED / CLOSED / PRESENT IN `main`
+- Merge verification date: 2026-05-07
+- Runtime commit: `53139b0e08f708d8e5fed3cafdcfb412f45d61a0`
+- Branch merged: `feature/oidc-sprint14-session-sso`
+- Merge commit on `main`: `56084b6`
+- Validation condition retained:
+  - `npm.cmd run lint`: PASS
+  - `npm.cmd run typecheck`: PASS
+  - `npm.cmd run build`: PASS
+  - global `npm.cmd run format:check`: FAIL due accepted external repository-wide drift
+  - scoped Sprint 14 formatting: PASS
+- No final logout behavior was introduced.
+- Sprint 15 handoff remains logout hardening only.
+
+## IV. Completed Work
 
 ### Task 64 - Session/SSO Contract Alignment
 
@@ -131,7 +147,7 @@
 - Ran required boundary scans.
 - Executed a Sprint 14 service-level runtime harness with in-memory session persistence and in-memory refresh-token persistence to validate session flow and Sprint 13 non-regression behavior.
 
-## IV. Files Created or Updated
+## V. Files Created or Updated
 
 Created:
 
@@ -148,7 +164,7 @@ Updated:
 - `src/modules/oidc/oidc.service.ts`
 - `src/modules/oidc/oidc.types.ts`
 
-## V. Static Validation Results
+## VI. Static Validation Results
 
 - `npm.cmd run lint`: PASS
 - `npm.cmd run typecheck`: PASS
@@ -188,7 +204,7 @@ Repository-wide `format:check` external failing files after Sprint 14 scoped for
 
 Sprint 14 did not mix unrelated formatting cleanup.
 
-## VI. Boundary and Security Checks
+## VII. Boundary and Security Checks
 
 Boundary scans:
 
@@ -215,7 +231,7 @@ Security posture confirmation:
 - No `token-lifecycle` reuse.
 - No final logout behavior introduced.
 
-## VII. Manual / Runtime Validation Results
+## VIII. Manual / Runtime Validation Results
 
 Harness execution:
 
@@ -246,7 +262,7 @@ Scenario results:
 - Sprint 13 introspection behavior unchanged: PASS
 - refresh-token rotation/reuse detection unchanged: PASS
 
-## VIII. Included Scope
+## IX. Included Scope
 
 Delivered Sprint 14 scope:
 
@@ -263,7 +279,7 @@ Delivered Sprint 14 scope:
 - idempotent invalidation primitive
 - Sprint 14 validation and report
 
-## IX. Excluded Scope
+## X. Excluded Scope
 
 Explicitly preserved exclusions:
 
@@ -282,20 +298,20 @@ Explicitly preserved exclusions:
 - `token-lifecycle` reuse
 - unrelated repository-wide formatting cleanup
 
-## X. Risks, Limitations, or Blockers
+## XI. Risks, Limitations, or Blockers
 
 - Repository-wide `format:check` remains externally failing due pre-existing formatting drift outside Sprint 14 touched files.
 - Redis-backed runtime session behavior is implemented through the existing low-level Redis abstraction, but the Sprint 14 manual harness used in-memory session persistence for deterministic validation and to avoid requiring a live Redis instance during evidence capture.
 - `GET /authorize` falls back to `requiresAuthentication` context when the session cookie is missing or invalid; invalid session states are rejected for SSO reuse and cleared where feasible rather than surfaced as a separate browser error page.
 
-## XI. CSRF Decision
+## XII. CSRF Decision
 
 - CSRF protection was assessed for `POST /authorize/continue` as a browser-facing session mutation point.
 - Sprint 14 does not introduce a new browser-facing session mutation endpoint beyond the existing validated OIDC flow.
 - Additional CSRF token/origin infrastructure was not implemented in Sprint 14 because doing so would introduce new browser interaction state and wider cross-request coordination not explicitly locked by the approved Sprint 14 runtime scope.
 - This decision is documented and handed off to Sprint 15 logout hardening, where browser-facing logout/session invalidation behavior will require explicit CSRF controls.
 
-## XII. Handoff to Sprint 15 - Logout Hardening
+## XIII. Handoff to Sprint 15 - Logout Hardening
 
 Sprint 15 should build on the Sprint 14 session foundation and add only approved logout scope:
 

@@ -651,3 +651,32 @@ It records meaningful state transitions and approved outcomes only.
 - Open items:
   - create/review/merge Sprint 13 PR
   - after Sprint 13 merge, start Sprint 14 planning only from approved Sprint 14 assignment/contract
+
+### 2026-05-07 / PHASE05-SPRINT14-SESSION-SSO-MERGED-001
+
+- Completed:
+  - refreshed `main` from `origin/main`
+  - verified Sprint 14 runtime commit `53139b0e08f708d8e5fed3cafdcfb412f45d61a0` is present in local `main` and `origin/main`
+  - updated post-merge operational state for Sprint 14
+  - updated Sprint 14 report with merge status
+- Approved:
+  - Phase 05 remains active
+  - Sprint 11: MERGED / CLOSED / PRESENT IN `main`
+  - Sprint 12: MERGED / CLOSED / PRESENT IN `main`
+  - Sprint 13: MERGED / CLOSED / PRESENT IN `main`
+  - Sprint 14 - Session + SSO: MERGED / CLOSED / PRESENT IN `main`
+  - Sprint 14 status remains COMPLETE WITH ACCEPTED EXTERNAL FORMAT CONDITION
+  - no final logout behavior was introduced in Sprint 14
+- Merge verification:
+  - local branch contains runtime commit: `main`
+  - remote branch contains runtime commit: `origin/main`
+  - merge commit on `main`: `56084b6` (`feat(oidc): implement Sprint 14 session SSO (#43)`)
+- Known condition:
+  - global `npm.cmd run format:check` remains failing due accepted external repository-wide formatting baseline drift outside Sprint 14 touched files
+- Source-of-truth documents changed:
+  - `docs/planning/reports/phase-05-sprint-14-report.md`
+- Agent files changed:
+  - `agent/current-context.md`
+  - `agent/session-history.md`
+- Open items:
+  - begin Sprint 15 planning only after approved Sprint 15 assignment/contract exists
