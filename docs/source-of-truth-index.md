@@ -29,6 +29,11 @@ It exists to prevent ambiguity, enforce contract-first execution, and stop archi
 ### 3. Contracts
 
 - `docs/contracts/oidc/jwt-token-contract.md`
+- `docs/contracts/oidc/refresh-token-contract.md`
+- `docs/contracts/oidc/refresh-token-rotation-contract.md`
+- `docs/contracts/oidc/token-revoke-introspection-contract.md`
+- `docs/contracts/oidc/session-sso-contract.md`
+- `docs/contracts/oidc/logout-hardening-contract.md`
 
 ### 4. Planning
 
@@ -37,6 +42,8 @@ It exists to prevent ambiguity, enforce contract-first execution, and stop archi
 - `docs/planning/phases/phase-02-identity-core.md`
 - `docs/planning/phases/phase-03-account-lifecycle.md`
 - `docs/planning/phases/phase-04-oidc-core.md`
+- `docs/planning/phases/phase-05-token-session-management.md`
+- `docs/planning/reports/phase-05-consolidated-report.md`
 
 ### 5. Governance
 
@@ -61,15 +68,34 @@ Recommended reading order for humans and AI agents:
 10. `docs/planning/phases/phase-02-identity-core.md`
 11. `docs/planning/phases/phase-03-account-lifecycle.md`
 12. `docs/planning/phases/phase-04-oidc-core.md`
-13. `docs/contracts/oidc/jwt-token-contract.md`
-14. Relevant sprint assignment under `docs/planning/assignments/`, selected from the execution prompt or current task context
-15. Relevant sprint report under `docs/planning/reports/`, when reviewing completed work or continuing from prior implementation
-16. `docs/governance/git-rules.md`
-17. `docs/governance/pr-template.md`
-18. `docs/governance/review-checklist.md`
-19. `docs/governance/anti-patterns.md`
+13. `docs/planning/phases/phase-05-token-session-management.md`
+14. `docs/planning/reports/phase-05-consolidated-report.md`
+15. `docs/contracts/oidc/jwt-token-contract.md`
+16. `docs/contracts/oidc/refresh-token-contract.md`
+17. `docs/contracts/oidc/refresh-token-rotation-contract.md`
+18. `docs/contracts/oidc/token-revoke-introspection-contract.md`
+19. `docs/contracts/oidc/session-sso-contract.md`
+20. `docs/contracts/oidc/logout-hardening-contract.md`
+21. Relevant sprint assignment under `docs/planning/assignments/`, selected from the execution prompt or current task context
+22. Relevant sprint report under `docs/planning/reports/`, when reviewing completed work or continuing from prior implementation
+23. `docs/governance/git-rules.md`
+24. `docs/governance/pr-template.md`
+25. `docs/governance/review-checklist.md`
+26. `docs/governance/anti-patterns.md`
 
 Sprint assignment and report documents are task-context documents. They must not be hard-coded as fixed reading-order entries in this index.
+
+Current phase execution baseline:
+
+- Phase 01: CLOSED
+- Phase 02: CLOSED
+- Phase 03: CLOSED
+- Phase 04: CLOSED
+- Phase 05: CLOSED
+- Current next phase: Phase 06 - Platform and Governance Hardening
+- Phase 06 status: planning-ready only
+- Phase 06 runtime implementation: not started
+- Phase 06 planning themes (high-level only): audit logging, admin controls, client management, observability, key rotation, security hardening
 
 ## V. Conflict Resolution Rules
 

@@ -95,11 +95,31 @@ Load in this sequence:
 - `phase-02-identity-core.md` -> identity core phase breakdown
 - `phase-03-account-lifecycle.md` -> account lifecycle phase breakdown
 - `phase-04-oidc-core.md` -> OIDC core phase breakdown
+- `phase-05-token-session-management.md` -> Phase 05 closed scope and boundary baseline
+- `phase-05-consolidated-report.md` -> Phase 05 closure and merge/validation evidence
 - `phase-02-sprint-04.md` -> historical sprint assignment
 - `docs/contracts/oidc/jwt-token-contract.md` -> JWT Token Contract (Phase 04 / Sprint 10)
+- `docs/contracts/oidc/refresh-token-contract.md` -> Refresh Token Foundation Contract (Phase 05 / Sprint 11)
+- `docs/contracts/oidc/refresh-token-rotation-contract.md` -> Refresh Token Rotation Contract (Phase 05 / Sprint 12)
+- `docs/contracts/oidc/token-revoke-introspection-contract.md` -> Revoke and Introspection Contract (Phase 05 / Sprint 13)
+- `docs/contracts/oidc/session-sso-contract.md` -> Session and SSO Contract (Phase 05 / Sprint 14)
+- `docs/contracts/oidc/logout-hardening-contract.md` -> Logout Hardening Contract (Phase 05 / Sprint 15)
 - sprint reports under `docs/planning/reports/` -> sprint execution evidence
 - governance documents -> repository control and merge discipline
 - `anti-patterns.md` -> merge-blocking anti-pattern reference aligned with architecture and governance
+
+Current planning status:
+
+- Phase 01: CLOSED
+- Phase 02: CLOSED
+- Phase 03: CLOSED
+- Phase 04: CLOSED
+- Phase 05: CLOSED
+- Current next phase: Phase 06 - Platform and Governance Hardening
+- Phase 06 status: planning-ready only
+- Phase 06 runtime implementation: not started
+- Next step: prepare and approve future Phase 06 planning/contracts/assignments before runtime implementation
+- Phase 06 planning themes (high-level only): audit logging, admin controls, client management, observability, key rotation, security hardening
 
 ## VI. Maintenance Rules
 
