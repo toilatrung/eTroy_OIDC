@@ -364,21 +364,22 @@ export class OidcService {
 
     findClient(this.clients, clientId);
 
-    const validatedRefreshToken = await this.refreshTokenService.validateRefreshToken({
+    const rotatedRefreshToken = await this.refreshTokenService.rotateRefreshToken({
       refreshToken: rawRefreshToken,
       clientId,
     });
-    const userIdentity = await resolveOidcUserIdentity(this.users, validatedRefreshToken.subject);
+    const userIdentity = await resolveOidcUserIdentity(this.users, rotatedRefreshToken.subject);
     const issuedAccessToken = this.accessTokenProvider.issueAccessToken({
       subject: userIdentity.sub,
-      audience: validatedRefreshToken.clientId,
-      scope: validatedRefreshToken.scope,
+      audience: rotatedRefreshToken.clientId,
+      scope: rotatedRefreshToken.scope,
     });
 
     return {
       access_token: issuedAccessToken.accessToken,
       token_type: issuedAccessToken.tokenType,
       expires_in: issuedAccessToken.expiresIn,
+      refresh_token: rotatedRefreshToken.refreshToken,
     };
   }
 
