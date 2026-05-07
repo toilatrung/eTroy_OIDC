@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 
 import { config } from '../../config/config.js';
+import { hashValue, verifyHash } from '../../infrastructure/crypto/index.js';
 
 import {
   OIDC_SESSION_ID_BYTE_LENGTH,
@@ -29,9 +30,20 @@ export interface OidcSessionCookieDescriptor {
   maxAgeMs: number;
 }
 
+export interface OidcCsrfCookieDescriptor {
+  name: string;
+  value: string;
+  path: string;
+  httpOnly: false;
+  sameSite: 'lax';
+  secure: boolean;
+  maxAgeMs: number;
+}
+
 export interface CreateOidcSessionResult {
   session: OidcSessionRecord;
   cookie: OidcSessionCookieDescriptor;
+  csrfCookie: OidcCsrfCookieDescriptor;
 }
 
 export type SessionCookieParseResult =
@@ -77,6 +89,8 @@ export class OidcSessionService {
     private readonly sessionTtlSeconds: number = config.oidc.session.ttlSeconds,
     private readonly cookieName: string = config.oidc.session.cookieName,
     private readonly cookiePath: string = config.oidc.session.cookiePath,
+    private readonly csrfCookieName: string = config.oidc.session.csrfCookieName,
+    private readonly csrfCookiePath: string = config.oidc.session.csrfCookiePath,
     private readonly sameSite: 'lax' = config.oidc.session.cookieSameSite,
     private readonly secureCookie: boolean = config.oidc.session.cookieSecure,
     private readonly getNow: () => Date = () => new Date(),
@@ -88,6 +102,8 @@ export class OidcSessionService {
     const createdAt = this.getNow();
     const expiresAt = new Date(createdAt.getTime() + this.sessionTtlSeconds * 1000);
     const sessionId = randomBytes(OIDC_SESSION_ID_BYTE_LENGTH).toString('base64url');
+    const csrfToken = randomBytes(OIDC_SESSION_ID_BYTE_LENGTH).toString('base64url');
+    const csrfTokenHash = hashValue(csrfToken);
     const session = await this.repository.createSessionRecord({
       sessionId,
       subject,
@@ -97,11 +113,13 @@ export class OidcSessionService {
       lastSeenAt: createdAt,
       status: 'active',
       invalidatedAt: null,
+      csrfTokenHash,
     });
 
     return {
       session,
       cookie: this.buildCookieDescriptor(session.sessionId),
+      csrfCookie: this.buildCsrfCookieDescriptor(csrfToken),
     };
   }
 
@@ -193,6 +211,23 @@ export class OidcSessionService {
     });
   }
 
+  validateLogoutCsrfToken(session: OidcSessionRecord, presentedToken: string | undefined): boolean {
+    if (session.csrfTokenHash === null) {
+      return false;
+    }
+
+    if (presentedToken === undefined) {
+      return false;
+    }
+
+    const normalized = presentedToken.trim();
+    if (normalized.length === 0) {
+      return false;
+    }
+
+    return verifyHash(normalized, session.csrfTokenHash);
+  }
+
   buildCookieDescriptor(sessionId: string): OidcSessionCookieDescriptor {
     return {
       name: this.cookieName,
@@ -205,9 +240,28 @@ export class OidcSessionService {
     };
   }
 
+  buildCsrfCookieDescriptor(csrfToken: string): OidcCsrfCookieDescriptor {
+    return {
+      name: this.csrfCookieName,
+      value: csrfToken,
+      path: this.csrfCookiePath,
+      httpOnly: false,
+      sameSite: this.sameSite,
+      secure: this.secureCookie,
+      maxAgeMs: this.sessionTtlSeconds * 1000,
+    };
+  }
+
   buildClearCookieDescriptor(): OidcSessionCookieDescriptor {
     return {
       ...this.buildCookieDescriptor(''),
+      maxAgeMs: 0,
+    };
+  }
+
+  buildClearCsrfCookieDescriptor(): OidcCsrfCookieDescriptor {
+    return {
+      ...this.buildCsrfCookieDescriptor(''),
       maxAgeMs: 0,
     };
   }

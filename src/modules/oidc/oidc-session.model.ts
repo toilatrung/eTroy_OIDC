@@ -9,6 +9,7 @@ export interface OidcSessionRecord {
   lastSeenAt: Date;
   status: OidcSessionStatus;
   invalidatedAt: Date | null;
+  csrfTokenHash: string | null;
 }
 
 export interface StoredOidcSessionRecord {
@@ -20,6 +21,7 @@ export interface StoredOidcSessionRecord {
   lastSeenAt: string;
   status: OidcSessionStatus;
   invalidatedAt: string | null;
+  csrfTokenHash: string | null;
 }
 
 export const OIDC_SESSION_ID_BYTE_LENGTH = 48;
@@ -43,6 +45,7 @@ export const serializeOidcSessionRecord = (record: OidcSessionRecord): StoredOid
   lastSeenAt: record.lastSeenAt.toISOString(),
   status: record.status,
   invalidatedAt: record.invalidatedAt?.toISOString() ?? null,
+  csrfTokenHash: record.csrfTokenHash,
 });
 
 export const deserializeOidcSessionRecord = (value: string): OidcSessionRecord | null => {
@@ -72,7 +75,10 @@ export const deserializeOidcSessionRecord = (value: string): OidcSessionRecord |
       candidate.status !== 'invalidated') ||
     (candidate.invalidatedAt !== null &&
       candidate.invalidatedAt !== undefined &&
-      typeof candidate.invalidatedAt !== 'string')
+      typeof candidate.invalidatedAt !== 'string') ||
+    (candidate.csrfTokenHash !== null &&
+      candidate.csrfTokenHash !== undefined &&
+      typeof candidate.csrfTokenHash !== 'string')
   ) {
     return null;
   }
@@ -90,6 +96,7 @@ export const deserializeOidcSessionRecord = (value: string): OidcSessionRecord |
         candidate.invalidatedAt === null || candidate.invalidatedAt === undefined
           ? null
           : assertValidDate(candidate.invalidatedAt, 'invalidatedAt'),
+      csrfTokenHash: candidate.csrfTokenHash ?? null,
     };
   } catch {
     return null;

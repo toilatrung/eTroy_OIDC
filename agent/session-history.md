@@ -680,3 +680,30 @@ It records meaningful state transitions and approved outcomes only.
   - `agent/session-history.md`
 - Open items:
   - begin Sprint 15 planning only after approved Sprint 15 assignment/contract exists
+
+### 2026-05-07 / PHASE05-SPRINT15-LOGOUT-HARDENING-001
+
+- Completed:
+  - implemented Sprint 15 logout hardening on `feature/oidc-sprint15-logout-hardening`
+  - added `POST /logout` route and OIDC-owned logout orchestration
+  - integrated session invalidation + cookie clearing
+  - added CSRF protection for active-session logout mutation using hashed CSRF token in OIDC session state
+  - added exact-match validated optional post-logout redirect with safe state reflection
+  - created Sprint 15 report: `docs/planning/reports/phase-05-sprint-15-report.md`
+- Approved:
+  - logout is idempotent and non-revealing for missing/malformed/unknown/expired/invalidated/repeated paths
+  - no `auth`/`users` ownership leakage and no `token-lifecycle` reuse
+  - no access-token persistence or blacklist behavior introduced
+- Validation evidence:
+  - `npm.cmd run lint`: PASS
+  - `npm.cmd run typecheck`: PASS
+  - `npm.cmd run build`: PASS
+  - `npm.cmd run format:check`: FAIL due accepted external repository-wide formatting drift outside Sprint 15 touched scope
+  - scoped Prettier check for touched files: PASS
+  - Sprint 15 boundary scans: PASS / PASS WITH REVIEW
+  - `SPRINT15_RUNTIME_HARNESS=PASS`
+  - `SPRINT15_RUNTIME_HARNESS_EXTENDED=PASS`
+- Limitations:
+  - refresh-token revocation on logout not implemented because safe session-to-token-family association is not present in approved baseline
+- Open items:
+  - stage Sprint 15 scoped files, commit, push branch, and open PR

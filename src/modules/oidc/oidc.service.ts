@@ -10,7 +10,11 @@ import { toOidcUserIdentity } from './claims.mapper.js';
 import { JwtAccessTokenProvider } from './access-token.provider.js';
 import { AuthorizationCodeRepository } from './authorization-code.repository.js';
 import { JwtIdTokenProvider } from './id-token.provider.js';
-import { OidcSessionService, type OidcSessionCookieDescriptor } from './oidc-session.service.js';
+import {
+  OidcSessionService,
+  type OidcCsrfCookieDescriptor,
+  type OidcSessionCookieDescriptor,
+} from './oidc-session.service.js';
 import { RefreshTokenService } from './refresh-token.service.js';
 import type {
   AccessTokenProvider,
@@ -55,6 +59,7 @@ const AUTHORIZATION_CODE_PATTERN = /^[A-Za-z0-9_-]{43,128}$/u;
 export interface AuthorizeContinueResult {
   redirectTo: string;
   sessionCookie: OidcSessionCookieDescriptor;
+  csrfCookie: OidcCsrfCookieDescriptor;
 }
 
 export interface TokenExchangeResponse {
@@ -64,6 +69,30 @@ export interface TokenExchangeResponse {
   id_token?: string;
   refresh_token?: string;
 }
+
+export interface LogoutRequestInput {
+  body: unknown;
+  cookieHeader: string | undefined;
+  csrfToken: string | undefined;
+}
+
+export interface LogoutSuccessResponse {
+  status: 'logged_out';
+}
+
+export type LogoutResult =
+  | {
+      kind: 'json';
+      body: LogoutSuccessResponse;
+      clearSessionCookie: boolean;
+      clearCsrfCookie: boolean;
+    }
+  | {
+      kind: 'redirect';
+      location: string;
+      clearSessionCookie: boolean;
+      clearCsrfCookie: boolean;
+    };
 
 type SupportedTokenTypeHint = 'refresh_token' | 'access_token';
 
@@ -195,6 +224,17 @@ const toQueryRecord = (query: unknown): Record<string, unknown> => {
 
 const inferTokenTypeHint = (token: string): SupportedTokenTypeHint =>
   token.split('.').length === 3 ? 'access_token' : 'refresh_token';
+
+const buildPostLogoutRedirectUrl = (redirectUri: string, state: string | undefined): string => {
+  if (state === undefined) {
+    return redirectUri;
+  }
+
+  const target = new URL(redirectUri);
+  target.searchParams.set('state', state);
+
+  return target.toString();
+};
 
 const toEpochSeconds = (value: Date): number => Math.floor(value.getTime() / 1000);
 
@@ -418,6 +458,7 @@ export class OidcService {
         context.state,
       ),
       sessionCookie: createdSession.cookie,
+      csrfCookie: createdSession.csrfCookie,
     };
   }
 
@@ -479,8 +520,71 @@ export class OidcService {
     });
   }
 
+  async logout(input: LogoutRequestInput): Promise<LogoutResult> {
+    const inputRecord = toQueryRecord(input.body);
+    const postLogoutRedirectUri = readOptionalString(inputRecord, 'post_logout_redirect_uri');
+    const clientId = readOptionalString(inputRecord, 'client_id');
+    const state = readOptionalString(inputRecord, 'state');
+    const csrfTokenFromBody = readOptionalString(inputRecord, 'csrf_token');
+
+    let redirectLocation: string | undefined;
+    if (postLogoutRedirectUri !== undefined) {
+      if (clientId === undefined) {
+        throw invalidInput('client_id is required when post_logout_redirect_uri is provided.');
+      }
+
+      const client = findClient(this.clients, clientId);
+      assertRedirectUri(client, postLogoutRedirectUri);
+      redirectLocation = buildPostLogoutRedirectUrl(postLogoutRedirectUri, state);
+    }
+
+    const validatedSession = await this.oidcSessionService.validateSessionCookie(
+      input.cookieHeader,
+    );
+    const clearCookies = validatedSession.status !== 'missing';
+
+    if (validatedSession.status === 'active') {
+      const csrfToken = input.csrfToken ?? csrfTokenFromBody;
+      const csrfValid = this.oidcSessionService.validateLogoutCsrfToken(
+        validatedSession.session,
+        csrfToken,
+      );
+
+      if (!csrfValid) {
+        throw new BaseError('Logout request could not be processed.', {
+          code: 'INVALID_CSRF',
+          statusCode: 403,
+        });
+      }
+
+      await this.oidcSessionService.invalidateSession(validatedSession.session.sessionId);
+    }
+
+    if (redirectLocation !== undefined) {
+      return {
+        kind: 'redirect',
+        location: redirectLocation,
+        clearSessionCookie: clearCookies,
+        clearCsrfCookie: clearCookies,
+      };
+    }
+
+    return {
+      kind: 'json',
+      body: {
+        status: 'logged_out',
+      },
+      clearSessionCookie: clearCookies,
+      clearCsrfCookie: clearCookies,
+    };
+  }
+
   getClearSessionCookieDescriptor(): OidcSessionCookieDescriptor {
     return this.oidcSessionService.buildClearCookieDescriptor();
+  }
+
+  getClearCsrfCookieDescriptor(): OidcCsrfCookieDescriptor {
+    return this.oidcSessionService.buildClearCsrfCookieDescriptor();
   }
 
   async invalidateSession(sessionId: string): Promise<void> {

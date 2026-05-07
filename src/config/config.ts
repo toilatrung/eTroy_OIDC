@@ -30,6 +30,8 @@ export interface AppConfig {
       cookiePath: string;
       cookieSameSite: 'lax';
       cookieSecure: boolean;
+      csrfCookieName: string;
+      csrfCookiePath: string;
     };
   };
 }
@@ -116,7 +118,9 @@ const parseOidcClients = (raw: string): OidcClient[] => {
 const oidcClients = parseOidcClients(validatedEnv.OIDC_CLIENTS_JSON);
 const OIDC_SESSION_TTL_SECONDS = 8 * 60 * 60;
 const OIDC_SESSION_COOKIE_NAME = 'etroy_oidc_sid';
-const OIDC_SESSION_COOKIE_PATH = '/authorize';
+const OIDC_SESSION_COOKIE_PATH = '/';
+const OIDC_CSRF_COOKIE_NAME = 'etroy_oidc_csrf';
+const OIDC_CSRF_COOKIE_PATH = '/';
 
 export const config: Readonly<AppConfig> = Object.freeze({
   app: Object.freeze({
@@ -143,6 +147,8 @@ export const config: Readonly<AppConfig> = Object.freeze({
       cookiePath: OIDC_SESSION_COOKIE_PATH,
       cookieSameSite: 'lax',
       cookieSecure: environment === 'production',
+      csrfCookieName: OIDC_CSRF_COOKIE_NAME,
+      csrfCookiePath: OIDC_CSRF_COOKIE_PATH,
     }),
   }),
 });
