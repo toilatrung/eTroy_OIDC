@@ -2,6 +2,14 @@ import express, { type Express, type NextFunction, type Request, type Response }
 
 import { config } from '../config/config.js';
 import {
+  createAdminUserHandler,
+  disableAdminUserHandler,
+  enableAdminUserHandler,
+  getAdminUserHandler,
+  markAdminUserEmailVerifiedHandler,
+  updateAdminUserProfileHandler,
+} from '../modules/admin/admin.controller.js';
+import {
   authorizeContinueHandler,
   authorizeHandler,
   introspectHandler,
@@ -31,6 +39,12 @@ export const createServer = (): Express => {
   app.post('/introspect', introspectHandler);
   app.post('/logout', logoutHandler);
   app.get('/userinfo', userInfoHandler);
+  app.post('/admin/users', createAdminUserHandler);
+  app.get('/admin/users/:sub', getAdminUserHandler);
+  app.post('/admin/users/:sub/disable', disableAdminUserHandler);
+  app.post('/admin/users/:sub/enable', enableAdminUserHandler);
+  app.patch('/admin/users/:sub/profile', updateAdminUserProfileHandler);
+  app.post('/admin/users/:sub/email-verification/mark-verified', markAdminUserEmailVerifiedHandler);
 
   app.use(
     (
