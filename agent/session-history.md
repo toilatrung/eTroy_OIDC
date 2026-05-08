@@ -828,3 +828,22 @@ It records meaningful state transitions and approved outcomes only.
   - no Sprint 17 assignment was created
   - no Sprint 17 report was created
   - no Sprint 17 runtime implementation was started
+
+### 2026-05-08 / PHASE06-SPRINT17-SOURCE-INTAKE-SUPPORT-DOCS-007
+
+- Completed:
+  - updated Sprint 17 source-intake support docs only
+  - extended audit event vocabulary for admin user actions:
+    - `admin.user.created`
+    - `admin.user.disabled`
+    - `admin.user.enabled`
+    - `admin.user.profile.updated`
+    - `admin.user.email_verified.marked`
+  - tightened admin module boundary wording around approved `users` service and `audit` service usage
+- State:
+  - Sprint 17 - Admin Module Controls remains SOURCE INTAKE / DRAFT FOR APPROVAL
+  - Sprint 17 runtime remains blocked before admin contract and Sprint 17 assignment approval
+- Guardrails:
+  - no `src/` runtime files changed
+  - no Sprint 17 report created
+  - no runtime implementation started

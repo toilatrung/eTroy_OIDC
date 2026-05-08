@@ -383,16 +383,17 @@ It is the operational control layer that keeps implementation aligned with appro
 - Phase 05 - Token and Session Management: CLOSED
 - Current next phase: Phase 06 - Platform and Governance Hardening
 - Phase 06 status: APPROVED FOR CONTRACT-BACKED EXECUTION
-- Phase 06 runtime implementation: IN PROGRESS (Sprint 16 merged; Sprint 17 not started)
+- Phase 06 runtime implementation: IN PROGRESS
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 16 PR: `#49` (merged `2026-05-08`)
 - Sprint 16 runtime commit: `c17c3aecf29927b3c69cf61b791cac49d98f8dc5`
 - Sprint 16 post-merge audit: APPROVE (no corrective action required)
 - Next sprint: Sprint 17 - Admin Module Controls
-- Sprint 17 status: PENDING SOURCE INTAKE / BLOCKED BEFORE CONTRACT AND ASSIGNMENT APPROVAL
+- Sprint 17 status: SOURCE INTAKE / DRAFT FOR APPROVAL
+- Sprint 17 runtime: BLOCKED before admin contract and assignment approval
 
 ---
 
 ## Next Step
 
-Proceed with contract-first Phase 06 execution sequencing. Sprint 17 remains blocked before runtime until Sprint 17 source documents are provided and approved, including the Sprint 17 assignment and admin contract.
+Review and approve Sprint 17 source documents before runtime. Sprint 17 remains blocked until `docs/contracts/admin/admin-control-contract.md` and `docs/planning/assignments/phase-06-sprint-17.md` are approved.

@@ -32,8 +32,11 @@ It summarizes approved state and next actions without redefining architecture.
   - post-merge audit result: `APPROVE`
   - corrective action: `NONE REQUIRED`
 - Next sprint: Sprint 17 - Admin Module Controls.
-- Sprint 17 status: PENDING SOURCE INTAKE / BLOCKED BEFORE CONTRACT AND ASSIGNMENT APPROVAL.
-- Sprint 17 gate: do not start runtime until Sprint 17 source documents are provided and approved.
+- Sprint 17 status: SOURCE INTAKE / DRAFT FOR APPROVAL.
+- Sprint 17 runtime: not started.
+- Sprint 17 gate: BLOCKED until `docs/contracts/admin/admin-control-contract.md` and `docs/planning/assignments/phase-06-sprint-17.md` are approved.
+- Planned Sprint 17 scope: admin-controlled user administration through approved `users` service contracts and approved `audit` service contracts.
+- Explicitly excluded from Sprint 17: client management, token/session controls, RBAC, hard delete, `sub` edit, user email change, password reset, and password change.
 
 ## III. Phase Boundary Notes
 
@@ -67,5 +70,6 @@ It summarizes approved state and next actions without redefining architecture.
 ## VI. Next Recommended Step
 
 - Keep Sprint 16 marked MERGED / CLOSED / PRESENT IN `main`.
-- Prepare Sprint 17 source intake only (contract/assignment documents first).
-- Keep Sprint 17 runtime blocked until Sprint 17 source documents are provided and approved.
+- Prepare Sprint 17 source-intake review for the owner-drafted admin contract and Sprint 17 assignment.
+- Keep Sprint 17 runtime blocked until the admin contract and Sprint 17 assignment are approved.
+- Do not start client management, token/session controls, RBAC, hard delete, `sub` edit, email change, password reset, or password change work under Sprint 17.
