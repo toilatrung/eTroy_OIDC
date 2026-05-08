@@ -865,24 +865,34 @@ It records meaningful state transitions and approved outcomes only.
   - no Sprint 17 report was created
   - client management, token/session controls, RBAC, hard delete, email change, `sub` mutation, password reset, and password change remain excluded from Sprint 17
 
-### 2026-05-08 / PHASE06-SPRINT17-MERGE-AND-SPRINT18-HANDOFF-009
+### 2026-05-08 / PHASE06-SPRINT18-MERGE-POSTSYNC
 
 - Completed:
-  - Sprint 17 readiness cleanup was completed.
-  - Sprint 17 runtime branch was created.
-  - Sprint 17 implementation was completed.
-  - Sprint 17 branch was pushed.
-  - Sprint 17 PR was merged successfully into `main`.
-  - Sprint 17 validation passed.
-  - Sprint 18 is the next candidate sprint for intake/readiness.
+  - Sprint 18 - OIDC Client Management merged and confirmed present in `main`.
+  - DB-managed OIDC client metadata lifecycle implemented under `src/modules/oidc`.
+  - Admin orchestration added through `src/modules/admin` without direct client model/repository ownership.
+  - Client secrets are system-generated, hash-only persisted, and raw secret is returned only once on create/rotate.
+  - Managed-client validation path added with static config fallback.
+  - Disabled managed clients cannot be bypassed by static fallback.
+  - Client lifecycle audit events implemented with exactly one event emitted per mutation.
+  - Manual DB-backed runtime validation completed with 11/11 scenarios PASS.
 - Approved:
-  - Sprint 17 is completed and merged into `main`.
-  - Admin remains an orchestration module using approved `users` and `audit` service contracts.
-  - Sprint 18 may begin intake/readiness but implementation must not begin until assigned task, contract, and readiness checks are confirmed.
+  - Sprint 18 status: MERGED / CLOSED / PRESENT IN `main`.
+  - Validation evidence complete.
+  - Manual validation matrix: 50/50 PASS.
 - Source-of-truth documents changed:
-  - `docs/planning/master-execution-plan.md`
-  - `docs/planning/phases/phase-06-platform-governance-hardening.md`
-  - `docs/source-of-truth-index.md`
-  - `docs/README.md`
+  - `docs/contracts/oidc/client-management-contract.md`
+  - `docs/planning/assignments/phase-06-sprint-18.md`
+  - `docs/planning/reports/phase-06-sprint-18-report.md`
+- Runtime files changed:
+  - `src/modules/oidc/client.model.ts`
+  - `src/modules/oidc/client.repository.ts`
+  - `src/modules/oidc/client.service.ts`
+  - `src/modules/oidc/oidc.service.ts`
+  - `src/modules/admin/admin.controller.ts`
+  - `src/modules/admin/admin.service.ts`
+  - `src/modules/admin/admin.validator.ts`
+  - `src/app/server.ts`
 - Open items:
-  - Sprint 18 intake/readiness.
+  - Begin Sprint 19 only after approved observability contract and Sprint 19 assignment.
+  - Do not introduce observability metrics/logging changes from Sprint 18 context alone.
