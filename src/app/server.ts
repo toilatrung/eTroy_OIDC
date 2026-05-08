@@ -8,6 +8,12 @@ import {
   getAdminUserHandler,
   markAdminUserEmailVerifiedHandler,
   updateAdminUserProfileHandler,
+  createAdminClientHandler,
+  getAdminClientHandler,
+  listAdminClientsHandler,
+  updateAdminClientHandler,
+  disableAdminClientHandler,
+  rotateAdminClientSecretHandler,
 } from '../modules/admin/admin.controller.js';
 import {
   authorizeContinueHandler,
@@ -45,6 +51,12 @@ export const createServer = (): Express => {
   app.post('/admin/users/:sub/enable', enableAdminUserHandler);
   app.patch('/admin/users/:sub/profile', updateAdminUserProfileHandler);
   app.post('/admin/users/:sub/email-verification/mark-verified', markAdminUserEmailVerifiedHandler);
+  app.post('/admin/clients', createAdminClientHandler);
+  app.get('/admin/clients', listAdminClientsHandler);
+  app.get('/admin/clients/:clientId', getAdminClientHandler);
+  app.patch('/admin/clients/:clientId', updateAdminClientHandler);
+  app.post('/admin/clients/:clientId/disable', disableAdminClientHandler);
+  app.post('/admin/clients/:clientId/rotate-secret', rotateAdminClientSecretHandler);
 
   app.use(
     (
