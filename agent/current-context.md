@@ -31,12 +31,28 @@ It summarizes approved state and next actions without redefining architecture.
   - merge commit on `main`: `a41ea4b`
   - post-merge audit result: `APPROVE`
   - corrective action: `NONE REQUIRED`
-- Next sprint: Sprint 18 - OIDC Client Management.
-- Sprint 18 status: READY FOR INTAKE.
-- Sprint 18 runtime: not started.
-- Sprint 18 gate: implementation must not begin until its Assigned Task and readiness state are confirmed.
-- Planned Sprint 18 scope: OIDC client metadata lifecycle management.
-- Explicitly excluded from Sprint 18: dynamic public self-service client registration, third-party marketplace clients, client-owned identity storage, raw client secret persistence.
+- Sprint 18 - OIDC Client Management: MERGED / CLOSED / PRESENT IN `main`.
+- Sprint 18 merge evidence:
+  - PR: `#54` (https://github.com/toilatrung/etroy-oidc/pull/54)
+  - runtime commit: `7f0be85`
+  - status: `IMPLEMENTED / MANUAL RUNTIME VALIDATED / VALIDATION EVIDENCE COMPLETE`
+  - manual runtime validation:
+    - DB-backed integration validation
+    - local database: `etroy-oidc-runtime-test`
+    - 11/11 runtime scenarios PASS
+    - temporary harness `temp-validation.ts` created, executed, and removed
+  - validation:
+    - `npm.cmd run lint`: PASS
+    - `npm.cmd run typecheck`: PASS
+    - `npm.cmd run format:check`: PASS
+    - `npm.cmd run build`: PASS
+    - Sprint 18 boundary/security scans: PASS / PASS WITH REVIEW
+    - manual validation matrix: 50/50 PASS
+- Known follow-up note:
+  - No unit/e2e test runner exists in `package.json`; runtime validation was DB-backed manual harness, not committed test suite.
+- Next sprint: Sprint 19 - Observability Hardening.
+- Sprint 19 status: READY FOR INTAKE / NOT STARTED.
+- Sprint 19 gate: implementation must not begin until Sprint 19 contract and assignment are approved.
 
 ## III. Phase Boundary Notes
 
@@ -50,25 +66,29 @@ It summarizes approved state and next actions without redefining architecture.
   - session management
   - SSO behavior
   - logout hardening if approved by Phase 05 planning
+- Phase 06 owns:
+  - OIDC client metadata lifecycle management
+  - secure secret generation and hash-only persistence
+  - admin-to-oidc orchestration boundaries
+  - observability hardening
 - Do not move refresh token lifecycle, rotation, revoke, introspection, session, SSO, or logout hardening into Phase 04.
 
-## IV. Phase 05 Validation Summary
+## IV. Phase 05/06 Validation Summary
 
-- Sprint 11-15 validation posture:
+- Sprint 11-18 validation posture:
   - `npm.cmd run lint`: PASS
   - `npm.cmd run typecheck`: PASS
   - `npm.cmd run build`: PASS
-  - `npm.cmd run format:check`: FAIL due accepted external repository-wide formatting baseline drift outside sprint-scoped touched files
-  - scoped touched-file Prettier checks: PASS
+  - `npm.cmd run format:check`: PASS (following repository-wide cleanup and scoped checks)
   - boundary scans: PASS / PASS WITH REVIEW
   - runtime/manual harnesses: PASS
 
 ## V. Known Condition
 
-- Global `npm.cmd run format:check` remains failing due accepted external repository-wide formatting baseline drift outside Sprint 11-15 touched files.
+- Unit and E2E test runners are currently missing from `package.json`; validation relies on build/static checks and manual DB-backed harnesses.
 
 ## VI. Next Recommended Step
 
-- Keep Sprint 17 marked MERGED / CLOSED / PRESENT IN `main`.
-- Wait for Sprint 18 intake and readiness confirmation.
-- Do not start Sprint 18 implementation without approved contract and assignment.
+- Keep Sprint 18 marked MERGED / CLOSED / PRESENT IN `main`.
+- Wait for Sprint 19 intake and readiness confirmation.
+- Do not start Sprint 19 implementation without approved contract and assignment.
