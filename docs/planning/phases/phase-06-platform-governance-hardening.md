@@ -15,8 +15,8 @@ Current phase status:
 - Phase 06 status: APPROVED FOR CONTRACT-BACKED EXECUTION
 - Phase 06 runtime implementation: IN PROGRESS
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
-- Sprint 17 - Admin Module Controls: SOURCE INTAKE / DRAFT FOR APPROVAL
-- Sprint 17 runtime: BLOCKED until `docs/contracts/admin/admin-control-contract.md` and `docs/planning/assignments/phase-06-sprint-17.md` are approved.
+- Sprint 17 - Admin Module Controls: APPROVED FOR RUNTIME IMPLEMENTATION
+- Sprint 17 runtime: READY FOR DEDICATED RUNTIME BRANCH FROM UPDATED `main`
 - Sprint 17 scope: admin-controlled user administration only through approved `users` service contracts and approved `audit` service contracts.
 - Sprint 18 remains OIDC Client Management; client lifecycle work must not move into Sprint 17.
 
@@ -349,10 +349,10 @@ Implement admin orchestration controls without violating domain ownership.
 
 The admin module must coordinate approved operations through `users`, `oidc`, and `audit` service contracts. It must not directly mutate cross-domain persistence.
 
-Sprint 17 source-intake status:
+Sprint 17 readiness status:
 
-- Sprint 17 - Admin Module Controls: SOURCE INTAKE / DRAFT FOR APPROVAL
-- Sprint 17 runtime: BLOCKED until the admin control contract and Sprint 17 assignment are approved.
+- Sprint 17 - Admin Module Controls: APPROVED FOR RUNTIME IMPLEMENTATION
+- Sprint 17 runtime: ready to start on a dedicated runtime branch from updated `main`.
 - Sprint 17 scope is admin-controlled user administration only.
 - Sprint 18 remains OIDC Client Management; client lifecycle work must not move into Sprint 17.
 
@@ -368,9 +368,9 @@ Approved dependencies:
 - `src/modules/audit` through audit service contract
 - `src/shared/errors`
 
-## 3. Required Contract
+## 3. Required Contracts
 
-Blocked until approved:
+Approved runtime basis:
 
 - `docs/contracts/admin/admin-control-contract.md`
 - `docs/contracts/audit/audit-event-contract.md` for admin audit events
@@ -401,7 +401,7 @@ Blocked until approved:
 
 ## 6. Expected Deliverables
 
-Candidate deliverables, subject to contract approval:
+Approved deliverables, subject to Sprint 17 runtime execution:
 
 - `src/modules/admin/admin.service.ts`
 - `src/modules/admin/admin.controller.ts`

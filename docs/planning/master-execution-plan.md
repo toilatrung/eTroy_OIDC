@@ -389,11 +389,11 @@ It is the operational control layer that keeps implementation aligned with appro
 - Sprint 16 runtime commit: `c17c3aecf29927b3c69cf61b791cac49d98f8dc5`
 - Sprint 16 post-merge audit: APPROVE (no corrective action required)
 - Next sprint: Sprint 17 - Admin Module Controls
-- Sprint 17 status: SOURCE INTAKE / DRAFT FOR APPROVAL
-- Sprint 17 runtime: BLOCKED before admin contract and assignment approval
+- Sprint 17 status: APPROVED FOR RUNTIME IMPLEMENTATION
+- Sprint 17 runtime: READY FOR DEDICATED RUNTIME BRANCH FROM UPDATED `main`
 
 ---
 
 ## Next Step
 
-Review and approve Sprint 17 source documents before runtime. Sprint 17 remains blocked until `docs/contracts/admin/admin-control-contract.md` and `docs/planning/assignments/phase-06-sprint-17.md` are approved.
+Start Sprint 17 runtime only on a dedicated Sprint 17 feature branch from updated `main`, produce the implementation packet before coding, and keep runtime scope bounded to the approved admin control baseline.

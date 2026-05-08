@@ -34,7 +34,8 @@ It exists to prevent ambiguity, enforce contract-first execution, and stop archi
 - `docs/contracts/oidc/token-revoke-introspection-contract.md`
 - `docs/contracts/oidc/session-sso-contract.md`
 - `docs/contracts/oidc/logout-hardening-contract.md`
-- `docs/contracts/audit/audit-event-contract.md` (Approved in this PR)
+- `docs/contracts/audit/audit-event-contract.md`
+- `docs/contracts/admin/admin-control-contract.md`
 
 ### 4. Planning
 
@@ -98,11 +99,15 @@ Current phase execution baseline:
 - Phase 05: CLOSED
 - Current next phase: Phase 06 - Platform and Governance Hardening
 - Phase 06 status: APPROVED FOR CONTRACT-BACKED EXECUTION
-- Phase 06 runtime implementation: NOT STARTED
-- Next sprint: Sprint 16 - Audit Logging Foundation
-- Audit Event Contract: Approved in this PR
-- Sprint 16 Assignment: Approved in this PR
-- Sprint 16 runtime gate: will be unblocked after this PR is merged; runtime implementation remains not started and must occur on a separate Sprint 16 feature branch.
+- Phase 06 runtime implementation: IN PROGRESS
+- Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 16 PR: `#49` (merged `2026-05-08`)
+- Sprint 16 runtime commit: `c17c3aecf29927b3c69cf61b791cac49d98f8dc5`
+- Sprint 16 post-merge audit: APPROVE (no corrective action required)
+- Next sprint: Sprint 17 - Admin Module Controls
+- Admin Control Contract: Approved for Sprint 17 runtime implementation
+- Sprint 17 Assignment: Approved for Sprint 17 runtime implementation
+- Sprint 17 runtime: READY FOR DEDICATED RUNTIME BRANCH FROM UPDATED `main`
 - Phase 06 planning themes (high-level only): audit logging, admin controls, client management, observability, key rotation, security hardening
 
 ## V. Conflict Resolution Rules

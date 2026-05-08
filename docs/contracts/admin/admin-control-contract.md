@@ -14,7 +14,7 @@
   * `src/modules/audit`
 * Primary Assignment: `docs/planning/assignments/phase-06-sprint-17.md`
 * Contract Path: `docs/contracts/admin/admin-control-contract.md`
-* Status: Draft for approval
+* Status: Approved for Sprint 17 runtime implementation
 
 ---
 
@@ -65,7 +65,7 @@ Authority rules:
 * `source-tree.md` is the primary physical structure contract.
 * `detailed-source-tree.md` is supporting reference only.
 * If this contract conflicts with architecture documents, architecture documents win unless an approved architecture update is included.
-* No Sprint 17 runtime implementation may begin unless this contract and `docs/planning/assignments/phase-06-sprint-17.md` are approved.
+* Sprint 17 runtime implementation may begin only from a dedicated runtime branch after this contract and `docs/planning/assignments/phase-06-sprint-17.md` are approved.
 
 ---
 
