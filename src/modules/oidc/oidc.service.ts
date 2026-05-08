@@ -7,6 +7,7 @@ import { userService, type UserService } from '../users/user.service.js';
 import { randomBytes, createHash } from 'node:crypto';
 
 import { toOidcUserIdentity } from './claims.mapper.js';
+import { oidcClientService } from './client.service.js';
 import { JwtAccessTokenProvider } from './access-token.provider.js';
 import { AuthorizationCodeRepository } from './authorization-code.repository.js';
 import { JwtIdTokenProvider } from './id-token.provider.js';
@@ -199,7 +200,21 @@ const assertAuthorizationCodeFormat = (code: string): void => {
   }
 };
 
-const findClient = (clients: readonly OidcClient[], clientId: string): OidcClient => {
+const findClient = async (
+  clients: readonly OidcClient[],
+  clientId: string,
+): Promise<OidcClient> => {
+  const managedClient = await oidcClientService.getClient(clientId);
+  if (managedClient) {
+    if (managedClient.status !== 'active') {
+      throw invalidInput('client_id is invalid.');
+    }
+    return {
+      clientId: managedClient.clientId,
+      redirectUris: managedClient.redirectUris,
+    };
+  }
+
   const client = clients.find((item) => item.clientId === clientId);
   if (client === undefined) {
     throw invalidInput('client_id is invalid.');
@@ -369,7 +384,7 @@ export class OidcService {
     query: unknown,
     cookieHeader: string | undefined,
   ): Promise<AuthorizeHandlerResult> {
-    const context = this.validateAuthorizeRequest(query);
+    const context = await this.validateAuthorizeRequest(query);
     const validatedSession = await this.oidcSessionService.validateSessionCookie(cookieHeader);
 
     if (validatedSession.status !== 'active') {
@@ -400,7 +415,7 @@ export class OidcService {
     };
   }
 
-  validateAuthorizeRequest(query: unknown): AuthorizeRequestContext {
+  async validateAuthorizeRequest(query: unknown): Promise<AuthorizeRequestContext> {
     const queryRecord = toQueryRecord(query);
     const responseType = readSingleString(queryRecord, 'response_type');
     if (responseType !== 'code') {
@@ -421,7 +436,7 @@ export class OidcService {
     assertOpenIdScope(scope);
     assertPkceChallenge(codeChallenge);
 
-    const client = findClient(this.clients, clientId);
+    const client = await findClient(this.clients, clientId);
     assertRedirectUri(client, redirectUri);
 
     return {
@@ -443,7 +458,7 @@ export class OidcService {
     const inputRecord = toQueryRecord(input);
     const email = readSingleString(inputRecord, 'email');
     const password = readSingleString(inputRecord, 'password');
-    const context = this.validateAuthorizeRequest(inputRecord);
+    const context = await this.validateAuthorizeRequest(inputRecord);
     const identity = await this.authBridge.validateCredentials(email, password);
     const issuedAuthorizationCode = await this.issueAuthorizationCode(context, identity.sub);
     const createdSession = await this.oidcSessionService.createSession({
@@ -483,7 +498,7 @@ export class OidcService {
     const clientId = readSingleString(inputRecord, 'client_id');
     const tokenTypeHint = readTokenTypeHint(inputRecord, 'token_type_hint');
 
-    findClient(this.clients, clientId);
+    await findClient(this.clients, clientId);
     if (tokenTypeHint !== undefined && tokenTypeHint !== 'refresh_token') {
       throw invalidInput('token_type_hint is not supported.');
     }
@@ -503,7 +518,7 @@ export class OidcService {
     const clientId = readSingleString(inputRecord, 'client_id');
     const tokenTypeHint = readTokenTypeHint(inputRecord, 'token_type_hint');
 
-    findClient(this.clients, clientId);
+    await findClient(this.clients, clientId);
     const resolvedHint = tokenTypeHint ?? inferTokenTypeHint(token);
 
     if (resolvedHint === 'refresh_token') {
@@ -533,7 +548,7 @@ export class OidcService {
         throw invalidInput('client_id is required when post_logout_redirect_uri is provided.');
       }
 
-      const client = findClient(this.clients, clientId);
+      const client = await findClient(this.clients, clientId);
       assertRedirectUri(client, postLogoutRedirectUri);
       redirectLocation = buildPostLogoutRedirectUrl(postLogoutRedirectUri, state);
     }
@@ -602,7 +617,7 @@ export class OidcService {
     assertAuthorizationCodeFormat(rawAuthorizationCode);
     assertPkceVerifier(codeVerifier);
 
-    const client = findClient(this.clients, clientId);
+    const client = await findClient(this.clients, clientId);
     assertRedirectUri(client, redirectUri);
 
     const codeHash = hashValue(rawAuthorizationCode);
@@ -657,7 +672,7 @@ export class OidcService {
     const rawRefreshToken = readSingleString(inputRecord, 'refresh_token');
     const clientId = readSingleString(inputRecord, 'client_id');
 
-    findClient(this.clients, clientId);
+    await findClient(this.clients, clientId);
 
     const rotatedRefreshToken = await this.refreshTokenService.rotateRefreshToken({
       refreshToken: rawRefreshToken,

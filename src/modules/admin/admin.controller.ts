@@ -7,14 +7,25 @@ import {
   validateAdminCreateUserInput,
   validateAdminUpdateProfileInput,
   validateAdminUserParams,
+  validateAdminClientParams,
+  validateAdminCreateClientInput,
+  validateAdminUpdateClientInput,
   type AdminCreateUserInput,
   type AdminUpdateProfileInput,
   type AdminUserParams,
+  type AdminClientParams,
+  type AdminCreateClientInput,
+  type AdminUpdateClientInput,
 } from './admin.validator.js';
 import type { UserAdminView } from '../users/user.service.js';
+import type { ClientAdminView, ClientWithSecret } from '../oidc/client.service.js';
 
 interface AdminUserResponseBody {
   data: UserAdminView;
+}
+
+interface AdminClientResponseBody {
+  data: ClientAdminView | ClientAdminView[] | ClientWithSecret | null;
 }
 
 type AdminRequestContextSource = Pick<Request, 'header' | 'method' | 'path' | 'route'>;
@@ -136,6 +147,120 @@ export const markAdminUserEmailVerifiedHandler = async (
     const params = validateAdminUserParams(request.params);
     const user = await adminService.markEmailVerified(params.sub, context);
     sendAdminUser(response, 200, user);
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+const sendAdminClient = (
+  response: Response<AdminClientResponseBody>,
+  statusCode: number,
+  clientData: ClientAdminView | ClientAdminView[] | ClientWithSecret | null,
+): void => {
+  response.status(statusCode).json({ data: clientData });
+};
+
+export const createAdminClientHandler = async (
+  request: Request<Record<string, never>, AdminClientResponseBody, AdminCreateClientInput>,
+  response: Response<AdminClientResponseBody>,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const context = buildAdminContext(request);
+    const input = validateAdminCreateClientInput(request.body);
+    const client = await adminService.createClient(input, context);
+    sendAdminClient(response, 201, client);
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+export const getAdminClientHandler = async (
+  request: Request<AdminClientParams, AdminClientResponseBody>,
+  response: Response<AdminClientResponseBody>,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const params = validateAdminClientParams(request.params);
+    const client = await adminService.getClient(params.clientId);
+    if (!client) {
+      response.status(404).json({ data: null });
+      return;
+    }
+    sendAdminClient(response, 200, client);
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+export const listAdminClientsHandler = async (
+  request: Request<Record<string, never>, AdminClientResponseBody>,
+  response: Response<AdminClientResponseBody>,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    // We can extract skip/limit from query params, but currently there's no validator for them.
+    // For simplicity, passing undefined defaults to 0 and 50.
+    const clients = await adminService.listClients();
+    sendAdminClient(response, 200, clients);
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+export const updateAdminClientHandler = async (
+  request: Request<AdminClientParams, AdminClientResponseBody, AdminUpdateClientInput>,
+  response: Response<AdminClientResponseBody>,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const context = buildAdminContext(request);
+    const params = validateAdminClientParams(request.params);
+    const input = validateAdminUpdateClientInput(request.body);
+    const client = await adminService.updateClient(params.clientId, input, context);
+    if (!client) {
+      response.status(404).json({ data: null });
+      return;
+    }
+    sendAdminClient(response, 200, client);
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+export const disableAdminClientHandler = async (
+  request: Request<AdminClientParams, AdminClientResponseBody>,
+  response: Response<AdminClientResponseBody>,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const context = buildAdminContext(request);
+    const params = validateAdminClientParams(request.params);
+    const client = await adminService.disableClient(params.clientId, context);
+    if (!client) {
+      response.status(404).json({ data: null });
+      return;
+    }
+    sendAdminClient(response, 200, client);
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+export const rotateAdminClientSecretHandler = async (
+  request: Request<AdminClientParams, AdminClientResponseBody>,
+  response: Response<AdminClientResponseBody>,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const context = buildAdminContext(request);
+    const params = validateAdminClientParams(request.params);
+    const result = await adminService.rotateClientSecret(params.clientId, context);
+    if (!result) {
+      response.status(404).json({ data: null });
+      return;
+    }
+    sendAdminClient(response, 200, result);
   } catch (error: unknown) {
     next(error);
   }

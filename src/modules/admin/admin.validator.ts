@@ -23,6 +23,30 @@ export interface AdminUpdateProfileInput {
   avatar_url?: string | undefined;
 }
 
+export interface AdminClientParams {
+  clientId: string;
+}
+
+export interface AdminCreateClientInput {
+  name: string;
+  redirectUris: string[];
+  postLogoutRedirectUris?: string[] | undefined;
+  allowedScopes: string[];
+  grantTypes: string[];
+  responseTypes: string[];
+  status?: 'active' | 'disabled' | undefined;
+}
+
+export interface AdminUpdateClientInput {
+  name?: string | undefined;
+  redirectUris?: string[] | undefined;
+  postLogoutRedirectUris?: string[] | undefined;
+  allowedScopes?: string[] | undefined;
+  grantTypes?: string[] | undefined;
+  responseTypes?: string[] | undefined;
+  status?: 'active' | 'disabled' | undefined;
+}
+
 const trimmedRequiredString = (fieldName: string) =>
   z
     .string()
@@ -65,6 +89,37 @@ const adminUpdateProfileSchema = z
   .strict()
   .refine((value) => value.name !== undefined || value.avatar_url !== undefined);
 
+const adminClientParamsSchema = z
+  .object({
+    clientId: trimmedRequiredString('clientId'),
+  })
+  .strict();
+
+const adminCreateClientSchema = z
+  .object({
+    name: trimmedRequiredString('name'),
+    redirectUris: z.array(trimmedRequiredString('redirectUri')).min(1),
+    postLogoutRedirectUris: z.array(trimmedRequiredString('postLogoutRedirectUri')).optional(),
+    allowedScopes: z.array(trimmedRequiredString('scope')).min(1),
+    grantTypes: z.array(trimmedRequiredString('grantType')).min(1),
+    responseTypes: z.array(trimmedRequiredString('responseType')).min(1),
+    status: z.enum(['active', 'disabled']).optional(),
+  })
+  .strict();
+
+const adminUpdateClientSchema = z
+  .object({
+    name: optionalTrimmedString,
+    redirectUris: z.array(trimmedRequiredString('redirectUri')).min(1).optional(),
+    postLogoutRedirectUris: z.array(trimmedRequiredString('postLogoutRedirectUri')).optional(),
+    allowedScopes: z.array(trimmedRequiredString('scope')).min(1).optional(),
+    grantTypes: z.array(trimmedRequiredString('grantType')).min(1).optional(),
+    responseTypes: z.array(trimmedRequiredString('responseType')).min(1).optional(),
+    status: z.enum(['active', 'disabled']).optional(),
+  })
+  .strict()
+  .refine((value) => Object.keys(value).length > 0);
+
 const invalidAdminInput = (): BaseError =>
   new BaseError('Invalid admin request input.', {
     code: 'INVALID_INPUT',
@@ -92,3 +147,12 @@ export const validateAdminCreateUserInput = (input: unknown): AdminCreateUserInp
 
 export const validateAdminUpdateProfileInput = (input: unknown): AdminUpdateProfileInput =>
   parseAdminInput(adminUpdateProfileSchema, input);
+
+export const validateAdminClientParams = (input: unknown): AdminClientParams =>
+  parseAdminInput(adminClientParamsSchema, input);
+
+export const validateAdminCreateClientInput = (input: unknown): AdminCreateClientInput =>
+  parseAdminInput(adminCreateClientSchema, input);
+
+export const validateAdminUpdateClientInput = (input: unknown): AdminUpdateClientInput =>
+  parseAdminInput(adminUpdateClientSchema, input);

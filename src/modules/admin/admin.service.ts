@@ -4,6 +4,13 @@ import {
   type RecordAuditEventInput,
 } from '../audit/audit.service.js';
 import {
+  oidcClientService,
+  type ClientAdminView,
+  type ClientWithSecret,
+  type CreateClientRequest,
+  type UpdateClientRequest,
+} from '../oidc/client.service.js';
+import {
   userService,
   type CreateAdminProvisionedUserInput,
   type UpdateProfileInput,
@@ -181,6 +188,43 @@ export class AdminService {
     });
 
     return user;
+  }
+
+  async createClient(
+    input: CreateClientRequest,
+    context: AdminOperationContext,
+  ): Promise<ClientWithSecret> {
+    return oidcClientService.createClient(input, context.actor.adminSub);
+  }
+
+  async getClient(clientId: string): Promise<ClientAdminView | null> {
+    return oidcClientService.getClient(clientId);
+  }
+
+  async listClients(skip?: number, limit?: number): Promise<ClientAdminView[]> {
+    return oidcClientService.listClients(skip, limit);
+  }
+
+  async updateClient(
+    clientId: string,
+    input: UpdateClientRequest,
+    context: AdminOperationContext,
+  ): Promise<ClientAdminView | null> {
+    return oidcClientService.updateClient(clientId, input, context.actor.adminSub);
+  }
+
+  async disableClient(
+    clientId: string,
+    context: AdminOperationContext,
+  ): Promise<ClientAdminView | null> {
+    return oidcClientService.disableClient(clientId, context.actor.adminSub);
+  }
+
+  async rotateClientSecret(
+    clientId: string,
+    context: AdminOperationContext,
+  ): Promise<ClientWithSecret | null> {
+    return oidcClientService.rotateClientSecret(clientId, context.actor.adminSub);
   }
 
   private async recordAdminUserEvent(input: {
