@@ -21,17 +21,19 @@ It summarizes approved state and next actions without redefining architecture.
 - Sprint 13 - Revoke + Introspection: MERGED / CLOSED / PRESENT IN `main`.
 - Sprint 14 - Session + SSO: MERGED / CLOSED / PRESENT IN `main`.
 - Sprint 15 - Logout Hardening: MERGED / CLOSED / PRESENT IN `main`.
+- Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`.
 - Phase 06 - Platform and Governance Hardening: APPROVED FOR CONTRACT-BACKED EXECUTION.
-- Phase 06 runtime implementation: NOT STARTED.
-- Next sprint: Sprint 16 - Audit Logging Foundation (not started).
-- Audit Event Contract: Approved in this PR.
-- Sprint 16 Assignment: Approved in this PR.
-- Sprint 16 runtime gate: will be unblocked after this PR is merged; runtime implementation remains not started and must occur on a separate Sprint 16 feature branch.
-- Sprint 15 merge evidence:
-  - PR: `#44`
-  - runtime commit: `c26403b`
-  - merge commit: `128944c`
-  - `origin/main` head at closure-sync baseline: `57530e8`
+- Phase 06 runtime implementation: IN PROGRESS (Sprint 16 complete in `main`; Sprint 17 not started).
+- Sprint 16 merge evidence:
+  - PR: `#49`
+  - PR merged: `2026-05-08`
+  - runtime commit: `c17c3aecf29927b3c69cf61b791cac49d98f8dc5`
+  - merge commit on `main`: `45d0f24c8f68d77a7a3f878ac3c7ce8188d87980`
+  - post-merge audit result: `APPROVE`
+  - corrective action: `NONE REQUIRED`
+- Next sprint: Sprint 17 - Admin Module Controls.
+- Sprint 17 status: PENDING SOURCE INTAKE / BLOCKED BEFORE CONTRACT AND ASSIGNMENT APPROVAL.
+- Sprint 17 gate: do not start runtime until Sprint 17 source documents are provided and approved.
 
 ## III. Phase Boundary Notes
 
@@ -64,6 +66,6 @@ It summarizes approved state and next actions without redefining architecture.
 
 ## VI. Next Recommended Step
 
-- Keep Phase 06 runtime NOT STARTED in this PR state.
-- Merge this PR to unblock Sprint 16 runtime execution.
-- Start Sprint 16 runtime only on a dedicated Sprint 16 feature branch after merge.
+- Keep Sprint 16 marked MERGED / CLOSED / PRESENT IN `main`.
+- Prepare Sprint 17 source intake only (contract/assignment documents first).
+- Keep Sprint 17 runtime blocked until Sprint 17 source documents are provided and approved.
