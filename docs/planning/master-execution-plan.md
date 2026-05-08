@@ -383,13 +383,16 @@ It is the operational control layer that keeps implementation aligned with appro
 - Phase 05 - Token and Session Management: CLOSED
 - Current next phase: Phase 06 - Platform and Governance Hardening
 - Phase 06 status: APPROVED FOR CONTRACT-BACKED EXECUTION
-- Phase 06 runtime implementation: NOT STARTED
-- Next sprint: Sprint 16 - Audit Logging Foundation
-- Audit Event Contract: Approved in this PR
-- Sprint 16 Assignment: Approved in this PR
+- Phase 06 runtime implementation: IN PROGRESS (Sprint 16 merged; Sprint 17 not started)
+- Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 16 PR: `#49` (merged `2026-05-08`)
+- Sprint 16 runtime commit: `c17c3aecf29927b3c69cf61b791cac49d98f8dc5`
+- Sprint 16 post-merge audit: APPROVE (no corrective action required)
+- Next sprint: Sprint 17 - Admin Module Controls
+- Sprint 17 status: PENDING SOURCE INTAKE / BLOCKED BEFORE CONTRACT AND ASSIGNMENT APPROVAL
 
 ---
 
 ## Next Step
 
-Proceed with contract-first Phase 06 execution sequencing. Sprint 16 runtime gate: will be unblocked after this PR is merged; runtime implementation remains not started and must occur on a separate Sprint 16 feature branch.
+Proceed with contract-first Phase 06 execution sequencing. Sprint 17 remains blocked before runtime until Sprint 17 source documents are provided and approved, including the Sprint 17 assignment and admin contract.
