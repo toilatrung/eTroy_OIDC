@@ -24,13 +24,13 @@
   * `docs/contracts/admin/admin-control-contract.md`
   * `docs/contracts/audit/audit-event-contract.md`
 * Assignment path: `docs/planning/assignments/phase-06-sprint-17.md`
-* Status: Draft for approval
+* Status: Approved for Sprint 17 runtime implementation
 
 ---
 
-## II. Runtime Gate
+## II. Runtime Start Conditions
 
-Sprint 17 runtime implementation is blocked until all are true:
+Sprint 17 runtime implementation is approved to start only when all execution conditions remain true:
 
 * `docs/contracts/admin/admin-control-contract.md` exists and is approved.
 * `docs/planning/assignments/phase-06-sprint-17.md` exists and is approved.
@@ -39,13 +39,13 @@ Sprint 17 runtime implementation is blocked until all are true:
 * Runtime work begins from updated `main` on a dedicated Sprint 17 feature branch.
 * Implementation packet is produced before coding.
 
-Until this gate is satisfied:
+This source-intake cleanup does not start runtime implementation. Before Sprint 17 coding:
 
-* do not create Sprint 17 runtime branch
-* do not edit `src/`
-* do not implement admin runtime
-* do not create Sprint 17 report
-* do not mark Sprint 17 as started
+* create a dedicated Sprint 17 runtime branch from updated `main`
+* produce the implementation packet before coding
+* do not edit `src/` for behavior on the source-intake cleanup branch
+* do not implement admin runtime outside the dedicated runtime branch
+* do not create Sprint 17 report until Sprint 17 runtime execution
 
 ---
 

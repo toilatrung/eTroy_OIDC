@@ -97,17 +97,19 @@ Load in this sequence:
 - `phase-04-oidc-core.md` -> OIDC core phase breakdown
 - `phase-05-token-session-management.md` -> Phase 05 closed scope and boundary baseline
 - `phase-05-consolidated-report.md` -> Phase 05 closure and merge/validation evidence
-- `phase-06-platform-governance-hardening.md` -> Phase 06 approved contract-backed execution plan (runtime not started)
+- `phase-06-platform-governance-hardening.md` -> Phase 06 approved contract-backed execution plan (runtime in progress)
 - `docs/planning/assignments/` -> sprint-level assignment documents defining execution scope and task contracts
 - `docs/planning/reports/` -> sprint/phase execution evidence, validation results, and handoff context
-- `phase-06-sprint-16.md` -> next sprint assignment (Approved in this PR; runtime remains not started)
+- `phase-06-sprint-16.md` -> Sprint 16 Audit Logging Foundation assignment (merged / closed / present in `main`)
+- `phase-06-sprint-17.md` -> Sprint 17 Admin Module Controls assignment (approved for runtime implementation)
 - `docs/contracts/oidc/jwt-token-contract.md` -> JWT Token Contract (Phase 04 / Sprint 10)
 - `docs/contracts/oidc/refresh-token-contract.md` -> Refresh Token Foundation Contract (Phase 05 / Sprint 11)
 - `docs/contracts/oidc/refresh-token-rotation-contract.md` -> Refresh Token Rotation Contract (Phase 05 / Sprint 12)
 - `docs/contracts/oidc/token-revoke-introspection-contract.md` -> Revoke and Introspection Contract (Phase 05 / Sprint 13)
 - `docs/contracts/oidc/session-sso-contract.md` -> Session and SSO Contract (Phase 05 / Sprint 14)
 - `docs/contracts/oidc/logout-hardening-contract.md` -> Logout Hardening Contract (Phase 05 / Sprint 15)
-- `docs/contracts/audit/audit-event-contract.md` -> Audit Event Contract (Approved in this PR)
+- `docs/contracts/audit/audit-event-contract.md` -> Audit Event Contract
+- `docs/contracts/admin/admin-control-contract.md` -> Admin Control Contract (approved for Sprint 17 runtime implementation)
 - governance documents -> repository control and merge discipline
 - `anti-patterns.md` -> merge-blocking anti-pattern reference aligned with architecture and governance
 
@@ -120,12 +122,15 @@ Current planning status:
 - Phase 05: CLOSED
 - Current next phase: Phase 06 - Platform and Governance Hardening
 - Phase 06 status: APPROVED FOR CONTRACT-BACKED EXECUTION
-- Phase 06 runtime implementation: NOT STARTED
-- Next sprint: Sprint 16 - Audit Logging Foundation
-- Audit Event Contract: Approved in this PR
-- Sprint 16 Assignment: Approved in this PR
-- Sprint 16 runtime gate: will be unblocked after this PR is merged; runtime implementation remains not started and must occur on a separate Sprint 16 feature branch.
-- Next step: merge this PR, then start Sprint 16 runtime on a dedicated Sprint 16 feature branch
+- Phase 06 runtime implementation: IN PROGRESS
+- Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 16 PR: `#49` (merged `2026-05-08`)
+- Sprint 16 runtime commit: `c17c3aecf29927b3c69cf61b791cac49d98f8dc5`
+- Sprint 16 post-merge audit: APPROVE (no corrective action required)
+- Next sprint: Sprint 17 - Admin Module Controls
+- Admin Control Contract: Approved for Sprint 17 runtime implementation
+- Sprint 17 Assignment: Approved for Sprint 17 runtime implementation
+- Next step: start Sprint 17 runtime on a dedicated Sprint 17 feature branch from updated `main`
 - Phase 06 planning themes (high-level only): audit logging, admin controls, client management, observability, key rotation, security hardening
 
 ## VI. Maintenance Rules

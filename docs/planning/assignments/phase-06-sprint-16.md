@@ -21,11 +21,13 @@
 
 - Branch Name: `feature/audit-sprint16-foundation`
 
-- Status: Approved (in this PR)
+- Status: MERGED / CLOSED / PRESENT IN `main`
 
-- Sprint 16 runtime status: NOT STARTED
+- Sprint 16 runtime status: COMPLETED
 
-- Sprint 16 runtime gate: will be unblocked after this PR is merged; runtime implementation remains not started and must occur on a separate Sprint 16 feature branch.
+- Sprint 16 PR: `#49` (merged `2026-05-08`)
+
+- Sprint 16 runtime commit: `c17c3aecf29927b3c69cf61b791cac49d98f8dc5`
 
 ---
 

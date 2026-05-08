@@ -10,9 +10,10 @@
 - Owner Module: `src/modules/audit`
 - Primary Assignment: `docs/planning/assignments/phase-06-sprint-16.md`
 - Contract Path: `docs/contracts/audit/audit-event-contract.md`
-- Status: Approved (in this PR)
-- Sprint 16 runtime status: NOT STARTED
-- Sprint 16 runtime gate: will be unblocked after this PR is merged; runtime implementation remains not started and must occur on a separate Sprint 16 feature branch.
+- Status: Approved
+- Sprint 16 runtime status: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 16 PR: `#49` (merged `2026-05-08`)
+- Sprint 16 runtime commit: `c17c3aecf29927b3c69cf61b791cac49d98f8dc5`
 
 ---
 
@@ -22,7 +23,7 @@ This contract defines the audit event model, persistence rules, recording bounda
 
 The contract exists to ensure security-relevant system activity can be recorded consistently without leaking secrets, duplicating business logic, mutating domain state, or violating module boundaries.
 
-This contract and the Sprint 16 assignment are approved in this PR, but Sprint 16 runtime implementation remains not started and may begin only after this PR is merged on a separate Sprint 16 feature branch.
+This contract and the Sprint 16 assignment are approved. Sprint 16 runtime implementation has been merged and closed in `main`; later audit producers must remain contract-backed by their owning sprint assignments.
 
 ---
 
@@ -838,7 +839,7 @@ Sprint 17 additive admin user vocabulary:
 - `admin.user.profile.updated`
 - `admin.user.email_verified.marked`
 
-These event types are reserved for approved Sprint 17 admin-controlled user administration. They do not authorize runtime implementation until the admin control contract and Sprint 17 assignment are approved.
+These event types are reserved for approved Sprint 17 admin-controlled user administration. Runtime use must remain within the approved admin control contract and Sprint 17 assignment.
 
 ### 9. Security Events
 

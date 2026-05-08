@@ -847,3 +847,20 @@ It records meaningful state transitions and approved outcomes only.
   - no `src/` runtime files changed
   - no Sprint 17 report created
   - no runtime implementation started
+
+### 2026-05-08 / PHASE06-SPRINT17-READINESS-CLEANUP-008
+
+- Completed:
+  - corrected stale Sprint 16 status wording after PR #49 merge
+  - marked Sprint 17 admin contract and assignment approved for runtime implementation
+  - preserved Sprint 17 scope as admin-controlled user administration only
+  - ran repository Prettier formatting recovery for the global format gate
+- Approved:
+  - Sprint 16 - Audit Logging Foundation remains MERGED / CLOSED / PRESENT IN `main`
+  - Sprint 17 - Admin Module Controls is approved for runtime implementation
+  - Sprint 17 runtime must start only on a dedicated runtime branch from updated `main`
+  - implementation packet remains required before coding
+- Guardrails:
+  - no Sprint 17 runtime behavior was implemented
+  - no Sprint 17 report was created
+  - client management, token/session controls, RBAC, hard delete, email change, `sub` mutation, password reset, and password change remain excluded from Sprint 17
