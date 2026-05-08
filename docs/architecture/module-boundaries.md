@@ -266,14 +266,25 @@ Primary role:
 Allowed:
 
 - orchestrate admin use cases
-- call `users`, `oidc`, and `audit` through approved contracts
-- handle disable user, create client, rotate client secret workflows
+- orchestrate controlled user administration only through approved `users` service contracts
+- record audit events only through approved `audit` service contracts
+- handle Sprint 17 admin-controlled user administration only where the admin contract and sprint assignment approve it
 
 Forbidden:
 
 - direct cross-domain DB mutation
+- direct user persistence mutation
+- direct audit persistence mutation
+- direct OIDC token/session/client persistence mutation
+- importing `UserModel`
+- importing `user.repository`
+- importing audit repository
 - direct token issuance implementation
 - raw infrastructure mutation without service contract
+- editing `sub`, internal user id, or `password_hash`
+- hard-delete users
+- changing user email in Sprint 17
+- expanding Sprint 17 admin scope into client management, token/session controls, or RBAC
 
 Ownership:
 

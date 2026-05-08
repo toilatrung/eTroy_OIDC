@@ -13,11 +13,12 @@ Runtime implementation must not begin until the relevant Phase 06 contracts and 
 Current phase status:
 
 - Phase 06 status: APPROVED FOR CONTRACT-BACKED EXECUTION
-- Phase 06 runtime implementation: NOT STARTED
-- Next sprint: Sprint 16 - Audit Logging Foundation
-- Audit Event Contract: Approved in this PR
-- Sprint 16 Assignment: Approved in this PR
-- Sprint 16 runtime gate: will be unblocked after this PR is merged; runtime implementation remains not started and must occur on a separate Sprint 16 feature branch.
+- Phase 06 runtime implementation: IN PROGRESS
+- Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 17 - Admin Module Controls: SOURCE INTAKE / DRAFT FOR APPROVAL
+- Sprint 17 runtime: BLOCKED until `docs/contracts/admin/admin-control-contract.md` and `docs/planning/assignments/phase-06-sprint-17.md` are approved.
+- Sprint 17 scope: admin-controlled user administration only through approved `users` service contracts and approved `audit` service contracts.
+- Sprint 18 remains OIDC Client Management; client lifecycle work must not move into Sprint 17.
 
 ## II. Phase Objective
 
@@ -348,6 +349,13 @@ Implement admin orchestration controls without violating domain ownership.
 
 The admin module must coordinate approved operations through `users`, `oidc`, and `audit` service contracts. It must not directly mutate cross-domain persistence.
 
+Sprint 17 source-intake status:
+
+- Sprint 17 - Admin Module Controls: SOURCE INTAKE / DRAFT FOR APPROVAL
+- Sprint 17 runtime: BLOCKED until the admin control contract and Sprint 17 assignment are approved.
+- Sprint 17 scope is admin-controlled user administration only.
+- Sprint 18 remains OIDC Client Management; client lifecycle work must not move into Sprint 17.
+
 ## 2. Owner Module / Layer
 
 Primary owner:
@@ -357,7 +365,6 @@ Primary owner:
 Approved dependencies:
 
 - `src/modules/users` through approved service contracts
-- `src/modules/oidc` through approved client/token/session service contracts
 - `src/modules/audit` through audit service contract
 - `src/shared/errors`
 
@@ -373,20 +380,24 @@ Blocked until approved:
 - admin service baseline
 - admin controller baseline if API surface is approved
 - controlled user administration orchestration if approved
-- controlled client administration orchestration if approved
-- controlled token/session administrative actions if approved
 - audit event recording for admin actions
 - defensive input validation
 
 ## 5. Excluded Scope
 
 - admin dashboard UI
-- new authentication/authorization role system unless approved by contract
+- client management
+- token/session controls
+- RBAC or a new authentication/authorization role system
 - direct user database mutation
 - direct OIDC token/session database mutation
+- direct OIDC client database mutation
 - direct audit persistence bypass
 - business logic duplication from `users` or `oidc`
 - broad super-admin behavior without scoped contract
+- hard-delete users
+- edit `sub`, internal user id, or `password_hash`
+- change user email in Sprint 17
 
 ## 6. Expected Deliverables
 

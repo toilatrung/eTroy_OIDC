@@ -806,8 +806,11 @@ Audit role:
 
 Allowed event types:
 
+- `admin.user.created`
 - `admin.user.disabled`
 - `admin.user.enabled`
+- `admin.user.profile.updated`
+- `admin.user.email_verified.marked`
 - `admin.client.created`
 - `admin.client.updated`
 - `admin.client.disabled`
@@ -822,6 +825,20 @@ Owner of business decision:
 Audit role:
 
 - record outcome only
+- audit does not decide whether an admin action is allowed
+- audit does not mutate user, client, token, session, or other business state
+- admin producers must call the approved audit service contract, not the audit repository
+- admin audit events must not persist raw passwords, password hashes, tokens, session cookies, client secrets, or full request bodies
+
+Sprint 17 additive admin user vocabulary:
+
+- `admin.user.created`
+- `admin.user.disabled`
+- `admin.user.enabled`
+- `admin.user.profile.updated`
+- `admin.user.email_verified.marked`
+
+These event types are reserved for approved Sprint 17 admin-controlled user administration. They do not authorize runtime implementation until the admin control contract and Sprint 17 assignment are approved.
 
 ### 9. Security Events
 
