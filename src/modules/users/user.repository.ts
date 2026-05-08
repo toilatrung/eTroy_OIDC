@@ -1,6 +1,6 @@
 import mongoose, { type HydratedDocument } from 'mongoose';
 
-import { UserModel, type UserDocument } from './user.model.js';
+import { UserModel, type UserDocument, type UserStatus } from './user.model.js';
 
 const { isValidObjectId } = mongoose;
 
@@ -10,14 +10,18 @@ export interface UserEntity {
   email: string;
   password_hash: string;
   email_verified: boolean;
+  status: UserStatus;
   name?: string;
   avatar_url?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateUserRecordInput {
   email: string;
   password_hash: string;
   email_verified?: boolean;
+  status?: UserStatus;
   name?: string;
   avatar_url?: string;
 }
@@ -25,6 +29,7 @@ export interface CreateUserRecordInput {
 export interface UpdateUserRecordInput {
   password_hash?: string;
   email_verified?: boolean;
+  status?: UserStatus;
   name?: string;
   avatar_url?: string;
 }
@@ -65,6 +70,9 @@ const toUserEntity = (document: HydratedDocument<UserDocument>): UserEntity => {
     email: document.email,
     password_hash: document.password_hash,
     email_verified: document.email_verified,
+    status: document.status,
+    createdAt: document.createdAt,
+    updatedAt: document.updatedAt,
   };
 
   if (document.name !== undefined) {
