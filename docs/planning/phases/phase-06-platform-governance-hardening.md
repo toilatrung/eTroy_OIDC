@@ -15,10 +15,10 @@ Current phase status:
 - Phase 06 status: APPROVED FOR CONTRACT-BACKED EXECUTION
 - Phase 06 runtime implementation: IN PROGRESS
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
-- Sprint 17 - Admin Module Controls: APPROVED FOR RUNTIME IMPLEMENTATION
-- Sprint 17 runtime: READY FOR DEDICATED RUNTIME BRANCH FROM UPDATED `main`
-- Sprint 17 scope: admin-controlled user administration only through approved `users` service contracts and approved `audit` service contracts.
-- Sprint 18 remains OIDC Client Management; client lifecycle work must not move into Sprint 17.
+- Sprint 17 - Admin Module Controls: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 18 - OIDC Client Management: READY FOR INTAKE
+- Sprint 18 runtime: NOT STARTED
+- Sprint 18 scope: OIDC client metadata lifecycle management. Client lifecycle work must not move outside Sprint 18.
 
 ## II. Phase Objective
 
@@ -351,10 +351,10 @@ The admin module must coordinate approved operations through `users`, `oidc`, an
 
 Sprint 17 readiness status:
 
-- Sprint 17 - Admin Module Controls: APPROVED FOR RUNTIME IMPLEMENTATION
-- Sprint 17 runtime: ready to start on a dedicated runtime branch from updated `main`.
+- Sprint 17 - Admin Module Controls: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 17 runtime: COMPLETED
 - Sprint 17 scope is admin-controlled user administration only.
-- Sprint 18 remains OIDC Client Management; client lifecycle work must not move into Sprint 17.
+- Sprint 18 remains OIDC Client Management.
 
 ## 2. Owner Module / Layer
 

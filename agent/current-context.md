@@ -23,20 +23,20 @@ It summarizes approved state and next actions without redefining architecture.
 - Sprint 15 - Logout Hardening: MERGED / CLOSED / PRESENT IN `main`.
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`.
 - Phase 06 - Platform and Governance Hardening: APPROVED FOR CONTRACT-BACKED EXECUTION.
-- Phase 06 runtime implementation: IN PROGRESS (Sprint 16 complete in `main`; Sprint 17 not started).
-- Sprint 16 merge evidence:
-  - PR: `#49`
+- Phase 06 runtime implementation: IN PROGRESS (Sprint 17 complete in `main`; Sprint 18 not started).
+- Sprint 17 merge evidence:
+  - PR: `#53`
   - PR merged: `2026-05-08`
-  - runtime commit: `c17c3aecf29927b3c69cf61b791cac49d98f8dc5`
-  - merge commit on `main`: `45d0f24c8f68d77a7a3f878ac3c7ce8188d87980`
+  - runtime commit: `15302ea`
+  - merge commit on `main`: `a41ea4b`
   - post-merge audit result: `APPROVE`
   - corrective action: `NONE REQUIRED`
-- Next sprint: Sprint 17 - Admin Module Controls.
-- Sprint 17 status: APPROVED FOR RUNTIME IMPLEMENTATION.
-- Sprint 17 runtime: not started.
-- Sprint 17 gate: ready for dedicated Sprint 17 runtime branch from updated `main`; implementation packet required before coding.
-- Planned Sprint 17 scope: admin-controlled user administration through approved `users` service contracts and approved `audit` service contracts.
-- Explicitly excluded from Sprint 17: client management, token/session controls, RBAC, hard delete, `sub` edit, user email change, password reset, and password change.
+- Next sprint: Sprint 18 - OIDC Client Management.
+- Sprint 18 status: READY FOR INTAKE.
+- Sprint 18 runtime: not started.
+- Sprint 18 gate: implementation must not begin until its Assigned Task and readiness state are confirmed.
+- Planned Sprint 18 scope: OIDC client metadata lifecycle management.
+- Explicitly excluded from Sprint 18: dynamic public self-service client registration, third-party marketplace clients, client-owned identity storage, raw client secret persistence.
 
 ## III. Phase Boundary Notes
 
@@ -69,7 +69,6 @@ It summarizes approved state and next actions without redefining architecture.
 
 ## VI. Next Recommended Step
 
-- Keep Sprint 16 marked MERGED / CLOSED / PRESENT IN `main`.
-- Start Sprint 17 runtime only on a dedicated Sprint 17 feature branch from updated `main`.
-- Produce the Sprint 17 implementation packet before coding.
-- Do not start client management, token/session controls, RBAC, hard delete, `sub` edit, email change, password reset, or password change work under Sprint 17.
+- Keep Sprint 17 marked MERGED / CLOSED / PRESENT IN `main`.
+- Wait for Sprint 18 intake and readiness confirmation.
+- Do not start Sprint 18 implementation without approved contract and assignment.

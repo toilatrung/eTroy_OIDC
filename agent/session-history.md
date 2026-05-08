@@ -1,4 +1,4 @@
-﻿# eTroy OIDC - Session History
+# eTroy OIDC - Session History
 
 ## I. Purpose
 
@@ -864,3 +864,25 @@ It records meaningful state transitions and approved outcomes only.
   - no Sprint 17 runtime behavior was implemented
   - no Sprint 17 report was created
   - client management, token/session controls, RBAC, hard delete, email change, `sub` mutation, password reset, and password change remain excluded from Sprint 17
+
+### 2026-05-08 / PHASE06-SPRINT17-MERGE-AND-SPRINT18-HANDOFF-009
+
+- Completed:
+  - Sprint 17 readiness cleanup was completed.
+  - Sprint 17 runtime branch was created.
+  - Sprint 17 implementation was completed.
+  - Sprint 17 branch was pushed.
+  - Sprint 17 PR was merged successfully into `main`.
+  - Sprint 17 validation passed.
+  - Sprint 18 is the next candidate sprint for intake/readiness.
+- Approved:
+  - Sprint 17 is completed and merged into `main`.
+  - Admin remains an orchestration module using approved `users` and `audit` service contracts.
+  - Sprint 18 may begin intake/readiness but implementation must not begin until assigned task, contract, and readiness checks are confirmed.
+- Source-of-truth documents changed:
+  - `docs/planning/master-execution-plan.md`
+  - `docs/planning/phases/phase-06-platform-governance-hardening.md`
+  - `docs/source-of-truth-index.md`
+  - `docs/README.md`
+- Open items:
+  - Sprint 18 intake/readiness.

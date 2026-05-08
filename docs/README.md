@@ -124,13 +124,13 @@ Current planning status:
 - Phase 06 status: APPROVED FOR CONTRACT-BACKED EXECUTION
 - Phase 06 runtime implementation: IN PROGRESS
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
-- Sprint 16 PR: `#49` (merged `2026-05-08`)
-- Sprint 16 runtime commit: `c17c3aecf29927b3c69cf61b791cac49d98f8dc5`
-- Sprint 16 post-merge audit: APPROVE (no corrective action required)
-- Next sprint: Sprint 17 - Admin Module Controls
-- Admin Control Contract: Approved for Sprint 17 runtime implementation
-- Sprint 17 Assignment: Approved for Sprint 17 runtime implementation
-- Next step: start Sprint 17 runtime on a dedicated Sprint 17 feature branch from updated `main`
+- Sprint 17 - Admin Module Controls: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 17 PR: `#53` (merged `2026-05-08`)
+- Sprint 17 runtime commit: `15302ea`
+- Sprint 17 post-merge audit: APPROVE (no corrective action required)
+- Next sprint: Sprint 18 - OIDC Client Management
+- Sprint 18 Assignment: READY FOR INTAKE
+- Next step: approve Sprint 18 assignment and contracts before starting implementation
 - Phase 06 planning themes (high-level only): audit logging, admin controls, client management, observability, key rotation, security hardening
 
 ## VI. Maintenance Rules
