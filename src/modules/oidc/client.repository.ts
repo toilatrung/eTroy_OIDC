@@ -19,6 +19,7 @@ export interface UpdateClientInput {
   allowedScopes?: string[] | undefined;
   grantTypes?: string[] | undefined;
   responseTypes?: string[] | undefined;
+  status?: 'active' | 'disabled' | undefined;
 }
 
 export class OidcClientRepository {
@@ -57,6 +58,7 @@ export class OidcClientRepository {
     if (updates.allowedScopes !== undefined) doc.allowedScopes = updates.allowedScopes;
     if (updates.grantTypes !== undefined) doc.grantTypes = updates.grantTypes;
     if (updates.responseTypes !== undefined) doc.responseTypes = updates.responseTypes;
+    if (updates.status !== undefined) doc.status = updates.status;
 
     return doc.save();
   }

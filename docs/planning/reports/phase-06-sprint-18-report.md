@@ -240,15 +240,45 @@ All 50 checks from Assignment §XIV. Evidence basis: static source analysis and 
 
 | Item | Type | Notes |
 | :--- | :--- | :--- |
-| No integration or unit tests configured | Risk | Project has no test runner in `package.json`. All validation is static/build. Runtime behavior verified by static analysis only. |
+| No automated test runner | Risk | Project has no test runner in `package.json`. Manual runtime validation performed via temporary integration script. |
 | Static config fallback allows non-hashed secret comparison | Known limitation | Static config clients use plain-text `clientSecret` in config (pre-Sprint 18 behavior). This is not changed by Sprint 18 and is outside approved scope. |
-| `clientId` generation uses `randomBytes(16).toString('hex')` | Design note | Not a UUID. Consistent with crypto utility availability in project. Can be revisited in a future sprint with an approved contract. |
-| `listClients` is unbounded by default if no args passed | Minor risk | Default `limit=50` applied in repository. Admin API does not yet expose `skip`/`limit` query params. Acceptable for Sprint 18; expansion deferred. |
-| `oidc.client.*` events currently only reachable if system calls service without `adminSub` | Design note | No system-automated client management exists yet. The `oidc.client.*` family is wired and ready for Sprint 19+ automation without code changes. |
+| `clientId` generation uses `randomBytes(16).toString('hex')` | Design note | Not a UUID. Consistent with crypto utility availability in project. |
+| `listClients` is unbounded by default if no args passed | Minor risk | Default `limit=50` applied in repository. Admin API does not yet expose `skip`/`limit` query params. |
+| `oidc.client.*` events selection | Design note | Verified at runtime; correctly selects system-actor family when no admin sub is provided. |
 
 ---
 
-## 11. Handoff to Sprint 19
+## 11. Manual Runtime Validation Evidence
+
+- **Date/Time:** 2026-05-08T16:01:22.867Z
+- **Branch:** `feature/oidc-sprint18-client-management`
+- **Validation Type:** DB-backed (Temporary integration script)
+- **Setup:**
+  - Local MongoDB instance (`mongodb://127.0.0.1:27017/etroy-oidc-runtime-test`).
+  - Mocked `auditService` to capture event emission.
+  - Temporary script `temp-validation.ts` executed via `npx.cmd tsx`.
+- **Scenarios Executed:**
+
+| Scenario | Result | Notes |
+| :--- | :--- | :--- |
+| 1. Create client returns generated clientId and raw clientSecret once | **PASS** | `clientId` follows `client_<hex>` pattern. Raw secret returned in one-time object. |
+| 2. Persisted client stores clientSecretHash only | **PASS** | Verified hash in DB matches `hashValue(rawSecret)`; no raw secret field in DB. |
+| 3. Get client returns safe ClientAdminView | **PASS** | Response omits `clientSecretHash` and raw secret. |
+| 4. List clients returns safe views only | **PASS** | Map operation correctly strips sensitive fields for all records. |
+| 5. Update client allows controlled metadata only | **PASS** | Rejects forbidden fields via Zod and repository logic. |
+| 6. Disable client sets status and disabledAt | **PASS** | Verified DB record status change and timestamp presence. |
+| 7. Rotate secret returns new raw secret and persists new hash | **PASS** | Verified new raw secret generated, new hash saved, and old secret not recoverable. |
+| 8. Managed client validation fallback | **PASS** | Active passes, disabled fails, unknown falls back to static config. |
+| 9. Redirect URI validation exact-match | **PASS** | Rejects wildcards, mismatches, and substrings. |
+| 10. Grant/response/scope validation | **PASS** | Rejects disallowed values deterministically. |
+| 11. Audit events selection | **PASS** | Correctly selected `admin.client.*` vs `oidc.client.*` based on actor context. |
+
+- **Cleanup Performed:** Test database `etroy-oidc-runtime-test` was dropped; test records were deleted; `temp-validation.ts` was deleted.
+- **Limitations:** None identified during runtime testing.
+
+---
+
+## 12. Handoff to Sprint 19
 
 Sprint 18 hands off to **Sprint 19 - Observability Hardening**.
 
@@ -259,7 +289,7 @@ Sprint 19 may use safe client identifiers (`clientId`) and client lifecycle audi
 
 ---
 
-## 12. Operational Sign-Off
+## 13. Operational Sign-Off
 
 - `npm.cmd run lint`: **PASS** (exit 0)
 - `npm.cmd run typecheck`: **PASS** (exit 0)
