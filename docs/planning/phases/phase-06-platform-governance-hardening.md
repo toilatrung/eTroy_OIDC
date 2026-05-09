@@ -22,8 +22,9 @@ Current phase status:
 - Sprint 20 - JWKS / Key Rotation Hardening: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 20 correction: PR #58 merged with post-merge blockers; corrective PR #60 merged and accepted.
 - Sprint 20 validation: lint/typecheck/build PASS; scoped Sprint 20 corrective files Prettier PASS; repository-wide `format:check` FAIL / ACCEPTED BASELINE EXCEPTION outside PR #60 scope
-- Sprint 21 - Security Governance Finalization: NOT STARTED
-- Sprint 21 runtime gate: blocked until Sprint 21 contract and assignment are approved.
+- Sprint 21 - Security Governance Finalization: REVIEW COMPLETED / RELEASE READY WITH ACCEPTED CONDITIONS
+- Sprint 21 runtime gate: PASS (contract/assignment approved, dedicated branch, evidence packet produced)
+- Sprint 21 blocker remediation: active repository `keys/private.pem` removed; PEM private-key ignore guard added
 
 ## II. Phase Objective
 
@@ -824,9 +825,16 @@ Affected areas may include:
 
 ## 3. Required Contract
 
-Blocked until approved:
+Sprint 21 runtime gate status:
 
 - `docs/contracts/security/security-hardening-contract.md`
+- `docs/planning/assignments/phase-06-sprint-21.md`
+
+Current result:
+
+- gate prerequisites satisfied
+- final classification completed
+- release readiness status: `RELEASE READY WITH ACCEPTED CONDITIONS`
 
 Supporting contracts:
 

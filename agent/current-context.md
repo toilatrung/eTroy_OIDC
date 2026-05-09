@@ -23,7 +23,7 @@ It summarizes approved state and next actions without redefining architecture.
 - Sprint 15 - Logout Hardening: MERGED / CLOSED / PRESENT IN `main`.
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`.
 - Phase 06 - Platform and Governance Hardening: APPROVED FOR CONTRACT-BACKED EXECUTION.
-- Phase 06 runtime implementation: IN PROGRESS (Sprint 16 through Sprint 20 complete in `main`; Sprint 21 not started).
+- Phase 06 runtime implementation: IN PROGRESS (Sprint 16 through Sprint 20 complete in `main`; Sprint 21 review and follow-up remediation completed on feature branch).
 - Sprint 17 merge evidence:
   - PR: `#53`
   - PR merged: `2026-05-08`
@@ -110,9 +110,14 @@ It summarizes approved state and next actions without redefining architecture.
     - repository-wide formatting drift remains deferred
     - corrective validation used a temporary in-memory harness, removed after execution
     - final security governance/release-readiness remains Sprint 21 scope
-- Next sprint: Sprint 21 - Security Governance Finalization.
-- Sprint 21 status: NOT STARTED.
-- Sprint 21 gate: runtime remains blocked until Sprint 21 contract and assignment are approved.
+- Next sprint: Phase 06 closure review / release-governance handoff.
+- Sprint 21 status: REVIEW COMPLETED / RELEASE READY WITH ACCEPTED CONDITIONS.
+- Sprint 21 gate: PASS (contract/assignment approved, latest `main`, dedicated branch, review packet produced).
+- Sprint 21 blocker follow-up:
+  - active repository `keys/private.pem` removed and PEM ignore guard added
+  - git-history check shows placeholder-only historical key marker, no real private key material evidence
+- Sprint 21 report:
+  - `docs/planning/reports/phase-06-security-hardening-report.md`
 
 ## III. Phase Boundary Notes
 
@@ -154,5 +159,5 @@ It summarizes approved state and next actions without redefining architecture.
 ## VI. Next Recommended Step
 
 - Sprint 20 is corrected and cleanly closed after PR #60 merge and Leader acceptance.
-- Begin Sprint 21 intake only after security-governance contract plus Sprint 21 assignment are approved.
-- Do not start Sprint 21 runtime implementation without approved Sprint 21 contract and assignment.
+- Sprint 21 review follow-up is complete and classified as `RELEASE READY WITH ACCEPTED CONDITIONS`.
+- Proceed with Phase 06 closure decision using documented accepted conditions and follow-up backlog tracking.

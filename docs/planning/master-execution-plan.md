@@ -401,11 +401,13 @@ It is the operational control layer that keeps implementation aligned with appro
 - Sprint 20 corrective commit: `11bc541`
 - Sprint 20 validation: lint/typecheck/build PASS; scoped Sprint 20 corrective files Prettier PASS; repository-wide `format:check` FAIL / ACCEPTED BASELINE EXCEPTION outside PR #60 scope
 - Next sprint: Sprint 21 - Security Governance Finalization
-- Sprint 21 status: NOT STARTED
-- Sprint 21 runtime gate: blocked until Sprint 21 contract and assignment are approved
+- Sprint 21 status: REVIEW COMPLETED / RELEASE READY WITH ACCEPTED CONDITIONS
+- Sprint 21 runtime gate: PASS (contract and assignment approved; branch and evidence gate satisfied)
+- Sprint 21 blocker remediation: active repository `keys/private.pem` removed; ignore guard added for PEM private key artifacts
+- Sprint 21 report: `docs/planning/reports/phase-06-security-hardening-report.md`
 
 ---
 
 ## Next Step
 
-Prepare Sprint 21 intake only. Do not begin final security governance/readiness runtime implementation until the security-hardening contract and Sprint 21 assignment are approved.
+Maintain accepted-condition follow-up backlog (format baseline cleanup, automated test-hardening) while proceeding with Phase 06 closure review.

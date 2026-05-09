@@ -36,6 +36,10 @@ It exists to prevent ambiguity, enforce contract-first execution, and stop archi
 - `docs/contracts/oidc/logout-hardening-contract.md`
 - `docs/contracts/audit/audit-event-contract.md`
 - `docs/contracts/admin/admin-control-contract.md`
+- `docs/contracts/oidc/client-management-contract.md`
+- `docs/contracts/observability/observability-contract.md`
+- `docs/contracts/oidc/key-rotation-contract.md`
+- `docs/contracts/security/security-hardening-contract.md`
 
 ### 4. Planning
 
@@ -47,6 +51,7 @@ It exists to prevent ambiguity, enforce contract-first execution, and stop archi
 - `docs/planning/phases/phase-05-token-session-management.md`
 - `docs/planning/phases/phase-06-platform-governance-hardening.md`
 - `docs/planning/reports/phase-05-consolidated-report.md`
+- `docs/planning/reports/phase-06-report.md`
 
 ### 5. Governance
 
@@ -102,12 +107,11 @@ Current phase execution baseline:
 - Phase 06 runtime implementation: IN PROGRESS
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 17 - Admin Module Controls: MERGED / CLOSED / PRESENT IN `main`
-- Sprint 17 PR: `#53` (merged `2026-05-08`)
-- Sprint 17 runtime commit: `15302ea`
-- Sprint 17 post-merge audit: APPROVE (no corrective action required)
-- Next sprint: Sprint 18 - OIDC Client Management
-- Sprint 18 Assignment: READY FOR INTAKE
-- Sprint 18 runtime: NOT STARTED
+- Sprint 18 - OIDC Client Management: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 19 - Observability Hardening: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 20 - JWKS / Key Rotation Hardening: MERGED / CLOSED / PRESENT IN `main` after corrective PR #60
+- Sprint 21 - Security Governance Finalization: REVIEW COMPLETED / RELEASE READY WITH ACCEPTED CONDITIONS
+- Sprint 21 report: `docs/planning/reports/phase-06-security-hardening-report.md`
 - Phase 06 planning themes (high-level only): audit logging, admin controls, client management, observability, key rotation, security hardening
 
 ## V. Conflict Resolution Rules

@@ -27,6 +27,8 @@ keys/private/*
 keys/public/*
 !keys/private/.gitkeep
 !keys/public/.gitkeep
+keys/private.pem
+keys/*.pem
 
 # test artifacts
 *.lcov
