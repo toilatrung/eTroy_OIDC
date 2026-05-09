@@ -386,15 +386,18 @@ It is the operational control layer that keeps implementation aligned with appro
 - Phase 06 runtime implementation: IN PROGRESS
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 17 - Admin Module Controls: MERGED / CLOSED / PRESENT IN `main`
-- Sprint 17 PR: `#53` (merged `2026-05-08`)
-- Sprint 17 runtime commit: `15302ea`
-- Sprint 17 post-merge audit: APPROVE (no corrective action required)
-- Next sprint: Sprint 18 - OIDC Client Management
-- Sprint 18 status: READY FOR INTAKE
-- Sprint 18 runtime: NOT STARTED
+- Sprint 18 - OIDC Client Management: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 19 - Observability Hardening: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 19 PR: `#56` (merged `2026-05-09`)
+- Sprint 19 merge commit: `d2f379d`
+- Sprint 19 runtime commit: `c03191a`
+- Sprint 19 validation: lint/typecheck/build PASS; scoped Sprint 19 Prettier PASS; repository-wide `format:check` FAIL / ACCEPTED BASELINE EXCEPTION outside Sprint 19 scope
+- Next sprint: Sprint 20 - JWKS / Key Rotation Hardening
+- Sprint 20 status: READY FOR INTAKE / NOT STARTED
+- Sprint 20 runtime gate: blocked until `docs/contracts/oidc/key-rotation-contract.md` and `docs/planning/assignments/phase-06-sprint-20.md` are approved
 
 ---
 
 ## Next Step
 
-Wait for Sprint 18 contract and assignment approval before beginning Sprint 18 runtime implementation.
+Prepare Sprint 20 intake only. Do not begin JWKS/key rotation runtime implementation until the key-rotation contract and Sprint 20 assignment are approved.

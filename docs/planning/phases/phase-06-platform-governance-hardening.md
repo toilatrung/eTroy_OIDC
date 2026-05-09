@@ -16,9 +16,11 @@ Current phase status:
 - Phase 06 runtime implementation: IN PROGRESS
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 17 - Admin Module Controls: MERGED / CLOSED / PRESENT IN `main`
-- Sprint 18 - OIDC Client Management: READY FOR INTAKE
-- Sprint 18 runtime: NOT STARTED
-- Sprint 18 scope: OIDC client metadata lifecycle management. Client lifecycle work must not move outside Sprint 18.
+- Sprint 18 - OIDC Client Management: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 19 - Observability Hardening: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 19 validation: lint/typecheck/build PASS; scoped Sprint 19 Prettier PASS; repository-wide `format:check` FAIL / ACCEPTED BASELINE EXCEPTION outside Sprint 19 scope
+- Sprint 20 - JWKS / Key Rotation Hardening: READY FOR INTAKE / NOT STARTED
+- Sprint 20 runtime gate: blocked until `docs/contracts/oidc/key-rotation-contract.md` and `docs/planning/assignments/phase-06-sprint-20.md` are approved.
 
 ## II. Phase Objective
 
