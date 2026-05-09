@@ -393,12 +393,15 @@ It is the operational control layer that keeps implementation aligned with appro
 - Sprint 19 runtime commit: `c03191a`
 - Sprint 19 validation: lint/typecheck/build PASS; scoped Sprint 19 Prettier PASS; repository-wide `format:check` FAIL / ACCEPTED BASELINE EXCEPTION outside Sprint 19 scope
 - Sprint 20 - JWKS / Key Rotation Hardening: MERGED / CLOSED / PRESENT IN `main`
-- Sprint 20 PR: `#58` (merged `2026-05-09`)
+- Sprint 20 PR #58: merged `2026-05-09`; required post-merge correction
+- Sprint 20 corrective PR #60: merged and accepted; present in `main`
 - Sprint 20 merge commit: `b980ba4`
 - Sprint 20 runtime commit: `45441d7`
-- Sprint 20 validation: lint/typecheck/build PASS; scoped Sprint 20 Prettier PASS; repository-wide `format:check` FAIL / ACCEPTED BASELINE EXCEPTION outside Sprint 20 scope
+- Sprint 20 corrective merge commit: `b7075dc`
+- Sprint 20 corrective commit: `11bc541`
+- Sprint 20 validation: lint/typecheck/build PASS; scoped Sprint 20 corrective files Prettier PASS; repository-wide `format:check` FAIL / ACCEPTED BASELINE EXCEPTION outside PR #60 scope
 - Next sprint: Sprint 21 - Security Governance Finalization
-- Sprint 21 status: READY FOR INTAKE / NOT STARTED
+- Sprint 21 status: NOT STARTED
 - Sprint 21 runtime gate: blocked until Sprint 21 contract and assignment are approved
 
 ---

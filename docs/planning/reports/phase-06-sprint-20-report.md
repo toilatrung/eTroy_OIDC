@@ -11,9 +11,9 @@ Sprint 20 implemented OIDC-owned signing-key lifecycle hardening with:
 - rotation, retirement, rollback, and compromised-state handling in key service
 - key lifecycle audit and observability hooks
 
-Status: MERGED WITH POST-MERGE CORRECTION REQUIRED.
+Status: MERGED / CLOSED / PRESENT IN `main` after corrective PR #60.
 
-Sprint 20 PR #58 was merged before Leader merge-readiness blockers were fully resolved. The corrective branch `fix/oidc-sprint20-key-rotation-corrections` restores contract compliance and factual validation evidence. Sprint 20 must not be treated as cleanly closed until the corrective PR is reviewed, merged, and accepted by Leader review.
+Sprint 20 PR #58 was merged before Leader merge-readiness blockers were fully resolved. Corrective PR #60 has been reviewed, accepted, merged, and is present in `main`. Sprint 20 is now corrected and cleanly closed.
 
 Merge evidence:
 
@@ -28,6 +28,9 @@ Post-merge corrective branch evidence:
 - branch: `fix/oidc-sprint20-key-rotation-corrections`
 - base: latest `main` after `63a4165`
 - reason: correct missing-active signing behavior, scoped Sprint 20 formatting, validation/report accuracy, and operational context status.
+- PR: `#60` (merged and accepted)
+- merge commit on `main`: `b7075dc`
+- corrective commit: `11bc541`
 
 ## 2. Source-of-Truth Basis
 
@@ -219,7 +222,7 @@ Remaining known conditions:
 
 - Repository-wide `npm.cmd run format:check` still fails due unrelated pre-existing formatting drift outside Sprint 20 touched/corrected files.
 - No committed unit/e2e test runner exists in `package.json`; corrective behavioral validation uses a temporary in-memory harness executed locally and removed before commit.
-- Corrective PR review and merge are still required before Sprint 20 can be considered cleanly corrected.
+- Corrective PR #60 has been reviewed, accepted, merged, and is present in `main`; Sprint 20 can be considered cleanly corrected.
 
 ## 16. Validation Evidence
 
@@ -305,13 +308,13 @@ Not implemented:
 - Repository-wide `format:check` still fails due pre-existing unrelated formatting drift outside Sprint 20 scope.
 - Audit event persistence in local harness context was intentionally bypassed; event emissions are implemented, but persistence requires healthy runtime dependencies.
 - Final security governance/release readiness remains Sprint 21 scope and must not start from this correction.
-- Sprint 20 clean closure is pending corrective PR merge and Leader acceptance.
+- Sprint 20 clean closure is recorded after corrective PR #60 merge and Leader acceptance.
 
 ## 20. Handoff to Sprint 21 - Security Governance Finalization
 
-Do not start Sprint 21 from this correction branch.
+Do not start Sprint 21 from this post-correction sync branch.
 
-After the corrective PR is merged and accepted, Sprint 20 can hand off:
+After corrective PR #60 was merged and accepted, Sprint 20 can hand off:
 
 - OIDC key lifecycle model/repository/service baseline
 - active signing key integration across token issuance/verification
@@ -319,4 +322,4 @@ After the corrective PR is merged and accepted, Sprint 20 can hand off:
 - key lifecycle audit and observability signal points
 - corrected validation evidence and known limitations
 
-Sprint 21 should begin only after its own approved contract and assignment are present.
+Sprint 21 remains NOT STARTED and should begin only after its own approved contract and assignment are present.

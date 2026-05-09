@@ -1001,3 +1001,28 @@ It records meaningful state transitions and approved outcomes only.
 - Open items:
   - push corrective branch and open corrective PR
   - do not treat Sprint 20 as cleanly closed until corrective PR is merged and accepted by Leader review
+
+### 2026-05-09 / PHASE06-SPRINT20-POST-CORRECTION-SYNC
+
+- Completed:
+  - Corrective PR #60 was merged and accepted after PR #58 post-merge blockers.
+  - Sprint 20 - JWKS / Key Rotation Hardening status is now `MERGED / CLOSED / PRESENT IN main after corrective PR #60`.
+  - PR #58 remains recorded as merged but requiring post-merge correction.
+  - PR #60 is recorded as the accepted corrective merge.
+- Correction result recorded:
+  - zero active signing now fails predictably with `NO_ACTIVE_SIGNING_KEY`
+  - multiple active signing keys fail predictably with `MULTIPLE_ACTIVE_SIGNING_KEYS`
+  - bootstrap/init behavior is isolated to explicit setup and is not called during signing
+  - rotation overlap, JWKS overlap/expiry, compromised exclusion, and private material safety probes passed
+  - scoped Sprint 20 corrective files passed Prettier
+  - global `format:check` still has unrelated baseline drift outside PR #60 scope
+- Scope guardrails:
+  - Sprint 21 remains `NOT STARTED`
+  - no Sprint 21 planning/runtime implementation started
+  - no runtime code changed in this sync
+- Files updated:
+  - `agent/current-context.md`
+  - `agent/session-history.md`
+  - `docs/planning/reports/phase-06-sprint-20-report.md`
+  - `docs/planning/master-execution-plan.md`
+  - `docs/planning/phases/phase-06-platform-governance-hardening.md`
