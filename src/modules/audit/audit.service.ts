@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { logger } from '../../infrastructure/logger/index.js';
+import { incrementCounter } from '../../infrastructure/metrics/metrics.js';
 import { BaseError } from '../../shared/errors/index.js';
 
 import { AuditRepository, type CreateAuditEventInput } from './audit.repository.js';
@@ -636,11 +637,20 @@ export class AuditService {
       normalizedInput = normalizeRecordInput(input);
     } catch (error: unknown) {
       const rejection = summarizeValidationError(error);
+      incrementCounter('audit_events_total', {
+        module: 'audit',
+        operation: 'record_event',
+        outcome: 'denied',
+        event_type: 'unknown',
+      });
       logger.warn(
         {
-          auditEventType: input.eventType,
-          reason: rejection.reason,
-          code: rejection.code,
+          module: 'audit',
+          operation: 'record_event',
+          outcome: 'denied',
+          eventType: 'unknown',
+          reasonCode: rejection.code,
+          errorCode: rejection.code,
         },
         'Audit event rejected by validation policy.',
       );
@@ -654,19 +664,32 @@ export class AuditService {
 
     try {
       const event = await this.repository.createEvent(normalizedInput);
+      incrementCounter('audit_events_total', {
+        module: 'audit',
+        operation: 'record_event',
+        outcome: 'success',
+        event_type: normalizedInput.eventType,
+      });
       return {
         status: 'recorded',
         event,
       };
     } catch (error: unknown) {
+      incrementCounter('audit_events_total', {
+        module: 'audit',
+        operation: 'record_event',
+        outcome: 'failure',
+        event_type: normalizedInput.eventType,
+      });
       logger.error(
         {
-          eventId: normalizedInput.eventId,
+          module: 'audit',
+          operation: 'record_event',
+          outcome: 'failure',
           eventType: normalizedInput.eventType,
-          reason:
-            error instanceof Error
-              ? error.message
-              : 'Unknown persistence failure during audit write.',
+          reasonCode: 'AUDIT_PERSISTENCE_FAILED',
+          errorName: error instanceof Error ? error.name : 'Error',
+          errorCode: 'AUDIT_PERSISTENCE_FAILED',
         },
         'Audit persistence failed; continuing primary flow by fail-open policy.',
       );
