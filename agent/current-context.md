@@ -23,7 +23,7 @@ It summarizes approved state and next actions without redefining architecture.
 - Sprint 15 - Logout Hardening: MERGED / CLOSED / PRESENT IN `main`.
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`.
 - Phase 06 - Platform and Governance Hardening: APPROVED FOR CONTRACT-BACKED EXECUTION.
-- Phase 06 runtime implementation: IN PROGRESS (Sprint 17 complete in `main`; Sprint 18 not started).
+- Phase 06 runtime implementation: IN PROGRESS (Sprint 16 through Sprint 19 complete in `main`; Sprint 20 not started).
 - Sprint 17 merge evidence:
   - PR: `#53`
   - PR merged: `2026-05-08`
@@ -50,9 +50,33 @@ It summarizes approved state and next actions without redefining architecture.
     - manual validation matrix: 50/50 PASS
 - Known follow-up note:
   - No unit/e2e test runner exists in `package.json`; runtime validation was DB-backed manual harness, not committed test suite.
-- Next sprint: Sprint 19 - Observability Hardening.
-- Sprint 19 status: READY FOR INTAKE / NOT STARTED.
-- Sprint 19 gate: implementation must not begin until Sprint 19 contract and assignment are approved.
+- Sprint 19 - Observability Hardening: MERGED / CLOSED / PRESENT IN `main`.
+- Sprint 19 merge evidence:
+  - PR: `#56` (https://github.com/toilatrung/etroy-oidc/pull/56)
+  - merge commit on `main`: `d2f379d1ef03255f352269c8c9e4492ed406a836`
+  - runtime commit: `c03191a2eac0aa6ccfa814a216a1138b1bca355e`
+  - merged at: `2026-05-09T17:51:40+07:00`
+  - delivered scope:
+    - safe structured logger normalization
+    - request/correlation ID middleware
+    - request lifecycle logging/metrics
+    - safe metrics primitives
+    - aggregate-only `/metrics`
+    - safe `/health` and `/ready`
+    - MongoDB/Redis readiness helpers
+    - audit outcome metric
+  - validation:
+    - `npm.cmd run lint`: PASS
+    - `npm.cmd run typecheck`: PASS
+    - `npm.cmd run build`: PASS
+    - scoped Sprint 19 Prettier: PASS
+    - repository-wide `npm.cmd run format:check`: FAIL / ACCEPTED BASELINE EXCEPTION
+  - known condition:
+    - repository-wide formatting baseline drift remains deferred to a separate PR/task.
+    - no broad formatting cleanup was included in Sprint 19.
+- Next sprint: Sprint 20 - JWKS / Key Rotation Hardening.
+- Sprint 20 status: READY FOR INTAKE / NOT STARTED.
+- Sprint 20 gate: runtime remains blocked until `docs/contracts/oidc/key-rotation-contract.md` and `docs/planning/assignments/phase-06-sprint-20.md` are approved.
 
 ## III. Phase Boundary Notes
 
@@ -71,24 +95,27 @@ It summarizes approved state and next actions without redefining architecture.
   - secure secret generation and hash-only persistence
   - admin-to-oidc orchestration boundaries
   - observability hardening
+- Sprint 20 must not introduce JWKS/key rotation runtime from Sprint 19 context alone.
 - Do not move refresh token lifecycle, rotation, revoke, introspection, session, SSO, or logout hardening into Phase 04.
 
 ## IV. Phase 05/06 Validation Summary
 
-- Sprint 11-18 validation posture:
+- Sprint 11-19 validation posture:
   - `npm.cmd run lint`: PASS
   - `npm.cmd run typecheck`: PASS
   - `npm.cmd run build`: PASS
-  - `npm.cmd run format:check`: PASS (following repository-wide cleanup and scoped checks)
+  - Sprint 19 scoped Prettier: PASS
+  - Sprint 19 repository-wide `npm.cmd run format:check`: FAIL / ACCEPTED BASELINE EXCEPTION
   - boundary scans: PASS / PASS WITH REVIEW
   - runtime/manual harnesses: PASS
 
 ## V. Known Condition
 
 - Unit and E2E test runners are currently missing from `package.json`; validation relies on build/static checks and manual DB-backed harnesses.
+- Repository-wide formatting baseline drift remains deferred to a separate PR/task after Sprint 19. Sprint 19 did not include broad formatting cleanup.
 
 ## VI. Next Recommended Step
 
-- Keep Sprint 18 marked MERGED / CLOSED / PRESENT IN `main`.
-- Wait for Sprint 19 intake and readiness confirmation.
-- Do not start Sprint 19 implementation without approved contract and assignment.
+- Keep Sprint 19 marked MERGED / CLOSED / PRESENT IN `main`.
+- Begin Sprint 20 intake only after key-rotation contract and Sprint 20 assignment are approved.
+- Do not start Sprint 20 runtime implementation without approved `docs/contracts/oidc/key-rotation-contract.md` and `docs/planning/assignments/phase-06-sprint-20.md`.

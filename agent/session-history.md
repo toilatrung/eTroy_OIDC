@@ -896,3 +896,44 @@ It records meaningful state transitions and approved outcomes only.
 - Open items:
   - Begin Sprint 19 only after approved observability contract and Sprint 19 assignment.
   - Do not introduce observability metrics/logging changes from Sprint 18 context alone.
+
+### 2026-05-09 / PHASE06-SPRINT19-MERGE-POSTSYNC
+
+- Completed:
+  - Sprint 19 - Observability Hardening merged and confirmed present in `main`.
+  - Merge evidence:
+    - PR: `#56`
+    - merge commit: `d2f379d1ef03255f352269c8c9e4492ed406a836`
+    - runtime commit: `c03191a2eac0aa6ccfa814a216a1138b1bca355e`
+    - merged at: `2026-05-09T17:51:40+07:00`
+  - Safe structured logger normalization, request/correlation middleware, request lifecycle logging/metrics, safe metrics primitives, aggregate `/metrics`, safe `/health` and `/ready`, MongoDB/Redis readiness helpers, and audit outcome metric are present.
+  - Sprint 19 report records validation evidence and accepted baseline formatting exception.
+- Approved:
+  - Sprint 19 status: MERGED / CLOSED / PRESENT IN `main`.
+  - Validation evidence accepted:
+    - `npm.cmd run lint`: PASS
+    - `npm.cmd run typecheck`: PASS
+    - `npm.cmd run build`: PASS
+    - scoped Sprint 19 Prettier: PASS
+    - repository-wide `npm.cmd run format:check`: FAIL / ACCEPTED BASELINE EXCEPTION
+  - Global formatting drift remains deferred to a separate PR/task.
+- Source-of-truth documents changed:
+  - `docs/contracts/observability/observability-contract.md`
+  - `docs/planning/assignments/phase-06-sprint-19.md`
+  - `docs/planning/reports/phase-06-sprint-19-report.md`
+- Runtime files changed:
+  - `src/app/server.ts`
+  - `src/app/middlewares/request-correlation.middleware.ts`
+  - `src/app/middlewares/request-logging.middleware.ts`
+  - `src/infrastructure/logger/logger.ts`
+  - `src/infrastructure/logger/index.ts`
+  - `src/infrastructure/metrics/metrics.ts`
+  - `src/modules/health/health.controller.ts`
+  - `src/infrastructure/database/connection.ts`
+  - `src/infrastructure/database/index.ts`
+  - `src/infrastructure/redis/client.ts`
+  - `src/infrastructure/redis/index.ts`
+  - `src/modules/audit/audit.service.ts`
+- Open items:
+  - Begin Sprint 20 intake only after key-rotation contract and Sprint 20 assignment are approved.
+  - Do not implement JWKS/key rotation runtime from Sprint 19 context alone.
