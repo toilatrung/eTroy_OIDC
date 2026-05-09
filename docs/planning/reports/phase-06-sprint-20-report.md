@@ -241,8 +241,9 @@ Not implemented:
 
 - Repository-wide `format:check` still fails due pre-existing baseline drift outside Sprint 20 scope.
 - Audit event persistence in local harness context used fail-open behavior when DB was unavailable; event emissions are implemented but persistence requires healthy runtime dependencies.
-- Contract file `docs/contracts/audit/audit-event-contract.md` currently lists core key events; Sprint 20 runtime adds rollback/compromised vocabulary in `audit.types.ts`. A contract additive vocabulary sync is recommended.
+- Audit contract vocabulary has been additively synchronized for Sprint 20 key lifecycle events: `oidc.key.rollback_performed` and `oidc.key.compromised`.
 - Full end-to-end overlap-expiry runtime scenario (time advancement with persisted records) is deferred.
+- Pre-rotation token verification during overlap not fully DB-backed e2e validated.
 
 ## 19. Handoff to Sprint 21 - Security Governance Finalization
 
