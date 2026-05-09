@@ -8,7 +8,7 @@ import {
 } from '../token-lifecycle/index.js';
 import { userService, type UserProfile, type UserService } from '../users/user.service.js';
 
-type VerificationUserService = Pick<UserService, 'getUserById' | 'markEmailVerifiedById'>;
+type VerificationUserService = Pick<UserService, 'getUserBySub' | 'markEmailVerifiedBySub'>;
 type VerificationTokenService = Pick<
   TokenService,
   'generateToken' | 'validateToken' | 'consumeToken'
@@ -48,7 +48,7 @@ export class VerificationService {
 
   async requestVerification(userId: unknown): Promise<VerificationRequestResult> {
     const normalizedUserId = normalizeRequiredString(userId, 'userId');
-    const user = await this.users.getUserById(normalizedUserId);
+    const user = await this.users.getUserBySub(normalizedUserId);
     const generatedToken = await this.tokens.generateToken(
       normalizedUserId,
       TOKEN_PURPOSE_EMAIL_VERIFICATION,
@@ -76,7 +76,7 @@ export class VerificationService {
       normalizedRawToken,
       TOKEN_PURPOSE_EMAIL_VERIFICATION,
     );
-    const user = await this.users.markEmailVerifiedById(validatedToken.userId);
+    const user = await this.users.markEmailVerifiedBySub(validatedToken.userId);
 
     await this.tokens.consumeToken(validatedToken.tokenId);
     return user;

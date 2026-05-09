@@ -22,6 +22,16 @@ import {
   disableAdminClientHandler,
   rotateAdminClientSecretHandler,
 } from '../modules/admin/admin.controller.js';
+import { loginHandler } from '../modules/auth/auth.controller.js';
+import { registerUserHandler } from '../modules/users/user.controller.js';
+import {
+  confirmVerificationHandler,
+  requestVerificationHandler,
+} from '../modules/verification/verification.controller.js';
+import {
+  confirmPasswordResetHandler,
+  requestPasswordResetHandler,
+} from '../modules/password-reset/password-reset.controller.js';
 import {
   authorizeContinueHandler,
   authorizeHandler,
@@ -62,6 +72,12 @@ export const createServer = (): Express => {
   app.post('/introspect', introspectHandler);
   app.post('/logout', logoutHandler);
   app.get('/userinfo', userInfoHandler);
+  app.post('/login', loginHandler);
+  app.post('/register', registerUserHandler);
+  app.post('/verification/request', requestVerificationHandler);
+  app.post('/verification/confirm', confirmVerificationHandler);
+  app.post('/password-reset/request', requestPasswordResetHandler);
+  app.post('/password-reset/confirm', confirmPasswordResetHandler);
   app.post('/admin/users', createAdminUserHandler);
   app.get('/admin/users/:sub', getAdminUserHandler);
   app.post('/admin/users/:sub/disable', disableAdminUserHandler);
