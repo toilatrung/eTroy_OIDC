@@ -1026,3 +1026,31 @@ It records meaningful state transitions and approved outcomes only.
   - `docs/planning/reports/phase-06-sprint-20-report.md`
   - `docs/planning/master-execution-plan.md`
   - `docs/planning/phases/phase-06-platform-governance-hardening.md`
+
+### 2026-05-10 / PHASE06-SPRINT21-SECURITY-READINESS-REVIEW
+
+- Completed:
+  - executed Phase 06 / Sprint 21 Tasks 113-120 review flow on branch `feature/security-sprint21-release-readiness`
+  - verified Sprint 20 corrected closure and PR #60 merge presence in `main`
+  - executed mandatory baseline/build and security scan command set
+  - produced Sprint 21 release-readiness report with full PASS/FAIL/NOT RUN evidence
+  - synchronized source-of-truth and planning status wording for Sprint 21 result
+- Approved:
+  - Sprint 21 runtime gate: PASS
+  - Sprint 21 final decision: `NOT RELEASE READY / BLOCKED`
+- Release blocker:
+  - committed private key material detected under `keys/private.pem` by repository-wide leakage scan
+- Known accepted condition:
+  - repository-wide `npm.cmd run format:check` remains FAIL due pre-existing baseline drift outside Sprint 21 touched files
+- Source-of-truth documents changed:
+  - `docs/source-of-truth-index.md`
+  - `docs/README.md`
+  - `docs/planning/master-execution-plan.md`
+  - `docs/planning/phases/phase-06-platform-governance-hardening.md`
+  - `docs/planning/reports/phase-06-security-hardening-report.md`
+- Agent files changed:
+  - `agent/current-context.md`
+  - `agent/session-history.md`
+- Open items:
+  - remediate key-material release blocker
+  - rerun Sprint 21 validation and reclassify release readiness

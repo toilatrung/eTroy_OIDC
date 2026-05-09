@@ -111,8 +111,12 @@ It summarizes approved state and next actions without redefining architecture.
     - corrective validation used a temporary in-memory harness, removed after execution
     - final security governance/release-readiness remains Sprint 21 scope
 - Next sprint: Sprint 21 - Security Governance Finalization.
-- Sprint 21 status: NOT STARTED.
-- Sprint 21 gate: runtime remains blocked until Sprint 21 contract and assignment are approved.
+- Sprint 21 status: REVIEW COMPLETED / NOT RELEASE READY / BLOCKED.
+- Sprint 21 gate: PASS (contract/assignment approved, latest `main`, dedicated branch, review packet produced).
+- Sprint 21 release blocker:
+  - committed private key material detected under `keys/private.pem` by repository-wide secret scan
+- Sprint 21 report:
+  - `docs/planning/reports/phase-06-security-hardening-report.md`
 
 ## III. Phase Boundary Notes
 
@@ -154,5 +158,5 @@ It summarizes approved state and next actions without redefining architecture.
 ## VI. Next Recommended Step
 
 - Sprint 20 is corrected and cleanly closed after PR #60 merge and Leader acceptance.
-- Begin Sprint 21 intake only after security-governance contract plus Sprint 21 assignment are approved.
-- Do not start Sprint 21 runtime implementation without approved Sprint 21 contract and assignment.
+- Sprint 21 review is complete and classified as `NOT RELEASE READY / BLOCKED`.
+- Resolve Sprint 21 release blocker(s), rerun mandatory validation, and reclassify release readiness before any Phase 06 closure decision.

@@ -98,6 +98,7 @@ Load in this sequence:
 - `phase-05-token-session-management.md` -> Phase 05 closed scope and boundary baseline
 - `phase-05-consolidated-report.md` -> Phase 05 closure and merge/validation evidence
 - `phase-06-platform-governance-hardening.md` -> Phase 06 approved contract-backed execution plan (runtime in progress)
+- `phase-06-report.md` -> Phase 06 consolidated sprint status index
 - `docs/planning/assignments/` -> sprint-level assignment documents defining execution scope and task contracts
 - `docs/planning/reports/` -> sprint/phase execution evidence, validation results, and handoff context
 - `phase-06-sprint-16.md` -> Sprint 16 Audit Logging Foundation assignment (merged / closed / present in `main`)
@@ -110,6 +111,11 @@ Load in this sequence:
 - `docs/contracts/oidc/logout-hardening-contract.md` -> Logout Hardening Contract (Phase 05 / Sprint 15)
 - `docs/contracts/audit/audit-event-contract.md` -> Audit Event Contract
 - `docs/contracts/admin/admin-control-contract.md` -> Admin Control Contract (approved for Sprint 17 runtime implementation)
+- `docs/contracts/oidc/client-management-contract.md` -> OIDC Client Management Contract (approved for Sprint 18 runtime implementation)
+- `docs/contracts/observability/observability-contract.md` -> Observability Contract (approved for Sprint 19 runtime implementation)
+- `docs/contracts/oidc/key-rotation-contract.md` -> JWKS / Key Rotation Contract (approved for Sprint 20 runtime implementation)
+- `docs/contracts/security/security-hardening-contract.md` -> Final Security Hardening Contract (approved for Sprint 21 runtime implementation)
+- `docs/planning/reports/phase-06-security-hardening-report.md` -> Sprint 21 final security/release-readiness report
 - governance documents -> repository control and merge discipline
 - `anti-patterns.md` -> merge-blocking anti-pattern reference aligned with architecture and governance
 
@@ -125,12 +131,11 @@ Current planning status:
 - Phase 06 runtime implementation: IN PROGRESS
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 17 - Admin Module Controls: MERGED / CLOSED / PRESENT IN `main`
-- Sprint 17 PR: `#53` (merged `2026-05-08`)
-- Sprint 17 runtime commit: `15302ea`
-- Sprint 17 post-merge audit: APPROVE (no corrective action required)
-- Next sprint: Sprint 18 - OIDC Client Management
-- Sprint 18 Assignment: READY FOR INTAKE
-- Next step: approve Sprint 18 assignment and contracts before starting implementation
+- Sprint 18 - OIDC Client Management: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 19 - Observability Hardening: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 20 - JWKS / Key Rotation Hardening: MERGED / CLOSED / PRESENT IN `main` after corrective PR #60
+- Sprint 21 - Security Governance Finalization: REVIEW COMPLETED / NOT RELEASE READY / BLOCKED
+- Sprint 21 report: `docs/planning/reports/phase-06-security-hardening-report.md`
 - Phase 06 planning themes (high-level only): audit logging, admin controls, client management, observability, key rotation, security hardening
 
 ## VI. Maintenance Rules
