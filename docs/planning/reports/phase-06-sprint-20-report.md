@@ -1,4 +1,4 @@
-# Phase 06 - Sprint 20: JWKS / Key Rotation Hardening Report
+﻿# Phase 06 - Sprint 20: JWKS / Key Rotation Hardening Report
 
 ## 1. Execution Summary
 
@@ -11,14 +11,23 @@ Sprint 20 implemented OIDC-owned signing-key lifecycle hardening with:
 - rotation, retirement, rollback, and compromised-state handling in key service
 - key lifecycle audit and observability hooks
 
-Status: MERGED / CLOSED / PRESENT IN `main`.
+Status: MERGED WITH POST-MERGE CORRECTION REQUIRED.
+
+Sprint 20 PR #58 was merged before Leader merge-readiness blockers were fully resolved. The corrective branch `fix/oidc-sprint20-key-rotation-corrections` restores contract compliance and factual validation evidence. Sprint 20 must not be treated as cleanly closed until the corrective PR is reviewed, merged, and accepted by Leader review.
 
 Merge evidence:
+
 - PR: `#58` (merged `2026-05-09`)
 - merge commit: `b980ba4`
 - runtime commit: `45441d7`
 - gate-doc correction commit: `875adb0`
 - report correction commit: `1cae1c1`
+
+Post-merge corrective branch evidence:
+
+- branch: `fix/oidc-sprint20-key-rotation-corrections`
+- base: latest `main` after `63a4165`
+- reason: correct missing-active signing behavior, scoped Sprint 20 formatting, validation/report accuracy, and operational context status.
 
 ## 2. Source-of-Truth Basis
 
@@ -42,15 +51,16 @@ Merge evidence:
 - `docs/governance/anti-patterns.md`
 - `agent/current-context.md`
 - `agent/session-history.md`
-- `agent/prompts/sprint-task-execution.md`
+
+`docs/` remains authoritative. `agent/` is operational context only and does not justify runtime behavior.
 
 ## 3. Runtime Gate Result
 
 - Sprint 19 merged/closed/present in `main`: PASS (`d2f379d`, main updated to `14a07c2`).
 - Required contracts/assignment present with approved status text: PASS.
-- Runtime started from updated `main`: PASS.
-- Dedicated branch used: PASS (`feature/oidc-sprint20-key-rotation`).
-- Implementation packet produced before runtime edits: PASS.
+- Runtime started from updated `main`: PASS for PR #58; corrective branch starts from latest `main` after Sprint 20 merge sync.
+- Dedicated branch used: PASS (`feature/oidc-sprint20-key-rotation` for PR #58; `fix/oidc-sprint20-key-rotation-corrections` for post-merge correction).
+- Implementation packet produced before runtime edits: PASS for PR #58.
 
 ## 4. Implementation Packet Summary
 
@@ -69,17 +79,18 @@ Merge evidence:
 - Task 110: Implemented rotation/retirement/rollback/compromised transitions.
 - Task 111: Added key lifecycle audit events and bounded metrics/logging hooks.
 - Task 112: Completed validation and this report.
+- Post-merge correction: removed signing-time bootstrap, formatted Sprint 20 touched files, reran required validation, and corrected report/context status.
 
 ## 6. Files Created or Updated
 
-Created:
+Created by PR #58:
 
 - `src/modules/oidc/key.model.ts`
 - `src/modules/oidc/key.repository.ts`
 - `src/modules/oidc/key.service.ts`
 - `docs/planning/reports/phase-06-sprint-20-report.md`
 
-Updated:
+Updated by PR #58:
 
 - `src/modules/oidc/access-token.provider.ts`
 - `src/modules/oidc/id-token.provider.ts`
@@ -93,17 +104,28 @@ Updated:
 - `src/infrastructure/crypto/index.ts`
 - `src/modules/audit/audit.types.ts`
 
+Corrected after merge:
+
+- `src/modules/oidc/key.service.ts`
+- Sprint 20 touched runtime files formatted with scoped Prettier
+- `docs/planning/reports/phase-06-sprint-20-report.md`
+- `agent/current-context.md`
+- `agent/session-history.md`
+
 ## 7. Active Signing Key Behavior
 
-- Signing now resolves active key via `OidcKeyService`.
-- Active-key guard:
+- Signing resolves the active key via `OidcKeyService`.
+- Signing no longer performs implicit bootstrap when no active key exists.
+- Explicit bootstrap/setup, if needed operationally, is isolated to `initializeActiveSigningKey()` and is not called by token signing.
+- Active-key guard after correction:
   - zero active keys -> predictable failure (`NO_ACTIVE_SIGNING_KEY`)
   - multiple active keys -> predictable failure (`MULTIPLE_ACTIVE_SIGNING_KEYS`)
 - New JWTs include active key `kid` in header.
+- No stale, retired, compromised, or unknown key fallback is used for signing.
 
 ## 8. JWKS Publication Behavior
 
-- `GET /jwks` added and served from OIDC controller/service.
+- `GET /jwks` is served from OIDC controller/service.
 - JWKS includes:
   - active public key
   - retired public keys still within overlap window
@@ -111,6 +133,7 @@ Updated:
   - private signing material
   - private JWK parameters (`d`, `p`, `q`, `dp`, `dq`, `qi`)
   - compromised keys by default
+  - retired keys outside overlap
   - internal persistence metadata
 
 ## 9. Overlap Window Behavior
@@ -118,18 +141,21 @@ Updated:
 - Default overlap window implemented as 24 hours (`24 * 60 * 60 * 1000`).
 - Rotation retires previous active key and sets `retiredAt` + `overlapExpiresAt`.
 - JWKS eligibility for retired keys is constrained to overlap window.
+- Corrective probe verifies that a token signed before rotation remains verifiable during overlap.
+- Corrective probe verifies retired keys outside overlap are excluded from JWKS.
 
 ## 10. Rotation Behavior
 
 - Manual/service-triggered rotation implemented in `OidcKeyService.rotateSigningKey`.
 - Sequence:
+  - require exactly one current active key
   - create new RSA keypair
   - generate unique system `kid` (`kid_<uuid>`) with retry on collision
-  - persist as active
+  - persist new key as active
   - retire prior active key
   - set overlap metadata
   - emit safe audit + metrics/log signals
-- Partial-failure posture favors avoiding no-active-key state.
+- Partial-failure posture remains documented: if retirement fails after new-key activation, ambiguous active state is guarded by signing failure rather than silent fallback.
 
 ## 11. Retirement Behavior
 
@@ -168,70 +194,98 @@ Updated:
   - counters: `oidc_key_rotation_total`, `oidc_key_rollback_total`, `oidc_key_compromised_total`
   - gauge: `oidc_active_signing_key_available`
   - structured logs with bounded metadata only
+- Corrective private-material probe verifies JWKS, captured audit payloads, metrics output, and report content do not contain private key material.
+- Required secret-safety `rg` scan remains PASS WITH REVIEW because matches are internal key handling, safe field names, redaction deny-lists, or validation command text.
 
-## 15. Validation Evidence
+## 15. Post-Merge Correction Summary
+
+Reason for correction:
+
+- Leader review found PR #58 was not cleanly merge-ready after merge.
+- Signing path silently bootstrapped a key when zero active keys existed.
+- Scoped Sprint 20 Prettier claim was inaccurate before correction.
+- Manual validation evidence for zero-active, overlap verification, expiry exclusion, and compromised exclusion was incomplete.
+- Operational context incorrectly marked Sprint 20 as cleanly closed.
+
+Files corrected:
+
+- `src/modules/oidc/key.service.ts`
+- Sprint 20 touched runtime files formatted with scoped Prettier
+- `docs/planning/reports/phase-06-sprint-20-report.md`
+- `agent/current-context.md`
+- `agent/session-history.md`
+
+Remaining known conditions:
+
+- Repository-wide `npm.cmd run format:check` still fails due unrelated pre-existing formatting drift outside Sprint 20 touched/corrected files.
+- No committed unit/e2e test runner exists in `package.json`; corrective behavioral validation uses a temporary in-memory harness executed locally and removed before commit.
+- Corrective PR review and merge are still required before Sprint 20 can be considered cleanly corrected.
+
+## 16. Validation Evidence
 
 ### Required Commands
 
-| Command                                           | Result                             | Notes                                                                                          |
-| :------------------------------------------------ | :--------------------------------- | :--------------------------------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------- | ---------------- | -------------------------------------------------------- |
-| `npm.cmd run lint`                                | PASS                               | Exit 0                                                                                         |
-| `npm.cmd run typecheck`                           | PASS                               | Exit 0                                                                                         |
-| `npm.cmd run build`                               | PASS                               | Exit 0                                                                                         |
-| `npm.cmd run format:check`                        | FAIL / ACCEPTED BASELINE EXCEPTION | Pre-existing non-Sprint-20 files remain off-format; Sprint 20 touched files checked separately |
-| `rg -n "process.env" src --glob "!src/config/**"` | PASS                               | No matches                                                                                     |
-| `rg -n "console.log" src`                         | PASS                               | No matches                                                                                     |
-| `rg -n "private.\*key                             | PRIVATE                            | BEGIN PRIVATE KEY                                                                              | client_secret                   | refresh_token" src keys docs --glob "!docs/planning/reports/\*\*"` | PASS WITH REVIEW                                                 | Matches are expected contract text, placeholder key file, and defensive sanitization patterns |
-| `rg -n "kid                                       | jwks                               | sign                                                                                           | verify                          | publicKey                                                          | privateKey" src/infrastructure/crypto src/modules/oidc src/jobs` | PASS WITH REVIEW                                                                              | Matches align with Sprint 20 scope and no leakage path found |
-| `rg -n "UserModel                                 | user.repository                    | mongoose.\*User                                                                                | findOne(.\*User                 | findById(.\*User" src/modules/oidc`                                | PASS                                                             | No matches                                                                                    |
-| `rg -n "deleteOne                                 | findOneAndDelete                   | findByIdAndDelete" src/modules/oidc`                                                           | PASS                            | No matches                                                         |
-| `rg -n "d:                                        | p:                                 | q:                                                                                             | dp:                             | dq:                                                                | qi:                                                              | BEGIN PRIVATE KEY                                                                             | privateKey                                                   | private_key" src/modules/oidc src/infrastructure/crypto` | PASS WITH REVIEW | Internal key-handling matches only; no JWKS leakage path |
-| `rg -n "oidc\\.key\\.rotated                      | oidc\\.key\\.retired               | oidc\\.key\\.rotation_failed                                                                   | oidc\\.key\\.rollback_performed | oidc\\.key\\.compromised" docs/contracts/audit src/modules`        | PASS WITH REVIEW                                                 | New event types added in runtime vocabulary; contract mentions base key events                |
+| Command                                                                                                                                                                                                                                                                                                                                                                                    | Result                             | Notes                                                                                                                                                                                                                        |
+| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm.cmd run lint`                                                                                                                                                                                                                                                                                                                                                                         | PASS                               | Exit 0.                                                                                                                                                                                                                      |
+| `npm.cmd run typecheck`                                                                                                                                                                                                                                                                                                                                                                    | PASS                               | Exit 0.                                                                                                                                                                                                                      |
+| `npm.cmd run build`                                                                                                                                                                                                                                                                                                                                                                        | PASS                               | Exit 0.                                                                                                                                                                                                                      |
+| `npm.cmd run format:check`                                                                                                                                                                                                                                                                                                                                                                 | FAIL / ACCEPTED BASELINE EXCEPTION | Exit 1. Remaining files are pre-existing unrelated drift: request middleware, database, logger, metrics, redis, admin, audit service, health, and OIDC client files. Sprint 20 touched/corrected files pass scoped Prettier. |
+| `npx.cmd prettier --check <Sprint 20 touched/corrected runtime files plus report/context files>`                                                                                                                                                                                                                                                                                           | PASS                               | Scoped Sprint 20/correction file set passes.                                                                                                                                                                                 |
+| `rg -n "process.env" src --glob "!src/config/**"`                                                                                                                                                                                                                                                                                                                                          | PASS                               | No matches.                                                                                                                                                                                                                  |
+| `rg -n "console.log" src`                                                                                                                                                                                                                                                                                                                                                                  | PASS                               | No matches.                                                                                                                                                                                                                  |
+| `rg -n "BEGIN PRIVATE KEY\|PRIVATE KEY\|privateKey\|private_key\|d:\|p:\|q:\|dp:\|dq:\|qi:\|client_secret\|clientSecret\|refresh_token\|access_token\|id_token\|authorization_code\|code_verifier\|password" src/modules/oidc src/infrastructure/crypto src/modules/audit src/infrastructure/logger src/infrastructure/metrics src/app docs/planning/reports/phase-06-sprint-20-report.md` | PASS WITH REVIEW                   | Matches are internal key handling fields, token/client field names, report validation command text, and redaction/deny-list patterns. No JWKS/log/audit/metrics/report exposure of private key material found.               |
+| `rg -n "UserModel\|user.repository\|mongoose.*User\|findOne(.*User\|findById(.*User" src/modules/oidc`                                                                                                                                                                                                                                                                                     | FAIL / COMMAND REGEX ERROR         | Required literal command fails with `regex parse error: unclosed group`.                                                                                                                                                     |
+| `rg -n "UserModel\|user\.repository\|mongoose.*User\|findOne\\(.*User\|findById\\(.*User" src/modules/oidc`                                                                                                                                                                                                                                                                                | PASS                               | Corrected escaping equivalent found no matches.                                                                                                                                                                              |
+| `rg -n "deleteOne\|findOneAndDelete\|findByIdAndDelete\|remove\(" src/modules/oidc`                                                                                                                                                                                                                                                                                                        | PASS                               | No matches.                                                                                                                                                                                                                  |
+| `rg -n "setInterval\|cron\|schedule\|node-cron\|KMS\|HSM\|SIEM\|tracing\|OpenTelemetry" src docs/planning/reports/phase-06-sprint-20-report.md`                                                                                                                                                                                                                                            | PASS WITH REVIEW                   | Matches only excluded-scope text in this report. No runtime scheduling/KMS/HSM/SIEM/tracing implementation found.                                                                                                            |
+| `rg -n "kid\|jwks\|rotate\|retire\|rollback\|compromised\|overlapExpiresAt\|private" src/modules/oidc src/infrastructure/crypto`                                                                                                                                                                                                                                                           | PASS WITH REVIEW                   | Matches align with approved key lifecycle implementation and low-level crypto helpers.                                                                                                                                       |
 
-### Scoped Sprint 20 Prettier Check
+### Scoped Sprint 20 / Correction Prettier Check
 
 Command:
 
 ```powershell
-npx.cmd prettier --check src/app/server.ts src/infrastructure/crypto/index.ts src/infrastructure/crypto/jwks.ts src/infrastructure/crypto/keys.ts src/modules/audit/audit.types.ts src/modules/oidc/access-token.provider.ts src/modules/oidc/id-token.provider.ts src/modules/oidc/oidc.controller.ts src/modules/oidc/oidc.service.ts src/modules/oidc/oidc.types.ts src/modules/oidc/userinfo.service.ts src/modules/oidc/key.model.ts src/modules/oidc/key.repository.ts src/modules/oidc/key.service.ts
+npx.cmd prettier --check src/app/server.ts src/infrastructure/crypto/index.ts src/infrastructure/crypto/jwks.ts src/infrastructure/crypto/keys.ts src/modules/audit/audit.types.ts src/modules/oidc/access-token.provider.ts src/modules/oidc/id-token.provider.ts src/modules/oidc/oidc.controller.ts src/modules/oidc/oidc.service.ts src/modules/oidc/oidc.types.ts src/modules/oidc/userinfo.service.ts src/modules/oidc/key.model.ts src/modules/oidc/key.repository.ts src/modules/oidc/key.service.ts docs/planning/reports/phase-06-sprint-20-report.md agent/current-context.md agent/session-history.md
 ```
 
 Result: PASS.
 
-## 16. Manual Validation Matrix
+## 17. Manual / Probe Validation Matrix
 
-| #     | Check                                                                                      | Result           | Evidence                                                                          |
-| :---- | :----------------------------------------------------------------------------------------- | :--------------- | :-------------------------------------------------------------------------------- |
-| 1     | Exactly one active signing key selected                                                    | PASS             | In-memory harness + service guard logic                                           |
-| 2     | New JWT contains `kid` header                                                              | PASS             | In-memory harness (`SPRINT20_KEY_SERVICE_HARNESS=PASS`)                           |
-| 3     | JWT `kid` matches active metadata                                                          | PASS             | In-memory harness                                                                 |
-| 4     | JWKS includes active public key                                                            | PASS             | In-memory harness                                                                 |
-| 5     | JWKS entries include `kid`                                                                 | PASS             | In-memory harness                                                                 |
-| 6     | JWKS excludes private JWK params                                                           | PASS             | In-memory harness + key/JWKS mapping code                                         |
-| 7     | JWKS excludes private PEM                                                                  | PASS             | Code review + JWKS response shape                                                 |
-| 8-12  | Rotation creates new key, activates it, retires previous key, sets retire/overlap metadata | PASS             | In-memory harness                                                                 |
-| 13    | Retired key published during overlap                                                       | PASS             | In-memory harness + repository eligibility query                                  |
-| 14    | Pre-rotation token verification during overlap                                             | NOT RUN          | No DB-backed end-to-end harness in this sprint report run                         |
-| 15    | Retired key excluded after overlap                                                         | NOT RUN          | Time-window expiry scenario not executed in runtime harness                       |
-| 16    | Retired key does not sign new tokens                                                       | PASS             | Service signs only active key                                                     |
-| 17-19 | Compromised key cannot sign / be active / be published                                     | PASS             | Service logic + in-memory harness compromise flow                                 |
-| 20-22 | Predictable failure for rotation issues and missing/ambiguous active key                   | PASS WITH REVIEW | Service error codes/guards implemented; full fault-injection runtime not executed |
-| 23-24 | Rollback only for eligible retired key; no hard-delete                                     | PASS             | Service guards + in-memory harness                                                |
-| 25-28 | Rollback/rotation/retirement/failure audit events                                          | PASS WITH REVIEW | Event emissions present; persistence depends on runtime DB availability           |
-| 29-35 | Audit/log/metrics secret safety                                                            | PASS WITH REVIEW | Contract-safe metadata only + scans + logger/metrics sanitization                 |
-| 36-43 | Boundary and scope non-regression checks                                                   | PASS             | Dependency scans + code inspection                                                |
-| 44    | No real production private key committed                                                   | PASS WITH REVIEW | `keys/private.pem` remains placeholder content                                    |
-| 45    | Sprint 20 report includes evidence                                                         | PASS             | This report                                                                       |
-
-Additional runtime harness command:
+Temporary harness:
 
 ```powershell
-npx.cmd tsx C:\tmp\sprint20-key-harness.ts
+$env:NODE_ENV='development'; $env:PORT='3000'; $env:MONGO_URI='mongodb://localhost:27017/etroy_oidc'; $env:REDIS_URL='redis://localhost:6379'; $env:APP_BASE_URL='http://localhost:3000'; $env:OIDC_CLIENTS_JSON='[{"clientId":"etroy-web","redirectUris":["http://localhost:5173/callback"]}]'; npx.cmd tsx .\temp-sprint20-correction-probes.ts
 ```
 
-Result: `SPRINT20_KEY_SERVICE_HARNESS=PASS`.
+The temporary harness was removed after execution and is not part of the corrective PR.
 
-## 17. Excluded Scope Confirmation
+| Check                                                             | Result           | Evidence                                                                                                                                            |
+| :---------------------------------------------------------------- | :--------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Zero active key signing fails predictably                         | PASS             | `ZERO_ACTIVE_SIGNING=PASS`; observed `NO_ACTIVE_SIGNING_KEY`.                                                                                       |
+| Multiple active keys fail predictably                             | PASS             | `MULTIPLE_ACTIVE_SIGNING=PASS`; observed `MULTIPLE_ACTIVE_SIGNING_KEYS`.                                                                            |
+| Token signed before rotation remains verifiable during overlap    | PASS             | `ROTATION_OVERLAP_VERIFY=PASS`.                                                                                                                     |
+| Retired key inside overlap appears in JWKS                        | PASS             | `JWKS_OVERLAP=PASS`.                                                                                                                                |
+| Retired key outside overlap is excluded from JWKS                 | PASS             | `JWKS_EXPIRY=PASS`.                                                                                                                                 |
+| Compromised key does not sign                                     | PASS             | `COMPROMISED_EXCLUSION=PASS`; signing used safe active key, not compromised key.                                                                    |
+| Compromised key is excluded from JWKS                             | PASS             | `COMPROMISED_EXCLUSION=PASS`.                                                                                                                       |
+| No private key material appears in JWKS/logs/audit/metrics/report | PASS WITH REVIEW | `PRIVATE_MATERIAL_SAFETY=PASS`; required `rg` scan verifies log/report/source paths. The probe captured audit payloads and metrics output directly. |
+
+Probe output:
+
+```text
+SPRINT20_CORRECTION_PROBES=PASS
+ZERO_ACTIVE_SIGNING=PASS
+MULTIPLE_ACTIVE_SIGNING=PASS
+ROTATION_OVERLAP_VERIFY=PASS
+JWKS_OVERLAP=PASS
+JWKS_EXPIRY=PASS
+COMPROMISED_EXCLUSION=PASS
+PRIVATE_MATERIAL_SAFETY=PASS
+```
+
+## 18. Excluded Scope Confirmation
 
 Not implemented:
 
@@ -240,30 +294,29 @@ Not implemented:
 - admin dashboard/key-management UI
 - broad RBAC/security-governance changes
 - refresh/session/client/user/auth lifecycle changes outside signed-token key selection
+- Sprint 21 final security hardening
+- release-readiness review
 - distributed tracing/SIEM integration
 - broad formatting cleanup
 - unrelated refactors
 
-## 18. Risks, Limitations, and Deferred Work
+## 19. Risks, Limitations, and Deferred Work
 
-- Repository-wide `format:check` still fails due pre-existing baseline drift outside Sprint 20 scope.
-- Audit event persistence in local harness context used fail-open behavior when DB was unavailable; event emissions are implemented but persistence requires healthy runtime dependencies.
-- Audit contract vocabulary has been additively synchronized for Sprint 20 key lifecycle events: `oidc.key.rollback_performed` and `oidc.key.compromised`.
-- Full end-to-end overlap-expiry runtime scenario (time advancement with persisted records) is deferred.
-- Pre-rotation token verification during overlap not fully DB-backed e2e validated.
+- Repository-wide `format:check` still fails due pre-existing unrelated formatting drift outside Sprint 20 scope.
+- Audit event persistence in local harness context was intentionally bypassed; event emissions are implemented, but persistence requires healthy runtime dependencies.
+- Final security governance/release readiness remains Sprint 21 scope and must not start from this correction.
+- Sprint 20 clean closure is pending corrective PR merge and Leader acceptance.
 
-## 19. Handoff to Sprint 21 - Security Governance Finalization
+## 20. Handoff to Sprint 21 - Security Governance Finalization
 
-Sprint 20 hands off:
+Do not start Sprint 21 from this correction branch.
+
+After the corrective PR is merged and accepted, Sprint 20 can hand off:
 
 - OIDC key lifecycle model/repository/service baseline
 - active signing key integration across token issuance/verification
 - hardened JWKS publication path
 - key lifecycle audit and observability signal points
-- validation evidence and known limitations
+- corrected validation evidence and known limitations
 
-Sprint 21 should:
-
-- execute final governance/security contract alignment for additive key audit vocabulary
-- run final release-readiness security checks with environment-backed runtime scenarios
-- close remaining repository-wide formatting baseline drift in dedicated scope if approved
+Sprint 21 should begin only after its own approved contract and assignment are present.
