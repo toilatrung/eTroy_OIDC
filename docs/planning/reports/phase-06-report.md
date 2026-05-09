@@ -11,7 +11,7 @@ This report is the Phase 06 status index across Sprint 16 through Sprint 21.
 - Sprint 18 - OIDC Client Management: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 19 - Observability Hardening: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 20 - JWKS / Key Rotation Hardening: MERGED / CLOSED / PRESENT IN `main` after corrective PR #60
-- Sprint 21 - Final Security Hardening and Release Readiness Review: REVIEW COMPLETED / `NOT RELEASE READY / BLOCKED`
+- Sprint 21 - Final Security Hardening and Release Readiness Review: REVIEW COMPLETED / `RELEASE READY WITH ACCEPTED CONDITIONS`
 
 ## 3. Primary Evidence Reports
 
@@ -24,5 +24,5 @@ This report is the Phase 06 status index across Sprint 16 through Sprint 21.
 
 ## 4. Current Phase 06 Closure Posture
 
-- Phase 06 closure decision: `BLOCKED`
-- Reason: unresolved Sprint 21 release-blocking security finding
+- Phase 06 closure decision: `READY WITH ACCEPTED CONDITIONS`
+- Reason: Sprint 21 blocker remediated; accepted known conditions documented in Sprint 21 report

@@ -110,7 +110,7 @@ Current phase execution baseline:
 - Sprint 18 - OIDC Client Management: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 19 - Observability Hardening: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 20 - JWKS / Key Rotation Hardening: MERGED / CLOSED / PRESENT IN `main` after corrective PR #60
-- Sprint 21 - Security Governance Finalization: REVIEW COMPLETED / NOT RELEASE READY / BLOCKED
+- Sprint 21 - Security Governance Finalization: REVIEW COMPLETED / RELEASE READY WITH ACCEPTED CONDITIONS
 - Sprint 21 report: `docs/planning/reports/phase-06-security-hardening-report.md`
 - Phase 06 planning themes (high-level only): audit logging, admin controls, client management, observability, key rotation, security hardening
 

@@ -1054,3 +1054,33 @@ It records meaningful state transitions and approved outcomes only.
 - Open items:
   - remediate key-material release blocker
   - rerun Sprint 21 validation and reclassify release readiness
+
+### 2026-05-10 / PHASE06-SPRINT21-FOLLOWUP-KEY-REMEDIATION
+
+- Completed:
+  - removed active repository key-material marker file `keys/private.pem`
+  - hardened ignore rules for PEM private-key artifacts in `.gitignore`
+  - reran Sprint 21 mandatory baseline commands and required scan suite
+  - reran required git-history and leakage checks
+  - updated Sprint 21 report with dedicated `Known Condition Classification` section and complete follow-up evidence
+  - synchronized Phase 06 status/report/context files to final Sprint 21 follow-up decision
+- Approved:
+  - active repository private key material blocker: remediated
+  - git-history inspection: placeholder-only historical key marker; no real private key material evidence observed
+  - Sprint 21 final decision after follow-up: `RELEASE READY WITH ACCEPTED CONDITIONS`
+- Accepted conditions retained:
+  - repository-wide `npm.cmd run format:check` baseline drift outside Sprint 21 scope
+  - missing committed unit/e2e runner and reliance on prior manual/runtime harness evidence
+  - dependency/readiness operational setup requirement (MongoDB/Redis)
+- Source-of-truth documents changed:
+  - `docs/planning/reports/phase-06-security-hardening-report.md`
+  - `docs/planning/reports/phase-06-report.md`
+  - `docs/planning/master-execution-plan.md`
+  - `docs/planning/phases/phase-06-platform-governance-hardening.md`
+  - `docs/source-of-truth-index.md`
+  - `docs/README.md`
+- Agent files changed:
+  - `agent/current-context.md`
+  - `agent/session-history.md`
+- Open items:
+  - track accepted-condition follow-ups in post-Phase 06 backlog and governance planning
