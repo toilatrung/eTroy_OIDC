@@ -310,7 +310,12 @@ modules/
 ├─ verification/
 ├─ password-reset/
 ├─ token-lifecycle/
-├─ oidc/
+├─ oidc/ (internal subfolders approved)
+│  ├─ controllers/
+│  ├─ services/
+│  ├─ repositories/
+│  ├─ models/
+│  └─ providers/
 ├─ admin/
 ├─ audit/
 └─ health/

@@ -1,4 +1,4 @@
-import { OidcClientModel, type OidcClientDocument } from './client.model.js';
+import { OidcClientModel, type OidcClientDocument } from '../models/client.model.js';
 
 export interface CreateClientInput {
   clientId: string;

@@ -98,10 +98,35 @@ src/
 |  |  |- password-reset.service.ts
 |  |  \- password-reset.model.ts
 |  |- oidc/
-|  |  |- oidc.service.ts
-|  |  |- oidc.controller.ts
-|  |  |- oidc.provider.ts
-|  |  \- claims.mapper.ts
+|  |  |- controllers/
+|  |  |  |- oidc.controller.ts
+|  |  |  \- userinfo.controller.ts
+|  |  |- services/
+|  |  |  |- oidc.service.ts
+|  |  |  |- userinfo.service.ts
+|  |  |  |- client.service.ts
+|  |  |  |- key.service.ts
+|  |  |  |- oidc-session.service.ts
+|  |  |  \- refresh-token.service.ts
+|  |  |- repositories/
+|  |  |  |- client.repository.ts
+|  |  |  |- key.repository.ts
+|  |  |  |- oidc-session.repository.ts
+|  |  |  |- refresh-token.repository.ts
+|  |  |  \- authorization-code.repository.ts
+|  |  |- models/
+|  |  |  |- client.model.ts
+|  |  |  |- key.model.ts
+|  |  |  |- oidc-session.model.ts
+|  |  |  |- refresh-token.model.ts
+|  |  |  \- authorization-code.model.ts
+|  |  |- providers/
+|  |  |  |- oidc.provider.ts
+|  |  |  |- access-token.provider.ts
+|  |  |  \- id-token.provider.ts
+|  |  |- mappers/
+|  |  |  \- claims.mapper.ts
+|  |  \- oidc.types.ts
 |  |- admin/
 |  |  \- admin.service.ts
 |  |- audit/

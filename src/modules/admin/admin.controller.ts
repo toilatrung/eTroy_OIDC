@@ -18,7 +18,7 @@ import {
   type AdminUpdateClientInput,
 } from './admin.validator.js';
 import type { UserAdminView } from '../users/user.service.js';
-import type { ClientAdminView, ClientWithSecret } from '../oidc/client.service.js';
+import type { ClientAdminView, ClientWithSecret } from '../oidc/services/client.service.js';
 
 interface AdminUserResponseBody {
   data: UserAdminView;

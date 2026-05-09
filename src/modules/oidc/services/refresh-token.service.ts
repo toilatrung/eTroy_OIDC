@@ -1,13 +1,13 @@
 import { randomBytes } from 'node:crypto';
 
-import { hashValue } from '../../infrastructure/crypto/index.js';
-import { BaseError } from '../../shared/errors/index.js';
+import { hashValue } from '../../../infrastructure/crypto/index.js';
+import { BaseError } from '../../../shared/errors/index.js';
 
-import type { RefreshTokenEntity, TokenIntrospectionResponse } from './oidc.types.js';
+import type { RefreshTokenEntity, TokenIntrospectionResponse } from '../types/oidc.types.js';
 import {
   RefreshTokenRepository,
   type RefreshTokenRepositoryPort,
-} from './refresh-token.repository.js';
+} from '../repositories/refresh-token.repository.js';
 
 const REFRESH_TOKEN_BYTE_LENGTH = 48;
 const REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60;

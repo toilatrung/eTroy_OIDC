@@ -9,7 +9,7 @@ import {
   type ClientWithSecret,
   type CreateClientRequest,
   type UpdateClientRequest,
-} from '../oidc/client.service.js';
+} from '../oidc/services/client.service.js';
 import {
   userService,
   type CreateAdminProvisionedUserInput,

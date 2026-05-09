@@ -1,6 +1,6 @@
 import Provider from 'oidc-provider';
 
-import { config, type OidcClient } from '../../config/config.js';
+import { config, type OidcClient } from '../../../config/config.js';
 
 export interface OidcProviderConfig {
   issuer: string;

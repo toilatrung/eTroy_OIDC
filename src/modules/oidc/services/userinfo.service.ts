@@ -1,10 +1,10 @@
-import { config, type OidcClient } from '../../config/config.js';
-import { BaseError } from '../../shared/errors/index.js';
-import { userService, type UserService } from '../users/user.service.js';
+import { config, type OidcClient } from '../../../config/config.js';
+import { BaseError } from '../../../shared/errors/index.js';
+import { userService, type UserService } from '../../users/user.service.js';
 
-import { mapOidcClaimsByScope, toOidcUserIdentity } from './claims.mapper.js';
+import { mapOidcClaimsByScope, toOidcUserIdentity } from '../mappers/claims.mapper.js';
 import { oidcKeyService } from './key.service.js';
-import type { OidcClaims, OidcUserIdentity } from './oidc.types.js';
+import type { OidcClaims, OidcUserIdentity } from '../types/oidc.types.js';
 
 type UserIdentityReader = Pick<UserService, 'getUserBySub'>;
 

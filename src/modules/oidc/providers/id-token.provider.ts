@@ -1,8 +1,12 @@
-import { config } from '../../config/config.js';
+import { config } from '../../../config/config.js';
 
-import { mapOidcClaimsByScope } from './claims.mapper.js';
-import { oidcKeyService } from './key.service.js';
-import type { IdTokenIssueInput, IdTokenIssueResult, IdTokenProvider } from './oidc.types.js';
+import { mapOidcClaimsByScope } from '../mappers/claims.mapper.js';
+import { oidcKeyService } from '../services/key.service.js';
+import type {
+  IdTokenIssueInput,
+  IdTokenIssueResult,
+  IdTokenProvider,
+} from '../types/oidc.types.js';
 
 const DEFAULT_ID_TOKEN_TTL_SECONDS = 900;
 

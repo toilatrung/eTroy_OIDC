@@ -1,8 +1,8 @@
 import type { HydratedDocument } from 'mongoose';
 
-import type { JwksRsaKey } from '../../infrastructure/crypto/index.js';
+import type { JwksRsaKey } from '../../../infrastructure/crypto/index.js';
 
-import { OidcKeyModel, type OidcKeyDocument, type OidcKeyStatus } from './key.model.js';
+import { OidcKeyModel, type OidcKeyDocument, type OidcKeyStatus } from '../models/key.model.js';
 
 export interface OidcKeyEntity {
   id: string;

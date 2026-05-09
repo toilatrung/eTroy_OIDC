@@ -1,9 +1,9 @@
 import { randomBytes } from 'node:crypto';
-import { hashValue } from '../../infrastructure/crypto/index.js';
-import { BaseError } from '../../shared/errors/index.js';
-import { auditService } from '../audit/audit.service.js';
-import { OidcClientRepository, type CreateClientInput } from './client.repository.js';
-import type { OidcClientDocument } from './client.model.js';
+import { hashValue } from '../../../infrastructure/crypto/index.js';
+import { BaseError } from '../../../shared/errors/index.js';
+import { auditService } from '../../audit/audit.service.js';
+import { OidcClientRepository, type CreateClientInput } from '../repositories/client.repository.js';
+import type { OidcClientDocument } from '../models/client.model.js';
 
 export interface CreateClientRequest {
   name: string;

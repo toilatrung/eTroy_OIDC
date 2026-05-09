@@ -1,11 +1,11 @@
-import { config } from '../../config/config.js';
+import { config } from '../../../config/config.js';
 
 import type {
   AccessTokenIssueInput,
   AccessTokenIssueResult,
   AccessTokenProvider,
-} from './oidc.types.js';
-import { oidcKeyService } from './key.service.js';
+} from '../types/oidc.types.js';
+import { oidcKeyService } from '../services/key.service.js';
 
 const DEFAULT_ACCESS_TOKEN_TTL_SECONDS = 900;
 

@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
-import type { JsonWebKeySet } from '../../infrastructure/crypto/index.js';
+import type { JsonWebKeySet } from '../../../infrastructure/crypto/index.js';
 
 import {
   oidcService,
@@ -9,12 +9,12 @@ import {
   type LogoutResult,
   type LogoutSuccessResponse,
   type TokenExchangeResponse,
-} from './oidc.service.js';
+} from '../services/oidc.service.js';
 import type {
   OidcCsrfCookieDescriptor,
   OidcSessionCookieDescriptor,
-} from './oidc-session.service.js';
-import type { TokenIntrospectionResponse } from './oidc.types.js';
+} from '../services/oidc-session.service.js';
+import type { TokenIntrospectionResponse } from '../types/oidc.types.js';
 
 interface AuthorizeResponseBody {
   data: AuthorizeRequestContext;

@@ -1,9 +1,12 @@
 import type Redis from 'ioredis';
 
-import { getRedisClient } from '../../infrastructure/redis/index.js';
+import { getRedisClient } from '../../../infrastructure/redis/index.js';
 
-import type { OidcSessionRecord, OidcSessionStatus } from './oidc-session.model.js';
-import { deserializeOidcSessionRecord, serializeOidcSessionRecord } from './oidc-session.model.js';
+import type { OidcSessionRecord, OidcSessionStatus } from '../models/oidc-session.model.js';
+import {
+  deserializeOidcSessionRecord,
+  serializeOidcSessionRecord,
+} from '../models/oidc-session.model.js';
 
 const SESSION_KEY_PREFIX = 'oidc:session:';
 
