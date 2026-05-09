@@ -80,8 +80,6 @@ const oidcClientSchema = new Schema<OidcClientDocument>(
   },
 );
 
-oidcClientSchema.index({ clientId: 1 }, { unique: true });
-
 export const OidcClientModel =
   (models.OidcClient as Model<OidcClientDocument> | undefined) ??
   model<OidcClientDocument>('OidcClient', oidcClientSchema);

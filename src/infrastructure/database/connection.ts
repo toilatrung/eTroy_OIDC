@@ -36,17 +36,28 @@ const withTimeout = async <T>(operation: Promise<T>, timeoutMs: number): Promise
 };
 
 export const connectDatabase = async (): Promise<Mongoose> => {
+  process.stdout.write(`Attempting to connect to MongoDB: ${config.infrastructure.mongodb.uri}\n`);
+
   if (mongoose.connection.readyState === 1) {
+    process.stdout.write('Already connected to MongoDB.\n');
     return mongoose;
   }
 
   if (connectionPromise !== null) {
+    process.stdout.write('Connection already in progress.\n');
     return connectionPromise;
   }
 
   connectionPromise = mongoose
     .connect(config.infrastructure.mongodb.uri, CONNECT_OPTIONS)
+    .then((m) => {
+      process.stdout.write(
+        `Successfully connected to MongoDB. ReadyState: ${mongoose.connection.readyState}\n`,
+      );
+      return m;
+    })
     .catch((error: unknown) => {
+      process.stdout.write(`Failed to connect to MongoDB: ${error}\n`);
       connectionPromise = null;
       throw formatConnectionError(error);
     });

@@ -154,4 +154,4 @@ export type TokenIntrospectionResponse =
 export type {
   OidcSessionRecord as OidcSessionEntity,
   OidcSessionStatus,
-} from './oidc-session.model.js';
+} from '../models/oidc-session.model.js';

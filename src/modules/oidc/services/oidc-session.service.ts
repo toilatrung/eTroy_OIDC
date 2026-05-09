@@ -1,17 +1,17 @@
 import { randomBytes } from 'node:crypto';
 
-import { config } from '../../config/config.js';
-import { hashValue, verifyHash } from '../../infrastructure/crypto/index.js';
+import { config } from '../../../config/config.js';
+import { hashValue, verifyHash } from '../../../infrastructure/crypto/index.js';
 
 import {
   OIDC_SESSION_ID_BYTE_LENGTH,
   OIDC_SESSION_ID_PATTERN,
   type OidcSessionRecord,
-} from './oidc-session.model.js';
+} from '../models/oidc-session.model.js';
 import {
   OidcSessionRepository,
   type OidcSessionRepositoryPort,
-} from './oidc-session.repository.js';
+} from '../repositories/oidc-session.repository.js';
 
 const INVALID_COOKIE_HEADER_PATTERN = /[\r\n]/u;
 

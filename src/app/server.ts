@@ -30,9 +30,9 @@ import {
   logoutHandler,
   revokeHandler,
   tokenHandler,
-} from '../modules/oidc/oidc.controller.js';
+} from '../modules/oidc/controllers/oidc.controller.js';
 import { healthHandler, readinessHandler } from '../modules/health/health.controller.js';
-import { userInfoHandler } from '../modules/oidc/userinfo.controller.js';
+import { userInfoHandler } from '../modules/oidc/controllers/userinfo.controller.js';
 import { BaseError } from '../shared/errors/index.js';
 
 interface ErrorResponseBody {
@@ -140,7 +140,22 @@ export const createServer = (): Express => {
   return app;
 };
 
-export const startServer = () =>
-  createServer().listen(config.app.port, () => {
-    process.stdout.write(`Server listening on port ${config.app.port}\n`);
-  });
+import { connectDatabase } from '../infrastructure/database/index.js';
+import { getRedisClient } from '../infrastructure/redis/index.js';
+
+export const startServer = async () => {
+  try {
+    await connectDatabase();
+    await getRedisClient();
+
+    return createServer().listen(config.app.port, () => {
+      process.stdout.write(`Server listening on port ${config.app.port}\n`);
+    });
+  } catch (error: unknown) {
+    logger.error('Failed to start server', {
+      errorName: error instanceof Error ? error.name : 'UnknownError',
+      errorCode: 'SERVER_START_FAILURE',
+    });
+    process.exit(1);
+  }
+};

@@ -11,13 +11,13 @@ import {
   type JwksRsaKey,
   type SigningJwtPayload,
   type SigningVerifiedJwt,
-} from '../../infrastructure/crypto/index.js';
-import { logger } from '../../infrastructure/logger/index.js';
-import { incrementCounter, setGauge } from '../../infrastructure/metrics/metrics.js';
-import { BaseError } from '../../shared/errors/index.js';
-import { auditService } from '../audit/audit.service.js';
+} from '../../../infrastructure/crypto/index.js';
+import { logger } from '../../../infrastructure/logger/index.js';
+import { incrementCounter, setGauge } from '../../../infrastructure/metrics/metrics.js';
+import { BaseError } from '../../../shared/errors/index.js';
+import { auditService } from '../../audit/audit.service.js';
 
-import { OidcKeyRepository, type OidcKeyEntity } from './key.repository.js';
+import { OidcKeyRepository, type OidcKeyEntity } from '../repositories/key.repository.js';
 
 const DEFAULT_OVERLAP_WINDOW_MS = 24 * 60 * 60 * 1000;
 const MAX_KID_GENERATION_ATTEMPTS = 5;

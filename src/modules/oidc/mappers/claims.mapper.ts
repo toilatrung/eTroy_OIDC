@@ -1,4 +1,4 @@
-import type { OidcClaims, OidcUserIdentity } from './oidc.types.js';
+import type { OidcClaims, OidcUserIdentity } from '../types/oidc.types.js';
 
 export interface UsersIdentityContractInput {
   sub: string;

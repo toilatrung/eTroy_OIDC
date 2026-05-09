@@ -1,7 +1,7 @@
 import type { HydratedDocument } from 'mongoose';
 
-import type { CreateRefreshTokenInput, RefreshTokenEntity } from './oidc.types.js';
-import { RefreshTokenModel, type RefreshTokenDocument } from './refresh-token.model.js';
+import type { CreateRefreshTokenInput, RefreshTokenEntity } from '../types/oidc.types.js';
+import { RefreshTokenModel, type RefreshTokenDocument } from '../models/refresh-token.model.js';
 
 const toEntity = (document: HydratedDocument<RefreshTokenDocument>): RefreshTokenEntity => ({
   id: document._id.toString(),

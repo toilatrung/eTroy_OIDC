@@ -1,6 +1,6 @@
 import mongoose, { type Model } from 'mongoose';
 
-import type { JwksRsaKey } from '../../infrastructure/crypto/index.js';
+import type { JwksRsaKey } from '../../../infrastructure/crypto/index.js';
 
 const { model, models, Schema } = mongoose;
 

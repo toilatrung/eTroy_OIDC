@@ -1,10 +1,10 @@
 import mongoose, { type HydratedDocument } from 'mongoose';
 
-import type { AuthorizationCodeEntity, CreateAuthorizationCodeInput } from './oidc.types.js';
+import type { AuthorizationCodeEntity, CreateAuthorizationCodeInput } from '../types/oidc.types.js';
 import {
   AuthorizationCodeModel,
   type AuthorizationCodeDocument,
-} from './authorization-code.model.js';
+} from '../models/authorization-code.model.js';
 
 const { isValidObjectId } = mongoose;
 

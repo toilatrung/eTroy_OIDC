@@ -1,17 +1,17 @@
-import { config, type OidcClient } from '../../config/config.js';
-import { hashValue } from '../../infrastructure/crypto/index.js';
-import type { JsonWebKeySet } from '../../infrastructure/crypto/index.js';
-import { BaseError } from '../../shared/errors/index.js';
-import { authService, type AuthenticatedIdentity } from '../auth/auth.service.js';
-import { userService, type UserService } from '../users/user.service.js';
+import { config, type OidcClient } from '../../../config/config.js';
+import { hashValue } from '../../../infrastructure/crypto/index.js';
+import type { JsonWebKeySet } from '../../../infrastructure/crypto/index.js';
+import { BaseError } from '../../../shared/errors/index.js';
+import { authService, type AuthenticatedIdentity } from '../../auth/auth.service.js';
+import { userService, type UserService } from '../../users/user.service.js';
 import { randomBytes, createHash } from 'node:crypto';
 
-import { toOidcUserIdentity } from './claims.mapper.js';
+import { toOidcUserIdentity } from '../mappers/claims.mapper.js';
 import { oidcClientService } from './client.service.js';
 import { oidcKeyService } from './key.service.js';
-import { JwtAccessTokenProvider } from './access-token.provider.js';
-import { AuthorizationCodeRepository } from './authorization-code.repository.js';
-import { JwtIdTokenProvider } from './id-token.provider.js';
+import { JwtAccessTokenProvider } from '../providers/access-token.provider.js';
+import { AuthorizationCodeRepository } from '../repositories/authorization-code.repository.js';
+import { JwtIdTokenProvider } from '../providers/id-token.provider.js';
 import {
   OidcSessionService,
   type OidcCsrfCookieDescriptor,
@@ -25,7 +25,7 @@ import type {
   IdTokenProvider,
   OidcUserIdentity,
   TokenIntrospectionResponse,
-} from './oidc.types.js';
+} from '../types/oidc.types.js';
 
 export interface AuthorizeRequestContext {
   accepted: true;
