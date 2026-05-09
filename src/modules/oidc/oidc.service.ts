@@ -1,6 +1,6 @@
 import { config, type OidcClient } from '../../config/config.js';
 import { hashValue } from '../../infrastructure/crypto/index.js';
-import { verifyJwtRs256 } from '../../infrastructure/crypto/index.js';
+import type { JsonWebKeySet } from '../../infrastructure/crypto/index.js';
 import { BaseError } from '../../shared/errors/index.js';
 import { authService, type AuthenticatedIdentity } from '../auth/auth.service.js';
 import { userService, type UserService } from '../users/user.service.js';
@@ -8,6 +8,7 @@ import { randomBytes, createHash } from 'node:crypto';
 
 import { toOidcUserIdentity } from './claims.mapper.js';
 import { oidcClientService } from './client.service.js';
+import { oidcKeyService } from './key.service.js';
 import { JwtAccessTokenProvider } from './access-token.provider.js';
 import { AuthorizationCodeRepository } from './authorization-code.repository.js';
 import { JwtIdTokenProvider } from './id-token.provider.js';
@@ -535,6 +536,10 @@ export class OidcService {
     });
   }
 
+  async getJwks(): Promise<JsonWebKeySet> {
+    return oidcKeyService.getJwks();
+  }
+
   async logout(input: LogoutRequestInput): Promise<LogoutResult> {
     const inputRecord = toQueryRecord(input.body);
     const postLogoutRedirectUri = readOptionalString(inputRecord, 'post_logout_redirect_uri');
@@ -641,12 +646,12 @@ export class OidcService {
     }
 
     const userIdentity = await resolveOidcUserIdentity(this.users, authorizationCode.subject);
-    const issuedAccessToken = this.accessTokenProvider.issueAccessToken({
+    const issuedAccessToken = await this.accessTokenProvider.issueAccessToken({
       subject: userIdentity.sub,
       audience: clientId,
       scope: authorizationCode.scope,
     });
-    const issuedIdToken = this.idTokenProvider.issueIdToken({
+    const issuedIdToken = await this.idTokenProvider.issueIdToken({
       audience: clientId,
       scope: authorizationCode.scope,
       user: userIdentity,
@@ -679,7 +684,7 @@ export class OidcService {
       clientId,
     });
     const userIdentity = await resolveOidcUserIdentity(this.users, rotatedRefreshToken.subject);
-    const issuedAccessToken = this.accessTokenProvider.issueAccessToken({
+    const issuedAccessToken = await this.accessTokenProvider.issueAccessToken({
       subject: userIdentity.sub,
       audience: rotatedRefreshToken.clientId,
       scope: rotatedRefreshToken.scope,
@@ -693,9 +698,11 @@ export class OidcService {
     };
   }
 
-  private introspectAccessToken(input: IntrospectTokenInput): TokenIntrospectionResponse {
+  private async introspectAccessToken(
+    input: IntrospectTokenInput,
+  ): Promise<TokenIntrospectionResponse> {
     try {
-      const { payload } = verifyJwtRs256(input.token);
+      const { payload } = await oidcKeyService.verifyJwt(input.token);
       const issuer = asStringClaim(payload, 'iss');
       const subject = asStringClaim(payload, 'sub');
       const scope = asStringClaim(payload, 'scope');

@@ -1,9 +1,9 @@
 import { config, type OidcClient } from '../../config/config.js';
-import { verifyJwtRs256 } from '../../infrastructure/crypto/index.js';
 import { BaseError } from '../../shared/errors/index.js';
 import { userService, type UserService } from '../users/user.service.js';
 
 import { mapOidcClaimsByScope, toOidcUserIdentity } from './claims.mapper.js';
+import { oidcKeyService } from './key.service.js';
 import type { OidcClaims, OidcUserIdentity } from './oidc.types.js';
 
 type UserIdentityReader = Pick<UserService, 'getUserBySub'>;
@@ -83,7 +83,8 @@ const ensureKnownAudience = (
 };
 
 const isInvalidJwtError = (error: unknown): boolean =>
-  error instanceof Error && error.message.startsWith('Invalid JWT:');
+  (error instanceof Error && error.message.startsWith('Invalid JWT:')) ||
+  (BaseError.isBaseError(error) && error.code === 'INVALID_JWT');
 
 const resolveOidcUserIdentity = async (
   users: UserIdentityReader,
@@ -114,7 +115,7 @@ export class UserInfoService {
 
     let payload: Record<string, unknown>;
     try {
-      payload = verifyJwtRs256(token).payload;
+      payload = (await oidcKeyService.verifyJwt(token)).payload;
     } catch (error: unknown) {
       if (isInvalidJwtError(error)) {
         throw unauthorized('access_token is invalid.');

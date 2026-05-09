@@ -1,7 +1,7 @@
 import { config } from '../../config/config.js';
-import { signJwtRs256 } from '../../infrastructure/crypto/index.js';
 
 import { mapOidcClaimsByScope } from './claims.mapper.js';
+import { oidcKeyService } from './key.service.js';
 import type { IdTokenIssueInput, IdTokenIssueResult, IdTokenProvider } from './oidc.types.js';
 
 const DEFAULT_ID_TOKEN_TTL_SECONDS = 900;
@@ -15,11 +15,11 @@ export class JwtIdTokenProvider implements IdTokenProvider {
     private readonly getNow: () => Date = () => new Date(),
   ) {}
 
-  issueIdToken(input: IdTokenIssueInput): IdTokenIssueResult {
+  async issueIdToken(input: IdTokenIssueInput): Promise<IdTokenIssueResult> {
     const issuedAt = toEpochSeconds(this.getNow());
     const expiresAt = issuedAt + this.expiresInSeconds;
     const scopedClaims = mapOidcClaimsByScope(input.user, input.scope);
-    const idToken = signJwtRs256({
+    const idToken = await oidcKeyService.signJwt({
       iss: this.issuer,
       sub: input.user.sub,
       aud: input.audience,

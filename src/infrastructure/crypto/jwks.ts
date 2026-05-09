@@ -1,4 +1,4 @@
-import type { JsonWebKey, KeyObject } from 'node:crypto';
+import { createPublicKey, type JsonWebKey, type KeyObject } from 'node:crypto';
 
 import { loadRsaKeyPair, type KeyLoadOptions } from './keys.js';
 
@@ -30,6 +30,25 @@ const toJwksRsaKey = (publicKey: KeyObject, kid: string): JwksRsaKey => {
     n: jwk.n,
     e: jwk.e,
   };
+};
+
+export const derivePublicJwk = (publicKey: KeyObject, kid: string): JwksRsaKey =>
+  toJwksRsaKey(publicKey, kid);
+
+export const createPublicKeyFromJwk = (jwk: JwksRsaKey): KeyObject => {
+  try {
+    return createPublicKey({
+      key: {
+        kty: jwk.kty,
+        n: jwk.n,
+        e: jwk.e,
+      },
+      format: 'jwk',
+    });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown JWK parse error.';
+    throw new Error(`Failed to parse public JWK: ${message}`);
+  }
 };
 
 export const createJwks = (options: KeyLoadOptions = {}): JsonWebKeySet => {

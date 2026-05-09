@@ -11,7 +11,7 @@ export interface AccessTokenIssueInput {
 }
 
 export interface AccessTokenProvider {
-  issueAccessToken(input: AccessTokenIssueInput): AccessTokenIssueResult;
+  issueAccessToken(input: AccessTokenIssueInput): Promise<AccessTokenIssueResult>;
 }
 
 export interface IdTokenIssueInput {
@@ -25,7 +25,7 @@ export interface IdTokenIssueResult {
 }
 
 export interface IdTokenProvider {
-  issueIdToken(input: IdTokenIssueInput): IdTokenIssueResult;
+  issueIdToken(input: IdTokenIssueInput): Promise<IdTokenIssueResult>;
 }
 
 export interface OidcUserIdentity {
