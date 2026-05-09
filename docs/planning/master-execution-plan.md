@@ -381,9 +381,9 @@ It is the operational control layer that keeps implementation aligned with appro
 - Phase 03 - Account Lifecycle: CLOSED
 - Phase 04 - OIDC Core: CLOSED
 - Phase 05 - Token and Session Management: CLOSED
-- Current next phase: Phase 06 - Platform and Governance Hardening
-- Phase 06 status: APPROVED FOR CONTRACT-BACKED EXECUTION
-- Phase 06 runtime implementation: IN PROGRESS
+- Current next phase: Phase 07 - Production Stabilization / Follow-up
+- Phase 06 status: CLOSED WITH ACCEPTED CONDITIONS
+- Phase 06 runtime implementation: COMPLETE WITH ACCEPTED CONDITIONS
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 17 - Admin Module Controls: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 18 - OIDC Client Management: MERGED / CLOSED / PRESENT IN `main`
@@ -400,14 +400,14 @@ It is the operational control layer that keeps implementation aligned with appro
 - Sprint 20 corrective merge commit: `b7075dc`
 - Sprint 20 corrective commit: `11bc541`
 - Sprint 20 validation: lint/typecheck/build PASS; scoped Sprint 20 corrective files Prettier PASS; repository-wide `format:check` FAIL / ACCEPTED BASELINE EXCEPTION outside PR #60 scope
-- Next sprint: Sprint 21 - Security Governance Finalization
-- Sprint 21 status: REVIEW COMPLETED / RELEASE READY WITH ACCEPTED CONDITIONS
+- Next phase: Phase 07 - Production Stabilization / Follow-up
+- Sprint 21 status: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 21 runtime gate: PASS (contract and assignment approved; branch and evidence gate satisfied)
 - Sprint 21 blocker remediation: active repository `keys/private.pem` removed; ignore guard added for PEM private key artifacts
 - Sprint 21 report: `docs/planning/reports/phase-06-security-hardening-report.md`
 
 ---
 
-## Next Step
+## Project implementation baseline: COMPLETE WITH ACCEPTED CONDITIONS
 
-Maintain accepted-condition follow-up backlog (format baseline cleanup, automated test-hardening) while proceeding with Phase 06 closure review.
+Maintain accepted-condition follow-up backlog (format baseline cleanup, automated test-hardening, dependency readiness runbooks) in post-Phase 06 production stabilization phase.

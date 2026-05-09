@@ -12,8 +12,8 @@ Runtime implementation must not begin until the relevant Phase 06 contracts and 
 
 Current phase status:
 
-- Phase 06 status: APPROVED FOR CONTRACT-BACKED EXECUTION
-- Phase 06 runtime implementation: IN PROGRESS
+- Phase 06 status: CLOSED WITH ACCEPTED CONDITIONS
+- Phase 06 runtime implementation: COMPLETE WITH ACCEPTED CONDITIONS
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 17 - Admin Module Controls: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 18 - OIDC Client Management: MERGED / CLOSED / PRESENT IN `main`
@@ -22,7 +22,7 @@ Current phase status:
 - Sprint 20 - JWKS / Key Rotation Hardening: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 20 correction: PR #58 merged with post-merge blockers; corrective PR #60 merged and accepted.
 - Sprint 20 validation: lint/typecheck/build PASS; scoped Sprint 20 corrective files Prettier PASS; repository-wide `format:check` FAIL / ACCEPTED BASELINE EXCEPTION outside PR #60 scope
-- Sprint 21 - Security Governance Finalization: REVIEW COMPLETED / RELEASE READY WITH ACCEPTED CONDITIONS
+- Sprint 21 - Final Security Hardening and Release Readiness Review: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 21 runtime gate: PASS (contract/assignment approved, dedicated branch, evidence packet produced)
 - Sprint 21 blocker remediation: active repository `keys/private.pem` removed; PEM private-key ignore guard added
 
@@ -1100,13 +1100,10 @@ Control:
 
 ## XIV. Recommended Immediate Next Step
 
-Create the Phase 06 status-sync PR containing only documentation changes:
+Completed the Phase 06 final status-sync docs-only branch:
 
-- canonical Phase 06 phase plan path alignment
-- contract and assignment approval-state/gate alignment
-- source-of-truth index update
-- documentation guide update
-- master execution plan update
-- agent context update
-
-No runtime implementation should be included in this PR.
+- status-sync PR merged
+- source-of-truth index updated
+- documentation guide updated
+- master execution plan updated
+- Phase 06 closed with accepted conditions and recorded as baseline complete.

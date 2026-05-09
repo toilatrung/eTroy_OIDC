@@ -102,15 +102,15 @@ Current phase execution baseline:
 - Phase 03: CLOSED
 - Phase 04: CLOSED
 - Phase 05: CLOSED
-- Current next phase: Phase 06 - Platform and Governance Hardening
-- Phase 06 status: APPROVED FOR CONTRACT-BACKED EXECUTION
-- Phase 06 runtime implementation: IN PROGRESS
+- Current next phase: Phase 07 - Production Stabilization / Follow-up
+- Phase 06 status: CLOSED WITH ACCEPTED CONDITIONS
+- Phase 06 runtime implementation: COMPLETE WITH ACCEPTED CONDITIONS
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 17 - Admin Module Controls: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 18 - OIDC Client Management: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 19 - Observability Hardening: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 20 - JWKS / Key Rotation Hardening: MERGED / CLOSED / PRESENT IN `main` after corrective PR #60
-- Sprint 21 - Security Governance Finalization: REVIEW COMPLETED / RELEASE READY WITH ACCEPTED CONDITIONS
+- Sprint 21 - Final Security Hardening and Release Readiness Review: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 21 report: `docs/planning/reports/phase-06-security-hardening-report.md`
 - Phase 06 planning themes (high-level only): audit logging, admin controls, client management, observability, key rotation, security hardening
 
