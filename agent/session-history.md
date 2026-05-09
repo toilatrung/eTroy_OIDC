@@ -961,3 +961,43 @@ It records meaningful state transitions and approved outcomes only.
   - `agent/session-history.md`
 - Open items:
   - Begin Sprint 21 intake only after Sprint 21 contract and assignment are approved.
+
+### 2026-05-09 / PHASE06-SPRINT20-POST-MERGE-CORRECTION-REQUIRED
+
+- Completed:
+  - Leader merge-readiness review for Sprint 20 identified post-merge blockers after PR #58 was already merged.
+  - Sprint 20 status corrected from clean closure to `MERGED WITH POST-MERGE CORRECTION REQUIRED`.
+  - Corrective branch created from latest `main`: `fix/oidc-sprint20-key-rotation-corrections`.
+  - Corrected signing behavior so token signing no longer bootstraps a key when zero active keys exist.
+  - Isolated bootstrap/setup behavior to explicit `OidcKeyService.initializeActiveSigningKey()`; token signing path does not call it.
+  - Applied Prettier only to Sprint 20 touched/corrected files and updated Sprint 20 report/context files.
+  - Updated Sprint 20 report with post-merge correction reason, corrected file list, validation rerun, and remaining known conditions.
+- Corrective validation evidence:
+  - `npm.cmd run lint`: PASS
+  - `npm.cmd run typecheck`: PASS
+  - `npm.cmd run build`: PASS
+  - `npm.cmd run format:check`: FAIL / ACCEPTED BASELINE EXCEPTION; remaining files are unrelated pre-existing formatting drift outside Sprint 20 touched/corrected files
+  - scoped Sprint 20/correction Prettier: PASS
+  - `rg -n "process.env" src --glob "!src/config/**"`: PASS
+  - `rg -n "console.log" src`: PASS
+  - secret/private-material scan: PASS WITH REVIEW
+  - required user-model regex command failed due unescaped grouping; corrected equivalent passed with no matches
+  - hard-delete scan: PASS
+  - scheduling/KMS/HSM/SIEM/tracing scan: PASS WITH REVIEW, matches only excluded-scope report text
+  - key lifecycle scan: PASS WITH REVIEW
+- Corrective manual/probe validation:
+  - zero active key signing probe: PASS (`NO_ACTIVE_SIGNING_KEY`)
+  - multiple active keys probe: PASS (`MULTIPLE_ACTIVE_SIGNING_KEYS`)
+  - token signed before rotation remains verifiable during overlap: PASS
+  - retired key inside overlap appears in JWKS: PASS
+  - retired key outside overlap excluded from JWKS: PASS
+  - compromised key does not sign and is excluded from JWKS: PASS
+  - JWKS/captured audit/metrics/report private-material safety probe: PASS
+- Guardrails:
+  - no Sprint 21 implementation started
+  - no broad formatting cleanup performed
+  - no refresh-token/session/client/user/auth credential lifecycle changes made
+  - no KMS/HSM/SIEM/tracing/scheduled rotation/admin dashboard/RBAC scope introduced
+- Open items:
+  - push corrective branch and open corrective PR
+  - do not treat Sprint 20 as cleanly closed until corrective PR is merged and accepted by Leader review

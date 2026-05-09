@@ -78,6 +78,11 @@ interface RotationResult {
   overlapExpiresAt: Date;
 }
 
+interface InitializationResult {
+  kid: string;
+  created: boolean;
+}
+
 export class OidcKeyService {
   constructor(
     private readonly repository: OidcKeyRepository = new OidcKeyRepository(),
@@ -151,6 +156,62 @@ export class OidcKeyService {
     return {
       keys: publicKeys,
     };
+  }
+
+  async initializeActiveSigningKey(): Promise<InitializationResult> {
+    const activeKeys = await this.repository.findActiveKeys();
+    if (activeKeys.length === 1) {
+      const [activeKey] = activeKeys;
+      if (activeKey === undefined) {
+        throw invalidKeyState('No active signing key is available.', 'NO_ACTIVE_SIGNING_KEY');
+      }
+
+      return {
+        kid: activeKey.kid,
+        created: false,
+      };
+    }
+
+    if (activeKeys.length > 1) {
+      throw invalidKeyState(
+        'Multiple active signing keys detected. Initialization is blocked.',
+        'MULTIPLE_ACTIVE_SIGNING_KEYS',
+      );
+    }
+
+    const now = this.getNow();
+
+    try {
+      const loaded = loadRsaKeyPair();
+      const created = await this.createActiveKeyWithRetry({
+        privateKeyMaterial: loaded.privateKeyPem,
+        publicJwkSource: loaded.publicKey,
+        createdAt: now,
+        activatedAt: now,
+        createdBy: DEFAULT_CREATED_BY,
+        rotationReason: 'BOOTSTRAP_FROM_LOCAL_KEYS',
+      });
+
+      return {
+        kid: created.kid,
+        created: true,
+      };
+    } catch {
+      const generated = generateRsaKeyPair();
+      const created = await this.createActiveKeyWithRetry({
+        privateKeyMaterial: generated.privateKeyPem,
+        publicJwkSource: generated.publicKey,
+        createdAt: now,
+        activatedAt: now,
+        createdBy: DEFAULT_CREATED_BY,
+        rotationReason: 'BOOTSTRAP_GENERATED_KEY',
+      });
+
+      return {
+        kid: created.kid,
+        created: true,
+      };
+    }
   }
 
   async rotateSigningKey(reasonCode = 'MANUAL_ROTATION'): Promise<RotationResult> {
@@ -344,7 +405,6 @@ export class OidcKeyService {
   }
 
   private async getSingleActiveSigningKey(): Promise<OidcKeyEntity> {
-    await this.ensureBootstrapActiveKey();
     const activeKeys = await this.repository.findActiveKeys();
     if (activeKeys.length === 0) {
       setGauge('oidc_active_signing_key_available', 0, {
@@ -375,38 +435,6 @@ export class OidcKeyService {
     }
 
     return activeKey;
-  }
-
-  private async ensureBootstrapActiveKey(): Promise<void> {
-    const activeKeys = await this.repository.findActiveKeys();
-    if (activeKeys.length > 0) {
-      return;
-    }
-
-    const now = this.getNow();
-
-    try {
-      const loaded = loadRsaKeyPair();
-      await this.createActiveKeyWithRetry({
-        privateKeyMaterial: loaded.privateKeyPem,
-        publicJwkSource: loaded.publicKey,
-        createdAt: now,
-        activatedAt: now,
-        createdBy: DEFAULT_CREATED_BY,
-        rotationReason: 'BOOTSTRAP_FROM_LOCAL_KEYS',
-      });
-      return;
-    } catch {
-      const generated = generateRsaKeyPair();
-      await this.createActiveKeyWithRetry({
-        privateKeyMaterial: generated.privateKeyPem,
-        publicJwkSource: generated.publicKey,
-        createdAt: now,
-        activatedAt: now,
-        createdBy: DEFAULT_CREATED_BY,
-        rotationReason: 'BOOTSTRAP_GENERATED_KEY',
-      });
-    }
   }
 
   private async createActiveKeyWithRetry(input: {
