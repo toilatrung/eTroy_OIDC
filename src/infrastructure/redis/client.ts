@@ -9,6 +9,11 @@ const REDIS_OPTIONS: Readonly<RedisOptions> = Object.freeze({
   connectTimeout: 5000,
 });
 
+export interface RedisReadiness {
+  dependency: 'redis';
+  status: 'up' | 'down';
+}
+
 let redisClient: Redis | null = null;
 let initializationPromise: Promise<Redis> | null = null;
 let isInitialized = false;
@@ -19,6 +24,23 @@ const formatRedisError = (error: unknown): Error => {
 };
 
 const createClient = (): Redis => new Redis(config.infrastructure.redis.url, REDIS_OPTIONS);
+
+const withTimeout = async <T>(operation: Promise<T>, timeoutMs: number): Promise<T> => {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error('Readiness check timed out.'));
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([operation, timeout]);
+  } finally {
+    if (timer !== undefined) {
+      clearTimeout(timer);
+    }
+  }
+};
 
 export const getRedisClient = async (): Promise<Redis> => {
   if (redisClient !== null && isInitialized) {
@@ -82,4 +104,26 @@ export const resetRedisClientForTest = (): void => {
   redisClient = null;
   initializationPromise = null;
   isInitialized = false;
+};
+
+export const checkRedisReadiness = async (timeoutMs = 1000): Promise<RedisReadiness> => {
+  if (redisClient === null || !isInitialized || redisClient.status !== 'ready') {
+    return {
+      dependency: 'redis',
+      status: 'down',
+    };
+  }
+
+  try {
+    await withTimeout(redisClient.ping(), timeoutMs);
+    return {
+      dependency: 'redis',
+      status: 'up',
+    };
+  } catch {
+    return {
+      dependency: 'redis',
+      status: 'down',
+    };
+  }
 };
