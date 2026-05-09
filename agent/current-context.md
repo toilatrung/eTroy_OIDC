@@ -74,9 +74,29 @@ It summarizes approved state and next actions without redefining architecture.
   - known condition:
     - repository-wide formatting baseline drift remains deferred to a separate PR/task.
     - no broad formatting cleanup was included in Sprint 19.
-- Next sprint: Sprint 20 - JWKS / Key Rotation Hardening.
-- Sprint 20 status: READY FOR INTAKE / NOT STARTED.
-- Sprint 20 gate: runtime remains blocked until `docs/contracts/oidc/key-rotation-contract.md` and `docs/planning/assignments/phase-06-sprint-20.md` are approved.
+- Sprint 20 - JWKS / Key Rotation Hardening: MERGED / CLOSED / PRESENT IN main.
+- Sprint 20 merge evidence:
+  - PR: `#58` (https://github.com/toilatrung/etroy-oidc/pull/58)
+  - merge commit on `main`: `b980ba4`
+  - runtime commit: `45441d7`
+  - gate-doc correction commit: `875adb0`
+  - report correction commit: `1cae1c1`
+  - validation:
+    - `npm.cmd run lint`: PASS
+    - `npm.cmd run typecheck`: PASS
+    - `npm.cmd run build`: PASS
+    - scoped Sprint 20 Prettier: PASS
+    - repository-wide `npm.cmd run format:check`: FAIL / ACCEPTED BASELINE EXCEPTION
+    - Sprint 20 rg scans: PASS / PASS WITH REVIEW
+    - manual harness: PASS
+  - known limitations:
+    - repository-wide formatting drift remains deferred
+    - full DB-backed overlap-expiry runtime scenario was not executed
+    - pre-rotation token verification during overlap was not fully DB-backed e2e validated
+    - final security governance/release-readiness remains Sprint 21 scope
+- Next sprint: Sprint 21 - Security Governance Finalization.
+- Sprint 21 status: READY FOR INTAKE / NOT STARTED.
+- Sprint 21 gate: runtime remains blocked until Sprint 21 contract and assignment are approved.
 
 ## III. Phase Boundary Notes
 
@@ -96,16 +116,17 @@ It summarizes approved state and next actions without redefining architecture.
   - admin-to-oidc orchestration boundaries
   - observability hardening
 - Sprint 20 must not introduce JWKS/key rotation runtime from Sprint 19 context alone.
+- Sprint 21 must not introduce final security governance from Sprint 20 context alone.
 - Do not move refresh token lifecycle, rotation, revoke, introspection, session, SSO, or logout hardening into Phase 04.
 
 ## IV. Phase 05/06 Validation Summary
 
-- Sprint 11-19 validation posture:
+- Sprint 11-20 validation posture:
   - `npm.cmd run lint`: PASS
   - `npm.cmd run typecheck`: PASS
   - `npm.cmd run build`: PASS
-  - Sprint 19 scoped Prettier: PASS
-  - Sprint 19 repository-wide `npm.cmd run format:check`: FAIL / ACCEPTED BASELINE EXCEPTION
+  - Sprint 20 scoped Prettier: PASS
+  - Sprint 20 repository-wide `npm.cmd run format:check`: FAIL / ACCEPTED BASELINE EXCEPTION
   - boundary scans: PASS / PASS WITH REVIEW
   - runtime/manual harnesses: PASS
 
@@ -116,6 +137,6 @@ It summarizes approved state and next actions without redefining architecture.
 
 ## VI. Next Recommended Step
 
-- Keep Sprint 19 marked MERGED / CLOSED / PRESENT IN `main`.
-- Begin Sprint 20 intake only after key-rotation contract and Sprint 20 assignment are approved.
-- Do not start Sprint 20 runtime implementation without approved `docs/contracts/oidc/key-rotation-contract.md` and `docs/planning/assignments/phase-06-sprint-20.md`.
+- Keep Sprint 20 marked MERGED / CLOSED / PRESENT IN `main`.
+- Begin Sprint 21 intake only after security-governance contract and Sprint 21 assignment are approved.
+- Do not start Sprint 21 runtime implementation without approved Sprint 21 contract and assignment.

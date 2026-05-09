@@ -19,8 +19,10 @@ Current phase status:
 - Sprint 18 - OIDC Client Management: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 19 - Observability Hardening: MERGED / CLOSED / PRESENT IN `main`
 - Sprint 19 validation: lint/typecheck/build PASS; scoped Sprint 19 Prettier PASS; repository-wide `format:check` FAIL / ACCEPTED BASELINE EXCEPTION outside Sprint 19 scope
-- Sprint 20 - JWKS / Key Rotation Hardening: READY FOR INTAKE / NOT STARTED
-- Sprint 20 runtime gate: blocked until `docs/contracts/oidc/key-rotation-contract.md` and `docs/planning/assignments/phase-06-sprint-20.md` are approved.
+- Sprint 20 - JWKS / Key Rotation Hardening: MERGED / CLOSED / PRESENT IN `main`
+- Sprint 20 validation: lint/typecheck/build PASS; scoped Sprint 20 Prettier PASS; repository-wide `format:check` FAIL / ACCEPTED BASELINE EXCEPTION outside Sprint 20 scope
+- Sprint 21 - Security Governance Finalization: READY FOR INTAKE / NOT STARTED
+- Sprint 21 runtime gate: blocked until Sprint 21 contract and assignment are approved.
 
 ## II. Phase Objective
 

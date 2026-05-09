@@ -11,7 +11,14 @@ Sprint 20 implemented OIDC-owned signing-key lifecycle hardening with:
 - rotation, retirement, rollback, and compromised-state handling in key service
 - key lifecycle audit and observability hooks
 
-Status: implementation complete with validation evidence recorded below.
+Status: MERGED / CLOSED / PRESENT IN `main`.
+
+Merge evidence:
+- PR: `#58` (merged `2026-05-09`)
+- merge commit: `b980ba4`
+- runtime commit: `45441d7`
+- gate-doc correction commit: `875adb0`
+- report correction commit: `1cae1c1`
 
 ## 2. Source-of-Truth Basis
 
