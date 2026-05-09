@@ -937,3 +937,27 @@ It records meaningful state transitions and approved outcomes only.
 - Open items:
   - Begin Sprint 20 intake only after key-rotation contract and Sprint 20 assignment are approved.
   - Do not implement JWKS/key rotation runtime from Sprint 19 context alone.
+
+### 2026-05-09 / PHASE06-SPRINT20-MERGE-POSTSYNC
+
+- Completed:
+  - Sprint 20 - JWKS / Key Rotation Hardening merged and confirmed present in `main`.
+  - Merge evidence:
+    - PR: `#58`
+    - merge commit: `b980ba4`
+    - runtime commit: `45441d7`
+    - gate-doc correction commit: `875adb0`
+    - report correction commit: `1cae1c1`
+  - Validation evidence accepted and recorded in context/reports.
+  - Known limitations accepted (global formatting drift, full DB-backed overlap scenario, etc.).
+- Approved:
+  - Sprint 20 status: MERGED / CLOSED / PRESENT IN `main`.
+  - Sprint 21 status: READY FOR INTAKE / NOT STARTED.
+- Source-of-truth documents changed:
+  - `docs/planning/phases/phase-06-platform-governance-hardening.md`
+  - `docs/planning/master-execution-plan.md`
+- Agent files changed:
+  - `agent/current-context.md`
+  - `agent/session-history.md`
+- Open items:
+  - Begin Sprint 21 intake only after Sprint 21 contract and assignment are approved.
