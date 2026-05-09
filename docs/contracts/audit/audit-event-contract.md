@@ -867,6 +867,8 @@ Allowed event types:
 - `oidc.key.rotated`
 - `oidc.key.retired`
 - `oidc.key.rotation_failed`
+- `oidc.key.rollback_performed`
+- `oidc.key.compromised`
 
 Owner of business decision:
 
