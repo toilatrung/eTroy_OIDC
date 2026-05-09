@@ -1084,3 +1084,27 @@ It records meaningful state transitions and approved outcomes only.
   - `agent/session-history.md`
 - Open items:
   - track accepted-condition follow-ups in post-Phase 06 backlog and governance planning
+
+### 2026-05-10 / PHASE06-FINAL-CLOSURE-SYNC
+
+- Completed:
+  - synchronized repository documentation and operational context after Phase 06 / Sprint 21 closure
+  - updated status to `CLOSED WITH ACCEPTED CONDITIONS` for Phase 06 and `MERGED / CLOSED / PRESENT IN main` for Sprint 21
+  - recorded project implementation baseline as `COMPLETE WITH ACCEPTED CONDITIONS`
+  - preserved accepted-condition follow-ups for repository-wide format drift, test-runner hardening, and dependency readiness
+  - verified Sprint 21 merge presence in `main` (merge commit `3d260de`)
+- Approved:
+  - Phase 06 status: CLOSED WITH ACCEPTED CONDITIONS
+  - Sprint 21 status: MERGED / CLOSED / PRESENT IN `main`
+  - Project baseline: COMPLETE WITH ACCEPTED CONDITIONS
+- Source-of-truth documents changed:
+  - `docs/source-of-truth-index.md`
+  - `docs/README.md`
+  - `docs/planning/master-execution-plan.md`
+  - `docs/planning/phases/phase-06-platform-governance-hardening.md`
+  - `docs/planning/reports/phase-06-report.md`
+- Agent files changed:
+  - `agent/current-context.md`
+  - `agent/session-history.md`
+- Open items:
+  - transition to Phase 07 for production stabilization and follow-up remediation

@@ -22,8 +22,9 @@ It summarizes approved state and next actions without redefining architecture.
 - Sprint 14 - Session + SSO: MERGED / CLOSED / PRESENT IN `main`.
 - Sprint 15 - Logout Hardening: MERGED / CLOSED / PRESENT IN `main`.
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`.
-- Phase 06 - Platform and Governance Hardening: APPROVED FOR CONTRACT-BACKED EXECUTION.
-- Phase 06 runtime implementation: IN PROGRESS (Sprint 16 through Sprint 20 complete in `main`; Sprint 21 review and follow-up remediation completed on feature branch).
+- Phase 06 - Platform and Governance Hardening: CLOSED WITH ACCEPTED CONDITIONS.
+- Project implementation baseline: COMPLETE WITH ACCEPTED CONDITIONS.
+- Phase 06 runtime implementation: COMPLETE WITH ACCEPTED CONDITIONS (Sprint 16 through Sprint 21 merged into `main`).
 - Sprint 17 merge evidence:
   - PR: `#53`
   - PR merged: `2026-05-08`
@@ -110,8 +111,8 @@ It summarizes approved state and next actions without redefining architecture.
     - repository-wide formatting drift remains deferred
     - corrective validation used a temporary in-memory harness, removed after execution
     - final security governance/release-readiness remains Sprint 21 scope
-- Next sprint: Phase 06 closure review / release-governance handoff.
-- Sprint 21 status: REVIEW COMPLETED / RELEASE READY WITH ACCEPTED CONDITIONS.
+- Current next phase: Phase 07 - Production Stabilization / Follow-up.
+- Sprint 21 status: MERGED / CLOSED / PRESENT IN `main`.
 - Sprint 21 gate: PASS (contract/assignment approved, latest `main`, dedicated branch, review packet produced).
 - Sprint 21 blocker follow-up:
   - active repository `keys/private.pem` removed and PEM ignore guard added
@@ -156,8 +157,8 @@ It summarizes approved state and next actions without redefining architecture.
 - Unit and E2E test runners are currently missing from `package.json`; validation relies on build/static checks and manual DB-backed harnesses.
 - Repository-wide formatting baseline drift remains deferred to a separate PR/task after Sprint 19. Sprint 19 did not include broad formatting cleanup.
 
-## VI. Next Recommended Step
+## VI. Project implementation baseline: COMPLETE WITH ACCEPTED CONDITIONS
 
-- Sprint 20 is corrected and cleanly closed after PR #60 merge and Leader acceptance.
-- Sprint 21 review follow-up is complete and classified as `RELEASE READY WITH ACCEPTED CONDITIONS`.
-- Proceed with Phase 06 closure decision using documented accepted conditions and follow-up backlog tracking.
+- Phase 06 is closed with accepted conditions.
+- Project implementation baseline is complete with accepted conditions.
+- Transition to Phase 07 (Post-release Stabilization / Follow-up) for repository-wide format cleanup and regression hardening.
