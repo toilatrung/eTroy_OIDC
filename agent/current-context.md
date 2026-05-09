@@ -23,7 +23,7 @@ It summarizes approved state and next actions without redefining architecture.
 - Sprint 15 - Logout Hardening: MERGED / CLOSED / PRESENT IN `main`.
 - Sprint 16 - Audit Logging Foundation: MERGED / CLOSED / PRESENT IN `main`.
 - Phase 06 - Platform and Governance Hardening: APPROVED FOR CONTRACT-BACKED EXECUTION.
-- Phase 06 runtime implementation: IN PROGRESS (Sprint 16 through Sprint 19 complete in `main`; Sprint 20 merged with post-merge correction required).
+- Phase 06 runtime implementation: IN PROGRESS (Sprint 16 through Sprint 20 complete in `main`; Sprint 21 not started).
 - Sprint 17 merge evidence:
   - PR: `#53`
   - PR merged: `2026-05-08`
@@ -74,17 +74,21 @@ It summarizes approved state and next actions without redefining architecture.
   - known condition:
     - repository-wide formatting baseline drift remains deferred to a separate PR/task.
     - no broad formatting cleanup was included in Sprint 19.
-- Sprint 20 - JWKS / Key Rotation Hardening: MERGED WITH POST-MERGE CORRECTION REQUIRED / PRESENT IN `main`.
+- Sprint 20 - JWKS / Key Rotation Hardening: MERGED / CLOSED / PRESENT IN `main` after corrective PR #60.
 - Sprint 20 merge evidence:
   - PR: `#58` (https://github.com/toilatrung/etroy-oidc/pull/58)
   - merge commit on `main`: `b980ba4`
   - runtime commit: `45441d7`
   - gate-doc correction commit: `875adb0`
   - report correction commit: `1cae1c1`
-  - Leader post-merge readiness review result:
-    - Sprint 20 is not accepted as clean closure.
-    - status must be treated as `MERGED WITH POST-MERGE CORRECTION REQUIRED`.
-    - blockers: signing-time zero-active bootstrap, inaccurate scoped Prettier/report claims, incomplete manual overlap/compromised validation evidence, and governance/context correction.
+  - PR #58 post-merge readiness result:
+    - PR #58 merged but required post-merge correction.
+    - blockers were signing-time zero-active bootstrap, inaccurate scoped Prettier/report claims, incomplete manual overlap/compromised validation evidence, and governance/context correction.
+  - corrective PR:
+    - PR: `#60` (https://github.com/toilatrung/etroy-oidc/pull/60)
+    - merge commit on `main`: `b7075dc`
+    - corrective commit: `11bc541`
+    - status: merged and accepted; Sprint 20 corrected closure may be recorded.
   - corrective branch:
     - `fix/oidc-sprint20-key-rotation-corrections`
     - starts from latest `main` after Sprint 20 merge sync
@@ -94,7 +98,7 @@ It summarizes approved state and next actions without redefining architecture.
     - `npm.cmd run typecheck`: PASS
     - `npm.cmd run build`: PASS
     - scoped Sprint 20 Prettier: PASS
-    - repository-wide `npm.cmd run format:check`: FAIL / ACCEPTED BASELINE EXCEPTION
+    - repository-wide `npm.cmd run format:check`: FAIL / ACCEPTED BASELINE EXCEPTION outside PR #60 scope
     - Sprint 20 rg scans: PASS / PASS WITH REVIEW
     - zero-active signing probe: PASS (`NO_ACTIVE_SIGNING_KEY`)
     - multiple-active signing probe: PASS (`MULTIPLE_ACTIVE_SIGNING_KEYS`)
@@ -107,7 +111,7 @@ It summarizes approved state and next actions without redefining architecture.
     - corrective validation used a temporary in-memory harness, removed after execution
     - final security governance/release-readiness remains Sprint 21 scope
 - Next sprint: Sprint 21 - Security Governance Finalization.
-- Sprint 21 status: BLOCKED / NOT STARTED until Sprint 20 corrective PR is reviewed and merged, then Sprint 21 contract and assignment are approved.
+- Sprint 21 status: NOT STARTED.
 - Sprint 21 gate: runtime remains blocked until Sprint 21 contract and assignment are approved.
 
 ## III. Phase Boundary Notes
@@ -149,6 +153,6 @@ It summarizes approved state and next actions without redefining architecture.
 
 ## VI. Next Recommended Step
 
-- Merge and accept Sprint 20 corrective PR from `fix/oidc-sprint20-key-rotation-corrections` before treating Sprint 20 as cleanly closed.
-- Begin Sprint 21 intake only after Sprint 20 correction is accepted and security-governance contract plus Sprint 21 assignment are approved.
+- Sprint 20 is corrected and cleanly closed after PR #60 merge and Leader acceptance.
+- Begin Sprint 21 intake only after security-governance contract plus Sprint 21 assignment are approved.
 - Do not start Sprint 21 runtime implementation without approved Sprint 21 contract and assignment.
