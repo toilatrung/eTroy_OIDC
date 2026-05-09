@@ -26,6 +26,7 @@ import {
   authorizeContinueHandler,
   authorizeHandler,
   introspectHandler,
+  jwksHandler,
   logoutHandler,
   revokeHandler,
   tokenHandler,
@@ -54,6 +55,7 @@ export const createServer = (): Express => {
     response.type('text/plain; version=0.0.4; charset=utf-8').status(200).send(renderMetrics());
   });
   app.get('/authorize', authorizeHandler);
+  app.get('/jwks', jwksHandler);
   app.post('/authorize/continue', authorizeContinueHandler);
   app.post('/token', tokenHandler);
   app.post('/revoke', revokeHandler);

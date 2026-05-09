@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import type { JsonWebKeySet } from '../../infrastructure/crypto/index.js';
 
 import {
   oidcService,
@@ -144,6 +145,19 @@ export const introspectHandler = async (
   try {
     const result = await oidcService.introspectToken(request.body);
     response.status(200).json(result);
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+export const jwksHandler = async (
+  _request: Request,
+  response: Response<JsonWebKeySet>,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const jwks = await oidcService.getJwks();
+    response.status(200).json(jwks);
   } catch (error: unknown) {
     next(error);
   }

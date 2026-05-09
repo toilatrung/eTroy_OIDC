@@ -1,11 +1,11 @@
 import { config } from '../../config/config.js';
-import { signJwtRs256 } from '../../infrastructure/crypto/index.js';
 
 import type {
   AccessTokenIssueInput,
   AccessTokenIssueResult,
   AccessTokenProvider,
 } from './oidc.types.js';
+import { oidcKeyService } from './key.service.js';
 
 const DEFAULT_ACCESS_TOKEN_TTL_SECONDS = 900;
 
@@ -18,10 +18,10 @@ export class JwtAccessTokenProvider implements AccessTokenProvider {
     private readonly getNow: () => Date = () => new Date(),
   ) {}
 
-  issueAccessToken(input: AccessTokenIssueInput): AccessTokenIssueResult {
+  async issueAccessToken(input: AccessTokenIssueInput): Promise<AccessTokenIssueResult> {
     const issuedAt = toEpochSeconds(this.getNow());
     const expiresAt = issuedAt + this.expiresInSeconds;
-    const accessToken = signJwtRs256({
+    const accessToken = await oidcKeyService.signJwt({
       iss: this.issuer,
       sub: input.subject,
       aud: input.audience,

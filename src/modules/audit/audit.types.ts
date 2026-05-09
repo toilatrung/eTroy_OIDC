@@ -69,6 +69,8 @@ export const AUDIT_EVENT_TYPES = [
   'oidc.key.rotated',
   'oidc.key.retired',
   'oidc.key.rotation_failed',
+  'oidc.key.rollback_performed',
+  'oidc.key.compromised',
 ] as const;
 
 export type AuditEventType = (typeof AUDIT_EVENT_TYPES)[number];
