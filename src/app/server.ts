@@ -175,7 +175,10 @@ export const startServer = async () => {
       process.stdout.write(`Server listening on port ${config.app.port}\n`);
     });
   } catch (error: unknown) {
-    logger.error({ error }, 'Failed to start server');
+    logger.error('Failed to start server', {
+      errorName: error instanceof Error ? error.name : 'UnknownError',
+      errorCode: 'SERVER_START_FAILURE',
+    });
     if (error instanceof Error) {
       process.stdout.write(`Error: ${error.message}\n${error.stack}\n`);
     }
