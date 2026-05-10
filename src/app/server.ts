@@ -1,4 +1,5 @@
 import express, { type Express, type NextFunction, type Request, type Response } from 'express';
+import cors from 'cors';
 
 import { config } from '../config/config.js';
 import { logger } from '../infrastructure/logger/index.js';
@@ -54,6 +55,12 @@ interface ErrorResponseBody {
 
 export const createServer = (): Express => {
   const app = express();
+  app.use(
+    cors({
+      origin: true,
+      credentials: true,
+    }),
+  );
   app.use(requestCorrelationMiddleware);
   app.use(requestLoggingMiddleware);
   app.use(express.json());
@@ -168,10 +175,10 @@ export const startServer = async () => {
       process.stdout.write(`Server listening on port ${config.app.port}\n`);
     });
   } catch (error: unknown) {
-    logger.error('Failed to start server', {
-      errorName: error instanceof Error ? error.name : 'UnknownError',
-      errorCode: 'SERVER_START_FAILURE',
-    });
+    logger.error({ error }, 'Failed to start server');
+    if (error instanceof Error) {
+      process.stdout.write(`Error: ${error.message}\n${error.stack}\n`);
+    }
     process.exit(1);
   }
 };
