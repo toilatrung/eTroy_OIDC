@@ -1,6 +1,3 @@
-Dưới đây là bản `README.md` đã viết lại toàn bộ, dùng license **Proprietary / All rights reserved** theo lựa chọn của bạn.
-
-````md
 # eTroy OIDC
 
 eTroy OIDC is the backend OpenID Connect Provider for the eTroy ecosystem.
@@ -717,12 +714,10 @@ Sensitive values must not appear in:
 * committed examples
 
 ## License
-
+```text
 Copyright (c) 2026 Trịnh Quang Trung.
 
 All rights reserved.
 
 This source code is proprietary and confidential. No part of this repository may be copied, modified, distributed, sublicensed, or used for commercial or non-commercial purposes without explicit written permission from the owner.
-
-```
 ```
