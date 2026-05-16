@@ -3,11 +3,14 @@ import { hashValue } from '../../../infrastructure/crypto/index.js';
 import type { JsonWebKeySet } from '../../../infrastructure/crypto/index.js';
 import { BaseError } from '../../../shared/errors/index.js';
 import { authService, type AuthenticatedIdentity } from '../../auth/auth.service.js';
+import { auditService } from '../../audit/audit.service.js';
 import { userService, type UserService } from '../../users/user.service.js';
 import { randomBytes, createHash } from 'node:crypto';
 
 import { toOidcUserIdentity } from '../mappers/claims.mapper.js';
 import { oidcClientService } from './client.service.js';
+import { OidcConsentService, type ConnectedApplicationView } from './consent.service.js';
+import { OidcInteractionService } from './interaction.service.js';
 import { oidcKeyService } from './key.service.js';
 import { JwtAccessTokenProvider } from '../providers/access-token.provider.js';
 import { AuthorizationCodeRepository } from '../repositories/authorization-code.repository.js';
@@ -27,18 +30,28 @@ import type {
   TokenIntrospectionResponse,
 } from '../types/oidc.types.js';
 
-export interface AuthorizeRequestContext {
-  accepted: true;
-  requiresAuthentication: true;
-  responseType: 'code';
-  client: {
-    clientId: string;
-  };
+type OidcProtocolErrorCode =
+  | 'invalid_client'
+  | 'invalid_redirect_uri'
+  | 'invalid_scope'
+  | 'invalid_request'
+  | 'access_denied'
+  | 'login_required'
+  | 'consent_required'
+  | 'session_expired'
+  | 'interaction_expired'
+  | 'server_error';
+
+interface AuthorizeRequestContext {
+  clientId: string;
+  clientName: string;
   redirectUri: string;
   scope: string;
+  scopeItems: string[];
   codeChallenge: string;
   codeChallengeMethod: 'S256';
   state?: string;
+  nonce?: string;
 }
 
 export type AuthResult = AuthenticatedIdentity;
@@ -55,14 +68,66 @@ const PKCE_S256 = 'S256';
 const INTERNAL_LOGIN_CLIENT_ID = 'etroy-oidc-internal';
 const AUTHORIZATION_CODE_BYTE_LENGTH = 32;
 const AUTHORIZATION_CODE_TTL_MS = 5 * 60 * 1000;
+const INTERACTION_TTL_MS = config.oidc.interaction.ttlSeconds * 1000;
 const CODE_CHALLENGE_PATTERN = /^[A-Za-z0-9_-]{43,128}$/u;
 const CODE_VERIFIER_PATTERN = /^[A-Za-z0-9\-._~]{43,128}$/u;
 const AUTHORIZATION_CODE_PATTERN = /^[A-Za-z0-9_-]{43,128}$/u;
+const STATE_PATTERN = /^[A-Za-z0-9\-._~]{1,1024}$/u;
+const NONCE_PATTERN = /^[A-Za-z0-9\-._~]{1,255}$/u;
+const ALLOWED_SCOPES = new Set(['openid', 'profile', 'email']);
 
-export interface AuthorizeContinueResult {
-  redirectTo: string;
-  sessionCookie: OidcSessionCookieDescriptor;
-  csrfCookie: OidcCsrfCookieDescriptor;
+interface OidcServiceErrorOptions {
+  code: OidcProtocolErrorCode;
+  message: string;
+  statusCode: number;
+  redirectUri?: string;
+  state?: string;
+  shouldRedirect: boolean;
+}
+
+export interface OidcAuthorizeDecisionResponse {
+  success: true;
+  data: {
+    redirectUrl: string;
+  };
+}
+
+export interface OidcAuthorizeInteractionResponse {
+  success: true;
+  data:
+    | {
+        status: 'completed';
+        redirectUrl: string;
+      }
+    | {
+        status: 'consent_required';
+        interactionId: string;
+        clientId: string;
+        clientName: string;
+        requestedScopes: string[];
+      };
+}
+
+export interface OidcConnectedApplicationsResponse {
+  success: true;
+  data: {
+    applications: ConnectedApplicationView[];
+  };
+}
+
+export interface OidcRevokeConsentResponse {
+  success: true;
+  data: {
+    clientId: string;
+    status: 'revoked';
+  };
+}
+
+interface ResolvedClientContext {
+  clientId: string;
+  clientName: string;
+  redirectUris: readonly string[];
+  allowedScopes: readonly string[];
 }
 
 export interface InternalLoginResult {
@@ -116,16 +181,11 @@ export type LogoutResult =
 
 type SupportedTokenTypeHint = 'refresh_token' | 'access_token';
 
-export type AuthorizeHandlerResult =
-  | {
-      kind: 'authentication_required';
-      context: AuthorizeRequestContext;
-      clearSessionCookie: boolean;
-    }
-  | {
-      kind: 'redirect';
-      redirectTo: string;
-    };
+export interface AuthorizeHandlerResult {
+  kind: 'redirect';
+  redirectTo: string;
+  clearSessionCookie: boolean;
+}
 
 const invalidInput = (message: string): BaseError =>
   new BaseError(message, {
@@ -137,6 +197,17 @@ const invalidGrant = (): BaseError =>
   new BaseError('Authorization code exchange is invalid.', {
     code: 'INVALID_GRANT',
     statusCode: 400,
+  });
+
+const oidcServiceError = (options: OidcServiceErrorOptions): BaseError =>
+  new BaseError(options.message, {
+    code: options.code,
+    statusCode: options.statusCode,
+    metadata: {
+      shouldRedirect: options.shouldRedirect,
+      ...(options.redirectUri === undefined ? {} : { redirectUri: options.redirectUri }),
+      ...(options.state === undefined ? {} : { state: options.state }),
+    },
   });
 
 const inactiveIntrospection = (): TokenIntrospectionResponse => ({ active: false });
@@ -194,16 +265,26 @@ const readTokenTypeHint = (
   return value;
 };
 
-const assertOpenIdScope = (scope: string): void => {
-  const scopes = scope.split(/\s+/u).filter((item) => item.length > 0);
-  if (!scopes.includes('openid')) {
-    throw invalidInput('scope must include openid.');
-  }
-};
+const normalizeScopeItems = (scope: string): string[] =>
+  [
+    ...new Set(
+      scope
+        .split(/\s+/u)
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0),
+    ),
+  ].sort((left, right) => left.localeCompare(right));
 
-const assertPkceChallenge = (challenge: string): void => {
+const assertPkceChallenge = (challenge: string, redirectUri: string, state?: string): void => {
   if (!CODE_CHALLENGE_PATTERN.test(challenge)) {
-    throw invalidInput('code_challenge must be URL-safe base64 and between 43 and 128 characters.');
+    throw oidcServiceError({
+      code: 'invalid_request',
+      message: 'code_challenge is invalid.',
+      statusCode: 400,
+      redirectUri,
+      ...(state === undefined ? {} : { state }),
+      shouldRedirect: true,
+    });
   }
 };
 
@@ -222,29 +303,51 @@ const assertAuthorizationCodeFormat = (code: string): void => {
 const findClient = async (
   clients: readonly OidcClient[],
   clientId: string,
-): Promise<OidcClient> => {
+): Promise<ResolvedClientContext> => {
   const managedClient = await oidcClientService.getClient(clientId);
   if (managedClient) {
     if (managedClient.status !== 'active') {
-      throw invalidInput('client_id is invalid.');
+      throw oidcServiceError({
+        code: 'invalid_client',
+        message: 'client_id is invalid.',
+        statusCode: 400,
+        shouldRedirect: false,
+      });
     }
     return {
       clientId: managedClient.clientId,
       redirectUris: managedClient.redirectUris,
+      clientName: managedClient.name,
+      allowedScopes: managedClient.allowedScopes,
     };
   }
 
   const client = clients.find((item) => item.clientId === clientId);
   if (client === undefined) {
-    throw invalidInput('client_id is invalid.');
+    throw oidcServiceError({
+      code: 'invalid_client',
+      message: 'client_id is invalid.',
+      statusCode: 400,
+      shouldRedirect: false,
+    });
   }
 
-  return client;
+  return {
+    clientId: client.clientId,
+    redirectUris: client.redirectUris,
+    clientName: client.clientId,
+    allowedScopes: [...ALLOWED_SCOPES],
+  };
 };
 
-const assertRedirectUri = (client: OidcClient, redirectUri: string): void => {
+const assertRedirectUri = (client: ResolvedClientContext, redirectUri: string): void => {
   if (!client.redirectUris.includes(redirectUri)) {
-    throw invalidInput('redirect_uri is invalid.');
+    throw oidcServiceError({
+      code: 'invalid_redirect_uri',
+      message: 'redirect_uri is invalid.',
+      statusCode: 400,
+      shouldRedirect: false,
+    });
   }
 };
 
@@ -264,6 +367,95 @@ const assertKnownFields = (
   if (invalidFields.length > 0) {
     throw invalidInput(`Unsupported field: ${invalidFields[0]}.`);
   }
+};
+
+const assertState = (state: string | undefined, redirectUri: string): void => {
+  if (state === undefined) {
+    return;
+  }
+
+  if (!STATE_PATTERN.test(state)) {
+    throw oidcServiceError({
+      code: 'invalid_request',
+      message: 'state is invalid.',
+      statusCode: 400,
+      redirectUri,
+      state,
+      shouldRedirect: true,
+    });
+  }
+};
+
+const assertNonce = (nonce: string | undefined, redirectUri: string, state?: string): void => {
+  if (nonce === undefined) {
+    return;
+  }
+
+  if (!NONCE_PATTERN.test(nonce)) {
+    throw oidcServiceError({
+      code: 'invalid_request',
+      message: 'nonce is invalid.',
+      statusCode: 400,
+      redirectUri,
+      ...(state === undefined ? {} : { state }),
+      shouldRedirect: true,
+    });
+  }
+};
+
+const assertScopeAllowed = (
+  requestedScopeItems: readonly string[],
+  allowedScopes: readonly string[],
+  redirectUri: string,
+  state?: string,
+): void => {
+  if (!requestedScopeItems.includes('openid')) {
+    throw oidcServiceError({
+      code: 'invalid_scope',
+      message: 'scope must include openid.',
+      statusCode: 400,
+      redirectUri,
+      ...(state === undefined ? {} : { state }),
+      shouldRedirect: true,
+    });
+  }
+
+  if (!requestedScopeItems.every((scope) => ALLOWED_SCOPES.has(scope))) {
+    throw oidcServiceError({
+      code: 'invalid_scope',
+      message: 'scope contains unsupported values.',
+      statusCode: 400,
+      redirectUri,
+      ...(state === undefined ? {} : { state }),
+      shouldRedirect: true,
+    });
+  }
+
+  const allowedScopeSet = new Set(allowedScopes);
+  if (!requestedScopeItems.every((scope) => allowedScopeSet.has(scope))) {
+    throw oidcServiceError({
+      code: 'invalid_scope',
+      message: 'scope is not allowed for this client.',
+      statusCode: 400,
+      redirectUri,
+      ...(state === undefined ? {} : { state }),
+      shouldRedirect: true,
+    });
+  }
+};
+
+const buildAuthorizeErrorRedirectUrl = (
+  redirectUri: string,
+  errorCode: OidcProtocolErrorCode,
+  state?: string,
+): string => {
+  const target = new URL(redirectUri);
+  target.searchParams.set('error', errorCode);
+  if (state !== undefined) {
+    target.searchParams.set('state', state);
+  }
+
+  return target.toString();
 };
 
 const inferTokenTypeHint = (token: string): SupportedTokenTypeHint =>
@@ -426,6 +618,8 @@ export class OidcService {
     private readonly idTokenProvider: IdTokenProvider = new JwtIdTokenProvider(),
     private readonly refreshTokenService: RefreshTokenService = new RefreshTokenService(),
     private readonly oidcSessionService: OidcSessionService = new OidcSessionService(),
+    private readonly consentService: OidcConsentService = new OidcConsentService(),
+    private readonly interactionService: OidcInteractionService = new OidcInteractionService(),
     private readonly getNow: () => Date = () => new Date(),
   ) {}
 
@@ -433,96 +627,604 @@ export class OidcService {
     query: unknown,
     cookieHeader: string | undefined,
   ): Promise<AuthorizeHandlerResult> {
-    const context = await this.validateAuthorizeRequest(query);
-    const validatedSession = await this.oidcSessionService.validateSessionCookie(cookieHeader);
+    try {
+      const context = await this.validateAuthorizeRequest(query);
+      const now = this.getNow();
 
-    if (validatedSession.status !== 'active') {
+      const interaction = await this.interactionService.create({
+        subject: null,
+        clientId: context.clientId,
+        redirectUri: context.redirectUri,
+        scope: context.scope,
+        scopeItems: context.scopeItems,
+        ...(context.state === undefined ? {} : { state: context.state }),
+        codeChallenge: context.codeChallenge,
+        codeChallengeMethod: context.codeChallengeMethod,
+        ...(context.nonce === undefined ? {} : { nonce: context.nonce }),
+        createdAt: now,
+        expiresAt: new Date(now.getTime() + INTERACTION_TTL_MS),
+      });
+
+      await this.recordAuthorizeStartedAudit(context);
+
+      const validatedSession = await this.oidcSessionService.validateSessionCookie(cookieHeader);
+      if (validatedSession.status !== 'active') {
+        await auditService.recordEvent({
+          eventType: 'oidc.authorization.login_required',
+          category: 'oidc',
+          severity: 'info',
+          outcome: 'denied',
+          actor: { type: 'unknown', source: 'browser' },
+          subject: { type: 'client', clientId: context.clientId },
+          client: {
+            clientId: context.clientId,
+            redirectUri: context.redirectUri,
+            scope: context.scopeItems,
+          },
+          reasonCode: 'LOGIN_REQUIRED',
+        });
+
+        return {
+          kind: 'redirect',
+          redirectTo: this.buildLoginInteractionRedirectUrl(interaction.interactionId),
+          clearSessionCookie: validatedSession.status !== 'missing',
+        };
+      }
+
+      const subject = validatedSession.session.subject;
+      const consent = await this.consentService.getConsent(subject, context.clientId);
+
+      if (!this.consentService.hasCoverage(consent, context.scopeItems)) {
+        await this.interactionService.markPendingConsent(interaction.interactionId, subject);
+
+        await auditService.recordEvent({
+          eventType: 'oidc.authorization.consent_required',
+          category: 'oidc',
+          severity: 'info',
+          outcome: 'denied',
+          actor: { type: 'user', sub: subject, source: 'browser' },
+          subject: { type: 'client', clientId: context.clientId },
+          client: {
+            clientId: context.clientId,
+            redirectUri: context.redirectUri,
+            scope: context.scopeItems,
+          },
+          reasonCode: 'CONSENT_REQUIRED',
+        });
+
+        return {
+          kind: 'redirect',
+          redirectTo: this.buildConsentInteractionRedirectUrl(interaction.interactionId),
+          clearSessionCookie: false,
+        };
+      }
+
+      await this.oidcSessionService.touchSessionForAuthorize(
+        validatedSession.session.sessionId,
+        context.clientId,
+      );
+      const redirectUrl = await this.issueAuthorizationCodeFromInteraction(
+        interaction.interactionId,
+        {
+          subject,
+          clientId: context.clientId,
+          redirectUri: context.redirectUri,
+          scope: context.scope,
+          scopeItems: context.scopeItems,
+          codeChallenge: context.codeChallenge,
+          codeChallengeMethod: context.codeChallengeMethod,
+          ...(context.state === undefined ? {} : { state: context.state }),
+          ...(context.nonce === undefined ? {} : { nonce: context.nonce }),
+        },
+      );
+
+      await auditService.recordEvent({
+        eventType: 'oidc.authorization.consent_reused',
+        category: 'oidc',
+        severity: 'info',
+        outcome: 'success',
+        actor: { type: 'user', sub: subject, source: 'browser' },
+        subject: { type: 'client', clientId: context.clientId },
+        client: {
+          clientId: context.clientId,
+          redirectUri: context.redirectUri,
+          scope: context.scopeItems,
+        },
+        reasonCode: 'CONSENT_REUSED',
+      });
+
       return {
-        kind: 'authentication_required',
-        context,
-        clearSessionCookie: validatedSession.status !== 'missing',
+        kind: 'redirect',
+        redirectTo: redirectUrl,
+        clearSessionCookie: false,
       };
+    } catch (error: unknown) {
+      if (BaseError.isBaseError(error)) {
+        if (error.code === 'invalid_scope') {
+          await auditService.recordEvent({
+            eventType: 'oidc.authorization.invalid_scope',
+            category: 'security',
+            severity: 'warning',
+            outcome: 'denied',
+            actor: { type: 'unknown', source: 'browser' },
+            reasonCode: 'INVALID_SCOPE',
+          });
+        }
+
+        if (error.code === 'invalid_redirect_uri') {
+          await auditService.recordEvent({
+            eventType: 'oidc.authorization.invalid_redirect_uri',
+            category: 'security',
+            severity: 'warning',
+            outcome: 'denied',
+            actor: { type: 'unknown', source: 'browser' },
+            reasonCode: 'INVALID_REDIRECT_URI',
+          });
+        }
+      }
+
+      const redirectUrl = this.tryBuildRedirectFromError(error);
+      if (redirectUrl !== null) {
+        return {
+          kind: 'redirect',
+          redirectTo: redirectUrl,
+          clearSessionCookie: false,
+        };
+      }
+
+      if (BaseError.isBaseError(error) && error.code === 'invalid_client') {
+        await auditService.recordEvent({
+          eventType: 'oidc.authorization.invalid_client',
+          category: 'security',
+          severity: 'warning',
+          outcome: 'denied',
+          actor: { type: 'unknown', source: 'browser' },
+          reasonCode: 'INVALID_CLIENT',
+        });
+      }
+
+      throw error;
     }
-
-    await this.oidcSessionService.touchSessionForAuthorize(
-      validatedSession.session.sessionId,
-      context.client.clientId,
-    );
-
-    const issuedAuthorizationCode = await this.issueAuthorizationCode(
-      context,
-      validatedSession.session.subject,
-    );
-
-    return {
-      kind: 'redirect',
-      redirectTo: buildAuthorizeRedirectUrl(
-        context.redirectUri,
-        issuedAuthorizationCode.rawCode,
-        context.state,
-      ),
-    };
   }
 
   async validateAuthorizeRequest(query: unknown): Promise<AuthorizeRequestContext> {
-    const queryRecord = toQueryRecord(query);
-    const responseType = readSingleString(queryRecord, 'response_type');
-    if (responseType !== 'code') {
-      throw invalidInput('response_type must be code.');
+    if (typeof query !== 'object' || query === null || Array.isArray(query)) {
+      throw oidcServiceError({
+        code: 'invalid_request',
+        message: 'authorize query must be an object.',
+        statusCode: 400,
+        shouldRedirect: false,
+      });
     }
 
-    const clientId = readSingleString(queryRecord, 'client_id');
-    const redirectUri = readSingleString(queryRecord, 'redirect_uri');
-    const scope = readSingleString(queryRecord, 'scope');
-    const codeChallenge = readSingleString(queryRecord, 'code_challenge');
-    const codeChallengeMethod = readSingleString(queryRecord, 'code_challenge_method');
-    const state = readOptionalString(queryRecord, 'state');
+    const queryRecord = query as Record<string, unknown>;
+    const readAuthorizeField = (
+      field: string,
+      options: { redirectUri?: string; state?: string; shouldRedirect?: boolean } = {},
+    ): string => {
+      const value = queryRecord[field];
+      if (typeof value !== 'string') {
+        throw oidcServiceError({
+          code: 'invalid_request',
+          message: `${field} is required.`,
+          statusCode: 400,
+          ...(options.redirectUri === undefined ? {} : { redirectUri: options.redirectUri }),
+          ...(options.state === undefined ? {} : { state: options.state }),
+          shouldRedirect: options.shouldRedirect ?? false,
+        });
+      }
 
-    if (codeChallengeMethod !== PKCE_S256) {
-      throw invalidInput('code_challenge_method must be S256.');
+      const normalized = value.trim();
+      if (normalized.length === 0) {
+        throw oidcServiceError({
+          code: 'invalid_request',
+          message: `${field} is required.`,
+          statusCode: 400,
+          ...(options.redirectUri === undefined ? {} : { redirectUri: options.redirectUri }),
+          ...(options.state === undefined ? {} : { state: options.state }),
+          shouldRedirect: options.shouldRedirect ?? false,
+        });
+      }
+
+      return normalized;
+    };
+    const allowedAuthorizeFields = [
+      'response_type',
+      'client_id',
+      'redirect_uri',
+      'scope',
+      'code_challenge',
+      'code_challenge_method',
+      'state',
+      'nonce',
+    ] as const;
+    const invalidAuthorizeField = Object.keys(queryRecord).find(
+      (field) => !allowedAuthorizeFields.includes(field as (typeof allowedAuthorizeFields)[number]),
+    );
+    if (invalidAuthorizeField !== undefined) {
+      throw oidcServiceError({
+        code: 'invalid_request',
+        message: `Unsupported field: ${invalidAuthorizeField}.`,
+        statusCode: 400,
+        shouldRedirect: false,
+      });
     }
 
-    assertOpenIdScope(scope);
-    assertPkceChallenge(codeChallenge);
-
+    const clientId = readAuthorizeField('client_id');
     const client = await findClient(this.clients, clientId);
+    const redirectUri = readAuthorizeField('redirect_uri');
     assertRedirectUri(client, redirectUri);
 
-    return {
-      accepted: true,
-      requiresAuthentication: true,
-      responseType: 'code',
-      client: {
-        clientId,
-      },
+    const responseType = readAuthorizeField('response_type', {
       redirectUri,
-      scope,
+      shouldRedirect: true,
+    });
+    if (responseType !== 'code') {
+      throw oidcServiceError({
+        code: 'invalid_request',
+        message: 'response_type must be code.',
+        statusCode: 400,
+        redirectUri,
+        shouldRedirect: true,
+      });
+    }
+
+    const state = readOptionalString(queryRecord, 'state');
+    assertState(state, redirectUri);
+
+    const scope = readAuthorizeField('scope', {
+      redirectUri,
+      ...(state === undefined ? {} : { state }),
+      shouldRedirect: true,
+    });
+    const scopeItems = normalizeScopeItems(scope);
+    assertScopeAllowed(scopeItems, client.allowedScopes, redirectUri, state);
+
+    const codeChallenge = readAuthorizeField('code_challenge', {
+      redirectUri,
+      ...(state === undefined ? {} : { state }),
+      shouldRedirect: true,
+    });
+    assertPkceChallenge(codeChallenge, redirectUri, state);
+
+    const codeChallengeMethodRaw = readAuthorizeField('code_challenge_method', {
+      redirectUri,
+      ...(state === undefined ? {} : { state }),
+      shouldRedirect: true,
+    });
+    if (codeChallengeMethodRaw !== PKCE_S256) {
+      throw oidcServiceError({
+        code: 'invalid_request',
+        message: 'code_challenge_method must be S256.',
+        statusCode: 400,
+        redirectUri,
+        ...(state === undefined ? {} : { state }),
+        shouldRedirect: true,
+      });
+    }
+
+    const nonce = readOptionalString(queryRecord, 'nonce');
+    assertNonce(nonce, redirectUri, state);
+
+    const normalizedScope = scopeItems.join(' ');
+
+    return {
+      clientId,
+      clientName: client.clientName,
+      redirectUri,
+      scope: normalizedScope,
+      scopeItems,
       codeChallenge,
       codeChallengeMethod: PKCE_S256,
       ...(state === undefined ? {} : { state }),
+      ...(nonce === undefined ? {} : { nonce }),
     };
   }
 
-  async continueAuthorize(input: unknown): Promise<AuthorizeContinueResult> {
-    const inputRecord = toQueryRecord(input);
-    const email = readSingleString(inputRecord, 'email');
-    const password = readSingleString(inputRecord, 'password');
-    const context = await this.validateAuthorizeRequest(inputRecord);
-    const identity = await this.authBridge.validateCredentials(email, password);
-    const issuedAuthorizationCode = await this.issueAuthorizationCode(context, identity.sub);
-    const createdSession = await this.oidcSessionService.createSession({
-      subject: identity.sub,
-      clientId: context.client.clientId,
+  async getAuthorizeInteraction(
+    interactionId: string,
+    cookieHeader: string | undefined,
+  ): Promise<OidcAuthorizeInteractionResponse> {
+    const interaction = await this.requireValidInteraction(interactionId);
+    const validatedSession = await this.oidcSessionService.validateSessionCookie(cookieHeader);
+    if (validatedSession.status !== 'active') {
+      throw oidcServiceError({
+        code: 'session_expired',
+        message: 'Session is expired or invalid.',
+        statusCode: 401,
+        shouldRedirect: false,
+      });
+    }
+
+    const subject = validatedSession.session.subject;
+    if (interaction.subject !== null && interaction.subject !== subject) {
+      throw oidcServiceError({
+        code: 'session_expired',
+        message: 'Session does not match interaction subject.',
+        statusCode: 401,
+        shouldRedirect: false,
+      });
+    }
+
+    const consent = await this.consentService.getConsent(subject, interaction.clientId);
+    if (this.consentService.hasCoverage(consent, interaction.scopeItems)) {
+      await this.oidcSessionService.touchSessionForAuthorize(
+        validatedSession.session.sessionId,
+        interaction.clientId,
+      );
+      const redirectUrl = await this.issueAuthorizationCodeFromInteraction(
+        interaction.interactionId,
+        {
+          subject,
+          clientId: interaction.clientId,
+          redirectUri: interaction.redirectUri,
+          scope: interaction.scope,
+          scopeItems: interaction.scopeItems,
+          codeChallenge: interaction.codeChallenge,
+          codeChallengeMethod: interaction.codeChallengeMethod,
+          ...(interaction.state === undefined ? {} : { state: interaction.state }),
+          ...(interaction.nonce === undefined ? {} : { nonce: interaction.nonce }),
+        },
+      );
+
+      await auditService.recordEvent({
+        eventType: 'oidc.authorization.consent_reused',
+        category: 'oidc',
+        severity: 'info',
+        outcome: 'success',
+        actor: { type: 'user', sub: subject, source: 'browser' },
+        subject: { type: 'client', clientId: interaction.clientId },
+        client: {
+          clientId: interaction.clientId,
+          redirectUri: interaction.redirectUri,
+          scope: interaction.scopeItems,
+        },
+        reasonCode: 'CONSENT_REUSED',
+      });
+
+      return {
+        success: true,
+        data: {
+          status: 'completed',
+          redirectUrl,
+        },
+      };
+    }
+
+    await this.interactionService.markPendingConsent(interaction.interactionId, subject);
+
+    return {
+      success: true,
+      data: {
+        status: 'consent_required',
+        interactionId: interaction.interactionId,
+        clientId: interaction.clientId,
+        clientName: await this.resolveClientName(interaction.clientId),
+        requestedScopes: [...interaction.scopeItems],
+      },
+    };
+  }
+
+  async decideAuthorizeInteraction(
+    input: unknown,
+    cookieHeader: string | undefined,
+  ): Promise<OidcAuthorizeDecisionResponse> {
+    if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+      throw oidcServiceError({
+        code: 'invalid_request',
+        message: 'request body must be an object.',
+        statusCode: 400,
+        shouldRedirect: false,
+      });
+    }
+
+    const inputRecord = input as Record<string, unknown>;
+    const allowedDecisionFields = ['interaction_id', 'decision'] as const;
+    const invalidDecisionField = Object.keys(inputRecord).find(
+      (field) => !allowedDecisionFields.includes(field as (typeof allowedDecisionFields)[number]),
+    );
+    if (invalidDecisionField !== undefined) {
+      throw oidcServiceError({
+        code: 'invalid_request',
+        message: `Unsupported field: ${invalidDecisionField}.`,
+        statusCode: 400,
+        shouldRedirect: false,
+      });
+    }
+    const interactionIdRaw = inputRecord.interaction_id;
+    const decisionRaw = inputRecord.decision;
+
+    if (typeof interactionIdRaw !== 'string' || interactionIdRaw.trim().length === 0) {
+      throw oidcServiceError({
+        code: 'invalid_request',
+        message: 'interaction_id is required.',
+        statusCode: 400,
+        shouldRedirect: false,
+      });
+    }
+
+    if (typeof decisionRaw !== 'string' || decisionRaw.trim().length === 0) {
+      throw oidcServiceError({
+        code: 'invalid_request',
+        message: 'decision is required.',
+        statusCode: 400,
+        shouldRedirect: false,
+      });
+    }
+
+    const interactionId = interactionIdRaw.trim();
+    const decision = decisionRaw.trim();
+
+    if (decision !== 'approve' && decision !== 'deny') {
+      throw oidcServiceError({
+        code: 'invalid_request',
+        message: 'decision must be approve or deny.',
+        statusCode: 400,
+        shouldRedirect: false,
+      });
+    }
+
+    const interaction = await this.requireValidInteraction(interactionId);
+    if (interaction.status !== 'pending_consent') {
+      throw oidcServiceError({
+        code: 'consent_required',
+        message: 'Interaction is not ready for consent decision.',
+        statusCode: 409,
+        shouldRedirect: false,
+      });
+    }
+    const validatedSession = await this.oidcSessionService.validateSessionCookie(cookieHeader);
+    if (validatedSession.status !== 'active') {
+      throw oidcServiceError({
+        code: 'session_expired',
+        message: 'Session is expired or invalid.',
+        statusCode: 401,
+        shouldRedirect: false,
+      });
+    }
+
+    const subject = validatedSession.session.subject;
+    if (interaction.subject !== null && interaction.subject !== subject) {
+      throw oidcServiceError({
+        code: 'session_expired',
+        message: 'Session does not match interaction subject.',
+        statusCode: 401,
+        shouldRedirect: false,
+      });
+    }
+
+    if (decision === 'deny') {
+      await this.interactionService.markDenied(interaction.interactionId, subject, this.getNow());
+      const redirectUrl = buildAuthorizeErrorRedirectUrl(
+        interaction.redirectUri,
+        'access_denied',
+        interaction.state,
+      );
+
+      await auditService.recordEvent({
+        eventType: 'oidc.authorization.consent_denied',
+        category: 'oidc',
+        severity: 'warning',
+        outcome: 'denied',
+        actor: { type: 'user', sub: subject, source: 'browser' },
+        subject: { type: 'client', clientId: interaction.clientId },
+        client: {
+          clientId: interaction.clientId,
+          redirectUri: interaction.redirectUri,
+          scope: interaction.scopeItems,
+        },
+        reasonCode: 'ACCESS_DENIED',
+      });
+
+      return {
+        success: true,
+        data: {
+          redirectUrl,
+        },
+      };
+    }
+
+    await this.consentService.approveConsent(
+      subject,
+      interaction.clientId,
+      interaction.scopeItems,
+      this.getNow(),
+    );
+    await this.oidcSessionService.touchSessionForAuthorize(
+      validatedSession.session.sessionId,
+      interaction.clientId,
+    );
+    const redirectUrl = await this.issueAuthorizationCodeFromInteraction(
+      interaction.interactionId,
+      {
+        subject,
+        clientId: interaction.clientId,
+        redirectUri: interaction.redirectUri,
+        scope: interaction.scope,
+        scopeItems: interaction.scopeItems,
+        codeChallenge: interaction.codeChallenge,
+        codeChallengeMethod: interaction.codeChallengeMethod,
+        ...(interaction.state === undefined ? {} : { state: interaction.state }),
+        ...(interaction.nonce === undefined ? {} : { nonce: interaction.nonce }),
+      },
+    );
+
+    await auditService.recordEvent({
+      eventType: 'oidc.authorization.consent_approved',
+      category: 'oidc',
+      severity: 'info',
+      outcome: 'success',
+      actor: { type: 'user', sub: subject, source: 'browser' },
+      subject: { type: 'client', clientId: interaction.clientId },
+      client: {
+        clientId: interaction.clientId,
+        redirectUri: interaction.redirectUri,
+        scope: interaction.scopeItems,
+      },
+      reasonCode: 'CONSENT_APPROVED',
     });
 
     return {
-      redirectTo: buildAuthorizeRedirectUrl(
-        context.redirectUri,
-        issuedAuthorizationCode.rawCode,
-        context.state,
-      ),
-      sessionCookie: createdSession.cookie,
-      csrfCookie: createdSession.csrfCookie,
+      success: true,
+      data: {
+        redirectUrl,
+      },
+    };
+  }
+
+  async listConnectedApplications(
+    cookieHeader: string | undefined,
+  ): Promise<OidcConnectedApplicationsResponse> {
+    const session = await this.requireActiveSession(cookieHeader);
+    const applications = await this.consentService.listConnectedApplications(
+      session.subject,
+      async (clientId) => this.resolveClientName(clientId),
+    );
+
+    return {
+      success: true,
+      data: {
+        applications,
+      },
+    };
+  }
+
+  async revokeConnectedApplication(
+    clientId: string,
+    cookieHeader: string | undefined,
+  ): Promise<OidcRevokeConsentResponse> {
+    const session = await this.requireActiveSession(cookieHeader);
+    const consent = await this.consentService.revokeConsent(
+      session.subject,
+      clientId,
+      this.getNow(),
+    );
+    if (consent === null) {
+      throw oidcServiceError({
+        code: 'invalid_request',
+        message: 'Consent was not found for the provided client.',
+        statusCode: 404,
+        shouldRedirect: false,
+      });
+    }
+
+    await auditService.recordEvent({
+      eventType: 'oidc.authorization.consent_revoked',
+      category: 'oidc',
+      severity: 'warning',
+      outcome: 'success',
+      actor: { type: 'user', sub: session.subject, source: 'browser' },
+      subject: { type: 'client', clientId },
+      client: { clientId },
+      reasonCode: 'CONSENT_REVOKED',
+    });
+
+    return {
+      success: true,
+      data: {
+        clientId,
+        status: 'revoked',
+      },
     };
   }
 
@@ -699,6 +1401,214 @@ export class OidcService {
     return this.oidcSessionService.invalidateSessionsBySubject(subject);
   }
 
+  private async recordAuthorizeStartedAudit(context: AuthorizeRequestContext): Promise<void> {
+    await auditService.recordEvent({
+      eventType: 'oidc.authorization.started',
+      category: 'oidc',
+      severity: 'info',
+      outcome: 'success',
+      actor: { type: 'unknown', source: 'browser' },
+      subject: { type: 'client', clientId: context.clientId },
+      client: {
+        clientId: context.clientId,
+        redirectUri: context.redirectUri,
+        scope: context.scopeItems,
+      },
+      reasonCode: 'AUTHORIZE_STARTED',
+    });
+  }
+
+  private buildLoginInteractionRedirectUrl(interactionId: string): string {
+    const target = new URL(config.oidc.interaction.loginPath, config.app.publicUiBaseUrl);
+    target.searchParams.set('interaction_id', interactionId);
+    return target.toString();
+  }
+
+  private buildConsentInteractionRedirectUrl(interactionId: string): string {
+    const target = new URL(config.oidc.interaction.consentPath, config.app.publicUiBaseUrl);
+    target.searchParams.set('interaction_id', interactionId);
+    return target.toString();
+  }
+
+  private tryBuildRedirectFromError(error: unknown): string | null {
+    if (!BaseError.isBaseError(error)) {
+      return null;
+    }
+
+    const metadata = error.metadata as Record<string, unknown>;
+    if (metadata.shouldRedirect !== true) {
+      return null;
+    }
+
+    const redirectUri = metadata.redirectUri;
+    if (typeof redirectUri !== 'string' || redirectUri.trim().length === 0) {
+      return null;
+    }
+
+    const state = typeof metadata.state === 'string' ? metadata.state : undefined;
+    const code = error.code as OidcProtocolErrorCode;
+    return buildAuthorizeErrorRedirectUrl(redirectUri, code, state);
+  }
+
+  private async requireActiveSession(cookieHeader: string | undefined): Promise<{
+    sessionId: string;
+    subject: string;
+  }> {
+    const validatedSession = await this.oidcSessionService.validateSessionCookie(cookieHeader);
+    if (validatedSession.status !== 'active') {
+      throw oidcServiceError({
+        code: 'session_expired',
+        message: 'Session is expired or invalid.',
+        statusCode: 401,
+        shouldRedirect: false,
+      });
+    }
+
+    return {
+      sessionId: validatedSession.session.sessionId,
+      subject: validatedSession.session.subject,
+    };
+  }
+
+  private async resolveClientName(clientId: string): Promise<string> {
+    const managedClient = await oidcClientService.getClient(clientId);
+    if (managedClient !== null) {
+      return managedClient.name;
+    }
+
+    const staticClient = this.clients.find((client) => client.clientId === clientId);
+    return staticClient?.clientId ?? clientId;
+  }
+
+  private async requireValidInteraction(interactionId: string): Promise<{
+    interactionId: string;
+    status: 'pending_login' | 'pending_consent';
+    subject: string | null;
+    clientId: string;
+    redirectUri: string;
+    scope: string;
+    scopeItems: string[];
+    state?: string;
+    codeChallenge: string;
+    codeChallengeMethod: 'S256';
+    nonce?: string;
+  }> {
+    const interaction = await this.interactionService.findById(interactionId);
+    if (interaction === null) {
+      await auditService.recordEvent({
+        eventType: 'oidc.authorization.interaction_expired',
+        category: 'oidc',
+        severity: 'warning',
+        outcome: 'failure',
+        actor: { type: 'unknown', source: 'browser' },
+        subject: { type: 'unknown', id: interactionId },
+        reasonCode: 'INTERACTION_NOT_FOUND_OR_EXPIRED',
+      });
+      throw oidcServiceError({
+        code: 'interaction_expired',
+        message: 'Interaction is not available.',
+        statusCode: 410,
+        shouldRedirect: false,
+      });
+    }
+
+    if (
+      this.interactionService.isExpired(interaction, this.getNow()) ||
+      interaction.status === 'expired'
+    ) {
+      await this.interactionService.markExpired(interaction.interactionId);
+      await auditService.recordEvent({
+        eventType: 'oidc.authorization.interaction_expired',
+        category: 'oidc',
+        severity: 'warning',
+        outcome: 'failure',
+        actor: { type: 'unknown', source: 'browser' },
+        subject: { type: 'client', clientId: interaction.clientId },
+        reasonCode: 'INTERACTION_EXPIRED',
+      });
+      throw oidcServiceError({
+        code: 'interaction_expired',
+        message: 'Interaction has expired.',
+        statusCode: 410,
+        shouldRedirect: false,
+      });
+    }
+
+    if (interaction.status !== 'pending_login' && interaction.status !== 'pending_consent') {
+      throw oidcServiceError({
+        code: 'invalid_request',
+        message: 'Interaction is not actionable.',
+        statusCode: 409,
+        shouldRedirect: false,
+      });
+    }
+
+    return {
+      interactionId: interaction.interactionId,
+      status: interaction.status,
+      subject: interaction.subject,
+      clientId: interaction.clientId,
+      redirectUri: interaction.redirectUri,
+      scope: interaction.scope,
+      scopeItems: interaction.scopeItems,
+      ...(interaction.state === undefined ? {} : { state: interaction.state }),
+      codeChallenge: interaction.codeChallenge,
+      codeChallengeMethod: interaction.codeChallengeMethod,
+      ...(interaction.nonce === undefined ? {} : { nonce: interaction.nonce }),
+    };
+  }
+
+  private async issueAuthorizationCodeFromInteraction(
+    interactionId: string,
+    context: {
+      subject: string;
+      clientId: string;
+      redirectUri: string;
+      scope: string;
+      scopeItems: string[];
+      codeChallenge: string;
+      codeChallengeMethod: 'S256';
+      state?: string;
+      nonce?: string;
+    },
+  ): Promise<string> {
+    const issuedAuthorizationCode = await this.issueAuthorizationCode(
+      {
+        clientId: context.clientId,
+        redirectUri: context.redirectUri,
+        scope: context.scope,
+        codeChallenge: context.codeChallenge,
+        codeChallengeMethod: context.codeChallengeMethod,
+        ...(context.state === undefined ? {} : { state: context.state }),
+        ...(context.nonce === undefined ? {} : { nonce: context.nonce }),
+      },
+      context.subject,
+    );
+
+    await this.interactionService.markCompleted(interactionId, context.subject, this.getNow());
+
+    await auditService.recordEvent({
+      eventType: 'oidc.authorization.code_issued',
+      category: 'oidc',
+      severity: 'info',
+      outcome: 'success',
+      actor: { type: 'user', sub: context.subject, source: 'browser' },
+      subject: { type: 'authorization_code', id: interactionId },
+      client: {
+        clientId: context.clientId,
+        redirectUri: context.redirectUri,
+        scope: context.scopeItems,
+      },
+      reasonCode: 'AUTHORIZATION_CODE_ISSUED',
+    });
+
+    return buildAuthorizeRedirectUrl(
+      context.redirectUri,
+      issuedAuthorizationCode.rawCode,
+      context.state,
+    );
+  }
+
   private async exchangeAuthorizationCodeGrant(
     inputRecord: Record<string, unknown>,
   ): Promise<TokenExchangeResponse> {
@@ -838,7 +1748,15 @@ export class OidcService {
   }
 
   private async issueAuthorizationCode(
-    context: AuthorizeRequestContext,
+    context: {
+      clientId: string;
+      redirectUri: string;
+      scope: string;
+      codeChallenge: string;
+      codeChallengeMethod: 'S256';
+      state?: string;
+      nonce?: string;
+    },
     subject: string,
   ): Promise<{ rawCode: string }> {
     const rawCode = randomBytes(AUTHORIZATION_CODE_BYTE_LENGTH).toString('base64url');
@@ -848,7 +1766,7 @@ export class OidcService {
 
     await this.authorizationCodeRepository.createAuthorizationCodeRecord({
       subject,
-      clientId: context.client.clientId,
+      clientId: context.clientId,
       redirectUri: context.redirectUri,
       scope: context.scope,
       codeHash,

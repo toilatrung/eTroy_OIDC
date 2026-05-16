@@ -33,6 +33,11 @@ export interface AppConfig {
   };
   oidc: {
     clients: readonly OidcClient[];
+    interaction: {
+      ttlSeconds: number;
+      loginPath: string;
+      consentPath: string;
+    };
     session: {
       ttlSeconds: number;
       cookieName: string;
@@ -142,6 +147,9 @@ const resolvePublicUiBaseUrl = (clients: readonly OidcClient[]): string => {
 };
 
 const publicUiBaseUrl = resolvePublicUiBaseUrl(oidcClients);
+const OIDC_INTERACTION_TTL_SECONDS = 10 * 60;
+const OIDC_INTERACTION_LOGIN_PATH = '/oidc/login';
+const OIDC_INTERACTION_CONSENT_PATH = '/oidc/consent';
 const OIDC_SESSION_TTL_SECONDS = 8 * 60 * 60;
 const OIDC_SESSION_COOKIE_NAME = 'etroy_oidc_sid';
 const OIDC_SESSION_COOKIE_PATH = '/';
@@ -176,6 +184,11 @@ export const config: Readonly<AppConfig> = Object.freeze({
   }),
   oidc: Object.freeze({
     clients: Object.freeze([...oidcClients]),
+    interaction: Object.freeze({
+      ttlSeconds: OIDC_INTERACTION_TTL_SECONDS,
+      loginPath: OIDC_INTERACTION_LOGIN_PATH,
+      consentPath: OIDC_INTERACTION_CONSENT_PATH,
+    }),
     session: Object.freeze({
       ttlSeconds: OIDC_SESSION_TTL_SECONDS,
       cookieName: OIDC_SESSION_COOKIE_NAME,

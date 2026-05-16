@@ -1,12 +1,15 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { JsonWebKeySet } from '../../../infrastructure/crypto/index.js';
 import type { AuthenticatedIdentity } from '../../auth/auth.service.js';
+import { BaseError } from '../../../shared/errors/index.js';
 
 import {
   oidcService,
   type AuthorizeHandlerResult,
-  type AuthorizeContinueResult,
-  type AuthorizeRequestContext,
+  type OidcAuthorizeDecisionResponse,
+  type OidcAuthorizeInteractionResponse,
+  type OidcConnectedApplicationsResponse,
+  type OidcRevokeConsentResponse,
   type LogoutResult,
   type LogoutSuccessResponse,
   type TokenExchangeResponse,
@@ -16,10 +19,6 @@ import type {
   OidcSessionCookieDescriptor,
 } from '../services/oidc-session.service.js';
 import type { TokenIntrospectionResponse } from '../types/oidc.types.js';
-
-interface AuthorizeResponseBody {
-  data: AuthorizeRequestContext;
-}
 
 interface InternalLoginRequestBody {
   email?: string;
@@ -81,7 +80,7 @@ const clearCookie = (response: Response, cookie: OidcCookieDescriptor): void => 
 
 export const authorizeHandler = async (
   request: Request,
-  response: Response<AuthorizeResponseBody>,
+  response: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
@@ -90,32 +89,81 @@ export const authorizeHandler = async (
       request.headers.cookie,
     );
 
-    if (result.kind === 'redirect') {
-      response.redirect(302, result.redirectTo);
-      return;
-    }
-
     if (result.clearSessionCookie) {
       clearCookie(response, oidcService.getClearSessionCookieDescriptor());
       clearCookie(response, oidcService.getClearCsrfCookieDescriptor());
     }
 
-    response.status(200).json({ data: result.context });
+    response.redirect(302, result.redirectTo);
   } catch (error: unknown) {
     next(error);
   }
 };
 
-export const authorizeContinueHandler = async (
-  request: Request<Record<string, never>, never, Record<string, unknown>>,
-  response: Response,
+export const authorizeInteractionHandler = async (
+  request: Request,
+  response: Response<OidcAuthorizeInteractionResponse>,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const result: AuthorizeContinueResult = await oidcService.continueAuthorize(request.body);
-    setCookie(response, result.sessionCookie);
-    setCookie(response, result.csrfCookie);
-    response.redirect(302, result.redirectTo);
+    const interactionId = request.query.interaction_id;
+    if (typeof interactionId !== 'string' || interactionId.trim().length === 0) {
+      throw new BaseError('interaction_id is required.', {
+        code: 'invalid_request',
+        statusCode: 400,
+      });
+    }
+
+    const result = await oidcService.getAuthorizeInteraction(
+      interactionId.trim(),
+      request.headers.cookie,
+    );
+    response.status(200).json(result);
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+export const authorizeDecisionHandler = async (
+  request: Request<Record<string, never>, never, Record<string, unknown>>,
+  response: Response<OidcAuthorizeDecisionResponse>,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const result = await oidcService.decideAuthorizeInteraction(
+      request.body,
+      request.headers.cookie,
+    );
+    response.status(200).json(result);
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+export const listConnectedApplicationsHandler = async (
+  request: Request,
+  response: Response<OidcConnectedApplicationsResponse>,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const result = await oidcService.listConnectedApplications(request.headers.cookie);
+    response.status(200).json(result);
+  } catch (error: unknown) {
+    next(error);
+  }
+};
+
+export const revokeConnectedApplicationHandler = async (
+  request: Request<{ clientId: string }>,
+  response: Response<OidcRevokeConsentResponse>,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const result = await oidcService.revokeConnectedApplication(
+      request.params.clientId,
+      request.headers.cookie,
+    );
+    response.status(200).json(result);
   } catch (error: unknown) {
     next(error);
   }
