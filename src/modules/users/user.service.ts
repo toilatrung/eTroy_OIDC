@@ -1,4 +1,4 @@
-import { hashValue } from '../../infrastructure/crypto/index.js';
+import { hashValue, verifyHash } from '../../infrastructure/crypto/index.js';
 import { BaseError } from '../../shared/errors/index.js';
 
 import {
@@ -52,7 +52,26 @@ export interface UserAdminView {
 }
 
 export interface ChangePasswordInput {
+  currentPassword?: unknown;
   newPassword?: unknown;
+}
+
+export interface ListAdminUsersInput {
+  skip?: unknown;
+  limit?: unknown;
+}
+
+export interface PreviewUnverifiedUsersPurgeInput {
+  olderThanDays?: unknown;
+}
+
+export interface PreviewUnverifiedUsersPurgeResult {
+  candidateCount: number;
+  olderThanDays: number;
+}
+
+export interface ChangePasswordOptions {
+  requireCurrentPassword?: boolean;
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
@@ -73,6 +92,12 @@ const duplicateEmail = (): BaseError =>
   new BaseError('Email already exists.', {
     code: 'DUPLICATE_EMAIL',
     statusCode: 409,
+  });
+
+const invalidCredentials = (): BaseError =>
+  new BaseError('Current password is invalid.', {
+    code: 'INVALID_CREDENTIALS',
+    statusCode: 401,
   });
 
 function assertKnownFields(
@@ -136,6 +161,29 @@ const normalizeEmail = (value: unknown): string => {
   }
 
   return email;
+};
+
+const normalizeNonNegativeInteger = (
+  value: unknown,
+  fieldName: string,
+  defaultValue: number,
+): number => {
+  if (value === undefined) {
+    return defaultValue;
+  }
+
+  if (typeof value === 'number' && Number.isInteger(value) && value >= 0) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const parsed = Number.parseInt(value, 10);
+    if (Number.isInteger(parsed) && parsed >= 0) {
+      return parsed;
+    }
+  }
+
+  throw invalidInput(`${fieldName} must be a non-negative integer.`);
 };
 
 const toUserProfile = (user: UserEntity): UserProfile => {
@@ -411,11 +459,32 @@ export class UserService {
     return toUserAdminView(user);
   }
 
-  async changePassword(sub: string, input: ChangePasswordInput = {}): Promise<UserProfile> {
-    assertKnownFields(input, ['newPassword']);
+  async changePassword(
+    sub: string,
+    input: ChangePasswordInput = {},
+    options: ChangePasswordOptions = {},
+  ): Promise<UserProfile> {
+    assertKnownFields(input, ['currentPassword', 'newPassword']);
 
     const normalizedSub = requiredString(sub, 'sub');
+    const requireCurrentPassword = options.requireCurrentPassword ?? true;
+    const currentPassword = requireCurrentPassword
+      ? requiredString(input.currentPassword, 'currentPassword')
+      : undefined;
     const newPassword = requiredString(input.newPassword, 'newPassword');
+
+    const existingUser = await this.userRepository.findBySub(normalizedSub);
+    if (existingUser === null) {
+      throw userNotFound();
+    }
+
+    if (
+      requireCurrentPassword &&
+      (currentPassword === undefined || !verifyHash(currentPassword, existingUser.password_hash))
+    ) {
+      throw invalidCredentials();
+    }
+
     const user = await this.userRepository.updateUser(
       { sub: normalizedSub },
       { password_hash: hashValue(newPassword) },
@@ -426,6 +495,29 @@ export class UserService {
     }
 
     return toUserProfile(user);
+  }
+
+  async listAdminUsers(input: ListAdminUsersInput = {}): Promise<UserAdminView[]> {
+    const skip = normalizeNonNegativeInteger(input.skip, 'skip', 0);
+    const limit = Math.min(normalizeNonNegativeInteger(input.limit, 'limit', 50), 200);
+    const users = await this.userRepository.listUsers({ skip, limit });
+    return users.map((user) => toUserAdminView(user));
+  }
+
+  async previewUnverifiedUsersPurge(
+    input: PreviewUnverifiedUsersPurgeInput = {},
+  ): Promise<PreviewUnverifiedUsersPurgeResult> {
+    const olderThanDays = Math.min(
+      normalizeNonNegativeInteger(input.olderThanDays, 'olderThanDays', 7),
+      3650,
+    );
+    const createdBefore = new Date(Date.now() - olderThanDays * 24 * 60 * 60 * 1000);
+    const candidateCount = await this.userRepository.countUnverifiedUsers({ createdBefore });
+
+    return {
+      candidateCount,
+      olderThanDays,
+    };
   }
 }
 

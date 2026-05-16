@@ -11,6 +11,8 @@ import {
 import {
   OidcSessionRepository,
   type OidcSessionRepositoryPort,
+  type ListOidcSessionsInput,
+  type InvalidateOidcSessionsBySubjectResult,
 } from '../repositories/oidc-session.repository.js';
 
 const INVALID_COOKIE_HEADER_PATTERN = /[\r\n]/u;
@@ -58,6 +60,12 @@ export type ValidatedOidcSessionResult =
   | { status: 'expired'; clearCookie: true }
   | { status: 'invalidated'; clearCookie: true }
   | { status: 'active'; session: OidcSessionRecord };
+
+export interface ListOidcSessionResultInput {
+  subject?: string;
+  status?: OidcSessionRecord['status'];
+  limit?: number;
+}
 
 const normalizeNonEmpty = (value: string): string => value.trim();
 
@@ -208,6 +216,32 @@ export class OidcSessionService {
     await this.repository.invalidateSession({
       sessionId,
       invalidatedAt: this.getNow(),
+    });
+  }
+
+  async listSessions(input: ListOidcSessionResultInput = {}): Promise<OidcSessionRecord[]> {
+    const repositoryInput: ListOidcSessionsInput = {};
+    if (input.subject !== undefined) {
+      repositoryInput.subject = normalizeNonEmpty(input.subject);
+    }
+    if (input.status !== undefined) {
+      repositoryInput.status = input.status;
+    }
+    if (input.limit !== undefined) {
+      repositoryInput.limit = input.limit;
+    }
+
+    return this.repository.listSessions(repositoryInput);
+  }
+
+  async invalidateSessionsBySubject(
+    subject: string,
+    limit?: number,
+  ): Promise<InvalidateOidcSessionsBySubjectResult> {
+    return this.repository.invalidateSessionsBySubject({
+      subject: normalizeNonEmpty(subject),
+      invalidatedAt: this.getNow(),
+      ...(limit === undefined ? {} : { limit }),
     });
   }
 

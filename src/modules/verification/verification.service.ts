@@ -53,7 +53,7 @@ export class VerificationService {
       normalizedUserId,
       TOKEN_PURPOSE_EMAIL_VERIFICATION,
     );
-    const verificationUrl = new URL('/verify-email', config.app.baseUrl);
+    const verificationUrl = new URL('/verify-email/result', config.app.publicUiBaseUrl);
     verificationUrl.searchParams.set('token', generatedToken.rawToken);
     const link = verificationUrl.toString();
 

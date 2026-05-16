@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 
+import { config } from '../../config/config.js';
 import { BaseError } from '../../shared/errors/index.js';
 import { verificationService, type VerificationRequestResult } from './verification.service.js';
 import type { UserProfile } from '../users/user.service.js';
@@ -55,4 +56,15 @@ export const confirmVerificationHandler = async (
   } catch (error: unknown) {
     next(error);
   }
+};
+
+export const verificationLinkRedirectHandler = (request: Request, response: Response): void => {
+  const target = new URL('/verify-email/result', config.app.publicUiBaseUrl);
+  const token = request.query.token;
+
+  if (typeof token === 'string' && token.trim().length > 0) {
+    target.searchParams.set('token', token.trim());
+  }
+
+  response.redirect(302, target.toString());
 };

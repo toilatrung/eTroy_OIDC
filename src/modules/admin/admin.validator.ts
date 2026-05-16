@@ -47,6 +47,16 @@ export interface AdminUpdateClientInput {
   status?: 'active' | 'disabled' | undefined;
 }
 
+export interface AdminListQueryInput {
+  skip?: number;
+  limit?: number;
+}
+
+export interface AdminPurgeUnverifiedUsersInput {
+  dryRun?: boolean;
+  olderThanDays?: number;
+}
+
 const trimmedRequiredString = (fieldName: string) =>
   z
     .string()
@@ -120,6 +130,42 @@ const adminUpdateClientSchema = z
   .strict()
   .refine((value) => Object.keys(value).length > 0);
 
+const optionalIntegerFromQuery = (fieldName: string, max: number) =>
+  z.preprocess(
+    (value) => {
+      if (value === undefined) {
+        return undefined;
+      }
+
+      if (typeof value === 'string') {
+        const parsed = Number.parseInt(value, 10);
+        return Number.isNaN(parsed) ? value : parsed;
+      }
+
+      return value;
+    },
+    z
+      .number()
+      .int()
+      .min(0, `${fieldName} must be >= 0`)
+      .max(max, `${fieldName} is too large`)
+      .optional(),
+  );
+
+const adminListQuerySchema = z
+  .object({
+    skip: optionalIntegerFromQuery('skip', 100000),
+    limit: optionalIntegerFromQuery('limit', 200),
+  })
+  .strict();
+
+const adminPurgeUnverifiedUsersSchema = z
+  .object({
+    dryRun: z.boolean().optional(),
+    olderThanDays: z.number().int().min(0).max(3650).optional(),
+  })
+  .strict();
+
 const invalidAdminInput = (): BaseError =>
   new BaseError('Invalid admin request input.', {
     code: 'INVALID_INPUT',
@@ -156,3 +202,23 @@ export const validateAdminCreateClientInput = (input: unknown): AdminCreateClien
 
 export const validateAdminUpdateClientInput = (input: unknown): AdminUpdateClientInput =>
   parseAdminInput(adminUpdateClientSchema, input);
+
+export const validateAdminListQueryInput = (input: unknown): AdminListQueryInput =>
+  (() => {
+    const parsed = parseAdminInput(adminListQuerySchema, input);
+    return {
+      ...(parsed.skip === undefined ? {} : { skip: parsed.skip }),
+      ...(parsed.limit === undefined ? {} : { limit: parsed.limit }),
+    };
+  })();
+
+export const validateAdminPurgeUnverifiedUsersInput = (
+  input: unknown,
+): AdminPurgeUnverifiedUsersInput =>
+  (() => {
+    const parsed = parseAdminInput(adminPurgeUnverifiedUsersSchema, input);
+    return {
+      ...(parsed.dryRun === undefined ? {} : { dryRun: parsed.dryRun }),
+      ...(parsed.olderThanDays === undefined ? {} : { olderThanDays: parsed.olderThanDays }),
+    };
+  })();
