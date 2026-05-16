@@ -1,18 +1,5 @@
-export interface MailSendRequest {
-  to: string;
-  subject: string;
-  text?: string;
-  html?: string;
-}
-
-export interface MailSendResult {
-  messageId: string;
-  accepted: string[];
-}
-
-export interface MailProvider {
-  send(request: MailSendRequest): Promise<MailSendResult>;
-}
+import { createNodemailerMailProvider } from './nodemailer.provider.js';
+import type { MailProvider, MailSendRequest, MailSendResult } from './mail.types.js';
 
 const ensureRecipient = (recipient: string): string => {
   const normalized = recipient.trim();
@@ -50,7 +37,9 @@ export class MailService {
 }
 
 export const createMailService = (
-  provider: MailProvider = new PlaceholderMailProvider(),
+  provider: MailProvider = createNodemailerMailProvider(),
 ): MailService => new MailService(provider);
 
 export const mailService = createMailService();
+
+export type { MailProvider, MailSendRequest, MailSendResult } from './mail.types.js';

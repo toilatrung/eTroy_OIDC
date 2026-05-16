@@ -21,6 +21,14 @@ export interface AppConfig {
     redis: {
       url: string;
     };
+    mail: {
+      host: string;
+      port: number;
+      secure: boolean;
+      user: string;
+      password: string;
+      from: string;
+    };
   };
   oidc: {
     clients: readonly OidcClient[];
@@ -137,6 +145,14 @@ export const config: Readonly<AppConfig> = Object.freeze({
     }),
     redis: Object.freeze({
       url: validatedEnv.REDIS_URL,
+    }),
+    mail: Object.freeze({
+      host: validatedEnv.MAIL_HOST,
+      port: validatedEnv.MAIL_PORT,
+      secure: validatedEnv.MAIL_SECURE,
+      user: validatedEnv.MAIL_USER,
+      password: validatedEnv.MAIL_PASSWORD,
+      from: validatedEnv.MAIL_FROM,
     }),
   }),
   oidc: Object.freeze({
