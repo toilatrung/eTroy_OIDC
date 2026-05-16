@@ -10,47 +10,22 @@ import {
   validateAdminClientParams,
   validateAdminCreateClientInput,
   validateAdminUpdateClientInput,
-  validateAdminListQueryInput,
-  validateAdminPurgeUnverifiedUsersInput,
   type AdminCreateUserInput,
   type AdminUpdateProfileInput,
   type AdminUserParams,
   type AdminClientParams,
   type AdminCreateClientInput,
   type AdminUpdateClientInput,
-  type AdminListQueryInput,
-  type AdminPurgeUnverifiedUsersInput,
 } from './admin.validator.js';
 import type { UserAdminView } from '../users/user.service.js';
 import type { ClientAdminView, ClientWithSecret } from '../oidc/services/client.service.js';
-import type { AuditEventRecord } from '../audit/audit.types.js';
-import type { OidcSessionView } from '../oidc/services/oidc.service.js';
 
 interface AdminUserResponseBody {
-  data: UserAdminView | UserAdminView[];
+  data: UserAdminView;
 }
 
 interface AdminClientResponseBody {
   data: ClientAdminView | ClientAdminView[] | ClientWithSecret | null;
-}
-
-interface AdminAuditResponseBody {
-  data: AuditEventRecord[];
-}
-
-interface AdminSessionResponseBody {
-  data: OidcSessionView[];
-}
-
-interface AdminPurgeResponseBody {
-  data: {
-    deletedCount: number;
-    candidateCount: number;
-    dryRun: boolean;
-    blocked: boolean;
-    reasonCode: string;
-    olderThanDays: number;
-  };
 }
 
 type AdminRequestContextSource = Pick<Request, 'header' | 'method' | 'path' | 'route'>;
@@ -111,23 +86,6 @@ export const getAdminUserHandler = async (
     const params = validateAdminUserParams(request.params);
     const user = await adminService.getUser(params.sub);
     sendAdminUser(response, 200, user);
-  } catch (error: unknown) {
-    next(error);
-  }
-};
-
-export const listAdminUsersHandler = async (
-  request: Request<Record<string, never>, AdminUserResponseBody, never, AdminListQueryInput>,
-  response: Response<AdminUserResponseBody>,
-  next: NextFunction,
-): Promise<void> => {
-  try {
-    validateAdminActor({
-      adminSub: request.header('x-admin-sub'),
-    });
-    const query = validateAdminListQueryInput(request.query);
-    const users = await adminService.listUsers(query);
-    response.status(200).json({ data: users });
   } catch (error: unknown) {
     next(error);
   }
@@ -303,55 +261,6 @@ export const rotateAdminClientSecretHandler = async (
       return;
     }
     sendAdminClient(response, 200, result);
-  } catch (error: unknown) {
-    next(error);
-  }
-};
-
-export const listAdminAuditLogsHandler = async (
-  request: Request<Record<string, never>, AdminAuditResponseBody, never, AdminListQueryInput>,
-  response: Response<AdminAuditResponseBody>,
-  next: NextFunction,
-): Promise<void> => {
-  try {
-    validateAdminActor({
-      adminSub: request.header('x-admin-sub'),
-    });
-    const query = validateAdminListQueryInput(request.query);
-    const events = await adminService.listAuditLogs(query);
-    response.status(200).json({ data: events });
-  } catch (error: unknown) {
-    next(error);
-  }
-};
-
-export const listAdminSessionsHandler = async (
-  request: Request<Record<string, never>, AdminSessionResponseBody, never, AdminListQueryInput>,
-  response: Response<AdminSessionResponseBody>,
-  next: NextFunction,
-): Promise<void> => {
-  try {
-    validateAdminActor({
-      adminSub: request.header('x-admin-sub'),
-    });
-    const query = validateAdminListQueryInput(request.query);
-    const sessions = await adminService.listSessions(query);
-    response.status(200).json({ data: sessions });
-  } catch (error: unknown) {
-    next(error);
-  }
-};
-
-export const purgeUnverifiedUsersHandler = async (
-  request: Request<Record<string, never>, AdminPurgeResponseBody, AdminPurgeUnverifiedUsersInput>,
-  response: Response<AdminPurgeResponseBody>,
-  next: NextFunction,
-): Promise<void> => {
-  try {
-    const context = buildAdminContext(request);
-    const input = validateAdminPurgeUnverifiedUsersInput(request.body ?? {});
-    const result = await adminService.purgeUnverifiedUsers(input, context);
-    response.status(200).json({ data: result });
   } catch (error: unknown) {
     next(error);
   }

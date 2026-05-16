@@ -52,7 +52,6 @@ export interface AuthBridge {
 export const defaultAuthBridge: AuthBridge = authService;
 
 const PKCE_S256 = 'S256';
-const INTERNAL_LOGIN_CLIENT_ID = 'etroy-oidc-internal';
 const AUTHORIZATION_CODE_BYTE_LENGTH = 32;
 const AUTHORIZATION_CODE_TTL_MS = 5 * 60 * 1000;
 const CODE_CHALLENGE_PATTERN = /^[A-Za-z0-9_-]{43,128}$/u;
@@ -61,12 +60,6 @@ const AUTHORIZATION_CODE_PATTERN = /^[A-Za-z0-9_-]{43,128}$/u;
 
 export interface AuthorizeContinueResult {
   redirectTo: string;
-  sessionCookie: OidcSessionCookieDescriptor;
-  csrfCookie: OidcCsrfCookieDescriptor;
-}
-
-export interface InternalLoginResult {
-  identity: AuthenticatedIdentity;
   sessionCookie: OidcSessionCookieDescriptor;
   csrfCookie: OidcCsrfCookieDescriptor;
 }
@@ -87,17 +80,6 @@ export interface LogoutRequestInput {
 
 export interface LogoutSuccessResponse {
   status: 'logged_out';
-}
-
-export interface OidcSessionView {
-  sessionId: string;
-  subject: string;
-  clientIds: string[];
-  createdAt: string;
-  expiresAt: string;
-  lastSeenAt: string;
-  status: 'active' | 'expired' | 'invalidated';
-  invalidatedAt: string | null;
 }
 
 export type LogoutResult =
@@ -256,16 +238,6 @@ const toQueryRecord = (query: unknown): Record<string, unknown> => {
   return query as Record<string, unknown>;
 };
 
-const assertKnownFields = (
-  source: Record<string, unknown>,
-  allowedFields: readonly string[],
-): void => {
-  const invalidFields = Object.keys(source).filter((field) => !allowedFields.includes(field));
-  if (invalidFields.length > 0) {
-    throw invalidInput(`Unsupported field: ${invalidFields[0]}.`);
-  }
-};
-
 const inferTokenTypeHint = (token: string): SupportedTokenTypeHint =>
   token.split('.').length === 3 ? 'access_token' : 'refresh_token';
 
@@ -279,26 +251,6 @@ const buildPostLogoutRedirectUrl = (redirectUri: string, state: string | undefin
 
   return target.toString();
 };
-
-const toSessionView = (session: {
-  sessionId: string;
-  subject: string;
-  clientIds: string[];
-  createdAt: Date;
-  expiresAt: Date;
-  lastSeenAt: Date;
-  status: 'active' | 'expired' | 'invalidated';
-  invalidatedAt: Date | null;
-}): OidcSessionView => ({
-  sessionId: session.sessionId,
-  subject: session.subject,
-  clientIds: [...session.clientIds],
-  createdAt: session.createdAt.toISOString(),
-  expiresAt: session.expiresAt.toISOString(),
-  lastSeenAt: session.lastSeenAt.toISOString(),
-  status: session.status,
-  invalidatedAt: session.invalidatedAt?.toISOString() ?? null,
-});
 
 const toEpochSeconds = (value: Date): number => Math.floor(value.getTime() / 1000);
 
@@ -526,24 +478,6 @@ export class OidcService {
     };
   }
 
-  async loginInternal(input: unknown): Promise<InternalLoginResult> {
-    const inputRecord = toQueryRecord(input);
-    assertKnownFields(inputRecord, ['email', 'password']);
-    const email = readSingleString(inputRecord, 'email');
-    const password = readSingleString(inputRecord, 'password');
-    const identity = await this.authBridge.validateCredentials(email, password);
-    const createdSession = await this.oidcSessionService.createSession({
-      subject: identity.sub,
-      clientId: INTERNAL_LOGIN_CLIENT_ID,
-    });
-
-    return {
-      identity,
-      sessionCookie: createdSession.cookie,
-      csrfCookie: createdSession.csrfCookie,
-    };
-  }
-
   async exchangeToken(input: unknown): Promise<TokenExchangeResponse> {
     const inputRecord = toQueryRecord(input);
     const grantType = readSingleString(inputRecord, 'grant_type');
@@ -675,28 +609,6 @@ export class OidcService {
 
   async invalidateSession(sessionId: string): Promise<void> {
     await this.oidcSessionService.invalidateSession(sessionId);
-  }
-
-  async getActiveSession(cookieHeader: string | undefined): Promise<OidcSessionView | null> {
-    const sessionResult = await this.oidcSessionService.validateSessionCookie(cookieHeader);
-    if (sessionResult.status !== 'active') {
-      return null;
-    }
-
-    return toSessionView(sessionResult.session);
-  }
-
-  async listSessions(limit?: number): Promise<OidcSessionView[]> {
-    const sessions = await this.oidcSessionService.listSessions({
-      ...(limit === undefined ? {} : { limit }),
-    });
-    return sessions.map((session) => toSessionView(session));
-  }
-
-  async invalidateSessionsBySubject(
-    subject: string,
-  ): Promise<{ invalidatedCount: number; truncated: boolean }> {
-    return this.oidcSessionService.invalidateSessionsBySubject(subject);
   }
 
   private async exchangeAuthorizationCodeGrant(

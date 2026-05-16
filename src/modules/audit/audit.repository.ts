@@ -5,11 +5,6 @@ import type { AuditEventRecord } from './audit.types.js';
 
 export type CreateAuditEventInput = Omit<AuditEventRecord, 'id'>;
 
-export interface ListAuditEventsInput {
-  skip?: number;
-  limit?: number;
-}
-
 const toAuditEventRecord = (document: HydratedDocument<AuditEventDocument>): AuditEventRecord => {
   const record: AuditEventRecord = {
     id: document._id.toString(),
@@ -54,17 +49,5 @@ export class AuditRepository {
   async createEvent(input: CreateAuditEventInput): Promise<AuditEventRecord> {
     const created = await AuditEventModel.create(input);
     return toAuditEventRecord(created);
-  }
-
-  async listEvents(input: ListAuditEventsInput = {}): Promise<AuditEventRecord[]> {
-    const skip = Math.max(0, Math.floor(input.skip ?? 0));
-    const limit = Math.max(1, Math.min(200, Math.floor(input.limit ?? 50)));
-    const events = await AuditEventModel.find({})
-      .sort({ occurredAt: -1, createdAt: -1, _id: -1 })
-      .skip(skip)
-      .limit(limit)
-      .exec();
-
-    return events.map((event) => toAuditEventRecord(event));
   }
 }

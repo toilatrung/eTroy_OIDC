@@ -1,10 +1,8 @@
 import {
   auditService,
   type AuditService,
-  type ListAuditEventsRequest,
   type RecordAuditEventInput,
 } from '../audit/audit.service.js';
-import type { AuditEventRecord } from '../audit/audit.types.js';
 import {
   oidcClientService,
   type ClientAdminView,
@@ -12,13 +10,9 @@ import {
   type CreateClientRequest,
   type UpdateClientRequest,
 } from '../oidc/services/client.service.js';
-import { oidcService, type OidcSessionView } from '../oidc/services/oidc.service.js';
 import {
   userService,
   type CreateAdminProvisionedUserInput,
-  type ListAdminUsersInput,
-  type PreviewUnverifiedUsersPurgeInput,
-  type PreviewUnverifiedUsersPurgeResult,
   type UpdateProfileInput,
   type UserAdminView,
   type UserService,
@@ -40,25 +34,6 @@ export interface AdminOperationContext {
   request?: AdminRequestMetadata;
 }
 
-export interface AdminPaginationInput {
-  skip?: number;
-  limit?: number;
-}
-
-export interface AdminPurgeUnverifiedUsersInput {
-  dryRun?: boolean;
-  olderThanDays?: number;
-}
-
-export interface AdminPurgeUnverifiedUsersResult {
-  deletedCount: number;
-  candidateCount: number;
-  dryRun: boolean;
-  blocked: boolean;
-  reasonCode: string;
-  olderThanDays: number;
-}
-
 type AdminUsersService = Pick<
   UserService,
   | 'createAdminProvisionedUser'
@@ -66,12 +41,9 @@ type AdminUsersService = Pick<
   | 'setUserStatusBySub'
   | 'updateAdminProfileBySub'
   | 'markEmailVerifiedBySub'
-  | 'listAdminUsers'
-  | 'previewUnverifiedUsersPurge'
 >;
 
-type AdminAuditService = Pick<AuditService, 'recordEvent' | 'listEvents'>;
-type AdminOidcService = Pick<typeof oidcService, 'listSessions'>;
+type AdminAuditService = Pick<AuditService, 'recordEvent'>;
 
 const toAuditRequest = (
   request: AdminRequestMetadata | undefined,
@@ -119,7 +91,6 @@ export class AdminService {
   constructor(
     private readonly users: AdminUsersService = userService,
     private readonly audit: AdminAuditService = auditService,
-    private readonly oidc: AdminOidcService = oidcService,
   ) {}
 
   async createUser(
@@ -145,10 +116,6 @@ export class AdminService {
 
   async getUser(sub: string): Promise<UserAdminView> {
     return this.users.getAdminUserViewBySub(sub);
-  }
-
-  async listUsers(input: ListAdminUsersInput = {}): Promise<UserAdminView[]> {
-    return this.users.listAdminUsers(input);
   }
 
   async disableUser(sub: string, context: AdminOperationContext): Promise<UserAdminView> {
@@ -258,64 +225,6 @@ export class AdminService {
     context: AdminOperationContext,
   ): Promise<ClientWithSecret | null> {
     return oidcClientService.rotateClientSecret(clientId, context.actor.adminSub);
-  }
-
-  async listAuditLogs(input: ListAuditEventsRequest = {}): Promise<AuditEventRecord[]> {
-    return this.audit.listEvents(input);
-  }
-
-  async listSessions(input: AdminPaginationInput = {}): Promise<OidcSessionView[]> {
-    const skip = input.skip ?? 0;
-    const limit = input.limit ?? 50;
-    const sessions = await this.oidc.listSessions(skip + limit);
-    return sessions.slice(skip, skip + limit);
-  }
-
-  async purgeUnverifiedUsers(
-    input: AdminPurgeUnverifiedUsersInput = {},
-    context: AdminOperationContext,
-  ): Promise<AdminPurgeUnverifiedUsersResult> {
-    const previewInput: PreviewUnverifiedUsersPurgeInput = {
-      ...(input.olderThanDays === undefined ? {} : { olderThanDays: input.olderThanDays }),
-    };
-    const preview: PreviewUnverifiedUsersPurgeResult =
-      await this.users.previewUnverifiedUsersPurge(previewInput);
-
-    const dryRun = input.dryRun ?? true;
-    const reasonCode = dryRun
-      ? 'ADMIN_PURGE_UNVERIFIED_USERS_DRY_RUN'
-      : 'ADMIN_PURGE_UNVERIFIED_USERS_BLOCKED';
-    const outcome: RecordAuditEventInput['outcome'] = dryRun ? 'noop' : 'denied';
-    const severity: RecordAuditEventInput['severity'] = dryRun ? 'info' : 'warning';
-    const request = toAuditRequest(context.request);
-
-    await this.audit.recordEvent({
-      eventType: 'security.unauthorized_admin_action',
-      category: 'security',
-      severity,
-      outcome,
-      actor: {
-        type: 'admin',
-        adminSub: context.actor.adminSub,
-      },
-      ...(request === undefined ? {} : { request }),
-      reasonCode,
-      metadata: {
-        operation: 'purge-unverified-users',
-        dryRun,
-        candidateCount: preview.candidateCount,
-        olderThanDays: preview.olderThanDays,
-      },
-    });
-
-    return {
-      deletedCount: 0,
-      candidateCount: preview.candidateCount,
-      dryRun,
-      blocked: !dryRun,
-      reasonCode,
-      olderThanDays: preview.olderThanDays,
-    };
   }
 
   private async recordAdminUserEvent(input: {

@@ -1,6 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { JsonWebKeySet } from '../../../infrastructure/crypto/index.js';
-import type { AuthenticatedIdentity } from '../../auth/auth.service.js';
 
 import {
   oidcService,
@@ -19,15 +18,6 @@ import type { TokenIntrospectionResponse } from '../types/oidc.types.js';
 
 interface AuthorizeResponseBody {
   data: AuthorizeRequestContext;
-}
-
-interface InternalLoginRequestBody {
-  email?: string;
-  password?: string;
-}
-
-interface InternalLoginResponseBody {
-  data: AuthenticatedIdentity;
 }
 
 interface TokenRequestBody {
@@ -116,21 +106,6 @@ export const authorizeContinueHandler = async (
     setCookie(response, result.sessionCookie);
     setCookie(response, result.csrfCookie);
     response.redirect(302, result.redirectTo);
-  } catch (error: unknown) {
-    next(error);
-  }
-};
-
-export const internalLoginHandler = async (
-  request: Request<Record<string, never>, InternalLoginResponseBody, InternalLoginRequestBody>,
-  response: Response<InternalLoginResponseBody>,
-  next: NextFunction,
-): Promise<void> => {
-  try {
-    const result = await oidcService.loginInternal(request.body ?? {});
-    setCookie(response, result.sessionCookie);
-    setCookie(response, result.csrfCookie);
-    response.status(200).json({ data: result.identity });
   } catch (error: unknown) {
     next(error);
   }

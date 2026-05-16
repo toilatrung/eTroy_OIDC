@@ -14,11 +14,7 @@ import {
   disableAdminUserHandler,
   enableAdminUserHandler,
   getAdminUserHandler,
-  listAdminAuditLogsHandler,
-  listAdminSessionsHandler,
-  listAdminUsersHandler,
   markAdminUserEmailVerifiedHandler,
-  purgeUnverifiedUsersHandler,
   updateAdminUserProfileHandler,
   createAdminClientHandler,
   getAdminClientHandler,
@@ -27,27 +23,19 @@ import {
   disableAdminClientHandler,
   rotateAdminClientSecretHandler,
 } from '../modules/admin/admin.controller.js';
-import {
-  changeCurrentPasswordHandler,
-  getCurrentUserHandler,
-  registerUserHandler,
-  signOutFromAllSessionsHandler,
-  updateCurrentProfileHandler,
-} from '../modules/users/user.controller.js';
+import { loginHandler } from '../modules/auth/auth.controller.js';
+import { registerUserHandler } from '../modules/users/user.controller.js';
 import {
   confirmVerificationHandler,
   requestVerificationHandler,
-  verificationLinkRedirectHandler,
 } from '../modules/verification/verification.controller.js';
 import {
   confirmPasswordResetHandler,
-  passwordResetLinkRedirectHandler,
   requestPasswordResetHandler,
 } from '../modules/password-reset/password-reset.controller.js';
 import {
   authorizeContinueHandler,
   authorizeHandler,
-  internalLoginHandler,
   introspectHandler,
   jwksHandler,
   logoutHandler,
@@ -56,7 +44,6 @@ import {
 } from '../modules/oidc/controllers/oidc.controller.js';
 import { healthHandler, readinessHandler } from '../modules/health/health.controller.js';
 import { userInfoHandler } from '../modules/oidc/controllers/userinfo.controller.js';
-import { oidcKeyService } from '../modules/oidc/services/key.service.js';
 import { BaseError } from '../shared/errors/index.js';
 
 interface ErrorResponseBody {
@@ -92,28 +79,18 @@ export const createServer = (): Express => {
   app.post('/introspect', introspectHandler);
   app.post('/logout', logoutHandler);
   app.get('/userinfo', userInfoHandler);
-  app.post('/login', internalLoginHandler);
+  app.post('/login', loginHandler);
   app.post('/register', registerUserHandler);
-  app.get('/api/v1/users/me', getCurrentUserHandler);
-  app.patch('/api/v1/users/me/profile', updateCurrentProfileHandler);
-  app.post('/api/v1/users/me/password', changeCurrentPasswordHandler);
-  app.delete('/api/v1/users/me/sessions', signOutFromAllSessionsHandler);
   app.post('/verification/request', requestVerificationHandler);
   app.post('/verification/confirm', confirmVerificationHandler);
-  app.get('/verify-email', verificationLinkRedirectHandler);
   app.post('/password-reset/request', requestPasswordResetHandler);
   app.post('/password-reset/confirm', confirmPasswordResetHandler);
-  app.get('/reset-password', passwordResetLinkRedirectHandler);
   app.post('/admin/users', createAdminUserHandler);
-  app.get('/admin/users', listAdminUsersHandler);
   app.get('/admin/users/:sub', getAdminUserHandler);
   app.post('/admin/users/:sub/disable', disableAdminUserHandler);
   app.post('/admin/users/:sub/enable', enableAdminUserHandler);
   app.patch('/admin/users/:sub/profile', updateAdminUserProfileHandler);
   app.post('/admin/users/:sub/email-verification/mark-verified', markAdminUserEmailVerifiedHandler);
-  app.get('/admin/audit-logs', listAdminAuditLogsHandler);
-  app.get('/admin/sessions', listAdminSessionsHandler);
-  app.post('/admin/maintenance/purge-unverified-users', purgeUnverifiedUsersHandler);
   app.post('/admin/clients', createAdminClientHandler);
   app.get('/admin/clients', listAdminClientsHandler);
   app.get('/admin/clients/:clientId', getAdminClientHandler);
@@ -193,7 +170,6 @@ export const startServer = async () => {
   try {
     await connectDatabase();
     await getRedisClient();
-    await oidcKeyService.initializeActiveSigningKey();
 
     return createServer().listen(config.app.port, () => {
       process.stdout.write(`Server listening on port ${config.app.port}\n`);

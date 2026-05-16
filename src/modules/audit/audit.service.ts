@@ -4,11 +4,7 @@ import { logger } from '../../infrastructure/logger/index.js';
 import { incrementCounter } from '../../infrastructure/metrics/metrics.js';
 import { BaseError } from '../../shared/errors/index.js';
 
-import {
-  AuditRepository,
-  type CreateAuditEventInput,
-  type ListAuditEventsInput,
-} from './audit.repository.js';
+import { AuditRepository, type CreateAuditEventInput } from './audit.repository.js';
 import {
   AUDIT_ACTOR_TYPES,
   AUDIT_EVENT_CATEGORIES,
@@ -45,11 +41,6 @@ export interface RecordAuditEventInput {
   reasonCode?: string;
   metadata?: AuditMetadata;
   occurredAt?: Date | string;
-}
-
-export interface ListAuditEventsRequest {
-  skip?: unknown;
-  limit?: unknown;
 }
 
 export type AuditRecordResult =
@@ -637,25 +628,6 @@ const summarizeValidationError = (error: unknown): { reason: string; code: strin
   };
 };
 
-const normalizeListParameter = (value: unknown, fieldName: string, defaultValue: number): number => {
-  if (value === undefined) {
-    return defaultValue;
-  }
-
-  if (typeof value === 'number' && Number.isInteger(value) && value >= 0) {
-    return value;
-  }
-
-  if (typeof value === 'string') {
-    const parsed = Number.parseInt(value, 10);
-    if (Number.isInteger(parsed) && parsed >= 0) {
-      return parsed;
-    }
-  }
-
-  throw invalidAuditInput(`${fieldName} must be a non-negative integer.`);
-};
-
 export class AuditService {
   constructor(private readonly repository: AuditRepository = new AuditRepository()) {}
 
@@ -728,15 +700,6 @@ export class AuditService {
         code: 'AUDIT_PERSISTENCE_FAILED',
       };
     }
-  }
-
-  async listEvents(input: ListAuditEventsRequest = {}): Promise<AuditEventRecord[]> {
-    const repositoryInput: ListAuditEventsInput = {
-      skip: normalizeListParameter(input.skip, 'skip', 0),
-      limit: Math.min(normalizeListParameter(input.limit, 'limit', 50), 200),
-    };
-
-    return this.repository.listEvents(repositoryInput);
   }
 }
 

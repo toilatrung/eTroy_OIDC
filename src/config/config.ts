@@ -10,7 +10,6 @@ export interface AppConfig {
     environment: 'development' | 'test' | 'production';
     port: number;
     baseUrl: string;
-    publicUiBaseUrl: string;
     isDevelopment: boolean;
     isTest: boolean;
     isProduction: boolean;
@@ -125,23 +124,6 @@ const parseOidcClients = (raw: string): OidcClient[] => {
 };
 
 const oidcClients = parseOidcClients(validatedEnv.OIDC_CLIENTS_JSON);
-const resolvePublicUiBaseUrl = (clients: readonly OidcClient[]): string => {
-  const preferredClient = clients.find((client) => client.clientId === 'etroy-web') ?? clients[0];
-  const candidateRedirectUri = preferredClient?.redirectUris[0];
-
-  if (candidateRedirectUri === undefined) {
-    return validatedEnv.APP_BASE_URL;
-  }
-
-  try {
-    const parsed = new URL(candidateRedirectUri);
-    return `${parsed.origin}/`;
-  } catch {
-    return validatedEnv.APP_BASE_URL;
-  }
-};
-
-const publicUiBaseUrl = resolvePublicUiBaseUrl(oidcClients);
 const OIDC_SESSION_TTL_SECONDS = 8 * 60 * 60;
 const OIDC_SESSION_COOKIE_NAME = 'etroy_oidc_sid';
 const OIDC_SESSION_COOKIE_PATH = '/';
@@ -153,7 +135,6 @@ export const config: Readonly<AppConfig> = Object.freeze({
     environment,
     port: validatedEnv.PORT,
     baseUrl: validatedEnv.APP_BASE_URL,
-    publicUiBaseUrl,
     isDevelopment: environment === 'development',
     isTest: environment === 'test',
     isProduction: environment === 'production',
