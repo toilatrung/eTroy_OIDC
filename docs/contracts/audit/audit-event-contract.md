@@ -735,6 +735,17 @@ Audit role:
 
 Allowed event types:
 
+- `oidc.authorization.started`
+- `oidc.authorization.login_required`
+- `oidc.authorization.consent_required`
+- `oidc.authorization.consent_approved`
+- `oidc.authorization.consent_denied`
+- `oidc.authorization.consent_reused`
+- `oidc.authorization.consent_revoked`
+- `oidc.authorization.code_issued`
+- `oidc.authorization.invalid_client`
+- `oidc.authorization.invalid_scope`
+- `oidc.authorization.interaction_expired`
 - `oidc.authorization.accepted`
 - `oidc.authorization.denied`
 - `oidc.authorization.pkce_failed`
