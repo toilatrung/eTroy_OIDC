@@ -6,9 +6,7 @@ import type { MailProvider, MailSendRequest, MailSendResult } from './mail.types
 
 type AcceptedRecipient = string | { address: string };
 
-const resolveAcceptedRecipient = (
-  value: AcceptedRecipient | undefined,
-): string => {
+const resolveAcceptedRecipient = (value: AcceptedRecipient | undefined): string => {
   if (typeof value === 'string') {
     return value;
   }
