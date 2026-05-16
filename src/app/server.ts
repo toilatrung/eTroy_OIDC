@@ -45,12 +45,15 @@ import {
   requestPasswordResetHandler,
 } from '../modules/password-reset/password-reset.controller.js';
 import {
-  authorizeContinueHandler,
+  authorizeDecisionHandler,
   authorizeHandler,
+  authorizeInteractionHandler,
   internalLoginHandler,
   introspectHandler,
   jwksHandler,
+  listConnectedApplicationsHandler,
   logoutHandler,
+  revokeConnectedApplicationHandler,
   revokeHandler,
   tokenHandler,
 } from '../modules/oidc/controllers/oidc.controller.js';
@@ -85,8 +88,9 @@ export const createServer = (): Express => {
     response.type('text/plain; version=0.0.4; charset=utf-8').status(200).send(renderMetrics());
   });
   app.get('/authorize', authorizeHandler);
+  app.get('/authorize/interaction', authorizeInteractionHandler);
   app.get('/jwks', jwksHandler);
-  app.post('/authorize/continue', authorizeContinueHandler);
+  app.post('/authorize/decision', authorizeDecisionHandler);
   app.post('/token', tokenHandler);
   app.post('/revoke', revokeHandler);
   app.post('/introspect', introspectHandler);
@@ -98,6 +102,11 @@ export const createServer = (): Express => {
   app.patch('/api/v1/users/me/profile', updateCurrentProfileHandler);
   app.post('/api/v1/users/me/password', changeCurrentPasswordHandler);
   app.delete('/api/v1/users/me/sessions', signOutFromAllSessionsHandler);
+  app.get('/api/v1/users/me/connected-applications', listConnectedApplicationsHandler);
+  app.post(
+    '/api/v1/users/me/connected-applications/:clientId/revoke',
+    revokeConnectedApplicationHandler,
+  );
   app.post('/verification/request', requestVerificationHandler);
   app.post('/verification/confirm', confirmVerificationHandler);
   app.get('/verify-email', verificationLinkRedirectHandler);
