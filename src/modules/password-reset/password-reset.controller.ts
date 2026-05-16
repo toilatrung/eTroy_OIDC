@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 
+import { config } from '../../config/config.js';
 import { BaseError } from '../../shared/errors/index.js';
 import {
   passwordResetService,
@@ -54,4 +55,18 @@ export const confirmPasswordResetHandler = async (
   } catch (error: unknown) {
     next(error);
   }
+};
+
+export const passwordResetLinkRedirectHandler = (
+  request: Request,
+  response: Response,
+): void => {
+  const target = new URL('/reset-password', config.app.publicUiBaseUrl);
+  const token = request.query.token;
+
+  if (typeof token === 'string' && token.trim().length > 0) {
+    target.searchParams.set('token', token.trim());
+  }
+
+  response.redirect(302, target.toString());
 };

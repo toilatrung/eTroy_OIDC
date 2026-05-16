@@ -36,6 +36,15 @@ export interface UpdateUserRecordInput {
 
 export type UserLookup = Readonly<{ id: string } | { sub: string }>;
 
+export interface ListUsersOptions {
+  skip?: number;
+  limit?: number;
+}
+
+export interface CountUnverifiedUsersOptions {
+  createdBefore?: Date;
+}
+
 interface MongoDuplicateKeyError extends Error {
   code?: unknown;
   keyPattern?: Record<string, unknown>;
@@ -148,5 +157,29 @@ export class UserRepository {
     } catch (error: unknown) {
       throw normalizeDuplicateEmail(error);
     }
+  }
+
+  async listUsers(options: ListUsersOptions = {}): Promise<UserEntity[]> {
+    const skip = Math.max(0, Math.floor(options.skip ?? 0));
+    const limit = Math.max(1, Math.min(200, Math.floor(options.limit ?? 50)));
+    const users = await UserModel.find({})
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    return users.map((user) => toUserEntity(user));
+  }
+
+  async countUnverifiedUsers(options: CountUnverifiedUsersOptions = {}): Promise<number> {
+    const filter: Record<string, unknown> = {
+      email_verified: false,
+    };
+
+    if (options.createdBefore !== undefined) {
+      filter.createdAt = { $lte: options.createdBefore };
+    }
+
+    return UserModel.countDocuments(filter).exec();
   }
 }

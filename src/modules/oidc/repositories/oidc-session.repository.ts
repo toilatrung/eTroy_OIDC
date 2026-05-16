@@ -41,6 +41,23 @@ export interface InvalidateOidcSessionInput {
   invalidatedAt: Date;
 }
 
+export interface ListOidcSessionsInput {
+  subject?: string;
+  status?: OidcSessionStatus;
+  limit?: number;
+}
+
+export interface InvalidateOidcSessionsBySubjectInput {
+  subject: string;
+  invalidatedAt: Date;
+  limit?: number;
+}
+
+export interface InvalidateOidcSessionsBySubjectResult {
+  invalidatedCount: number;
+  truncated: boolean;
+}
+
 export interface ExpireOidcSessionInput {
   sessionId: string;
 }
@@ -51,6 +68,10 @@ export interface OidcSessionRepositoryPort {
   touchSession(input: TouchOidcSessionInput): Promise<OidcSessionRecord | null>;
   invalidateSession(input: InvalidateOidcSessionInput): Promise<OidcSessionRecord | null>;
   markSessionExpired(input: ExpireOidcSessionInput): Promise<OidcSessionRecord | null>;
+  listSessions(input?: ListOidcSessionsInput): Promise<OidcSessionRecord[]>;
+  invalidateSessionsBySubject(
+    input: InvalidateOidcSessionsBySubjectInput,
+  ): Promise<InvalidateOidcSessionsBySubjectResult>;
 }
 
 export class OidcSessionRepository implements OidcSessionRepositoryPort {
@@ -137,6 +158,80 @@ export class OidcSessionRepository implements OidcSessionRepositoryPort {
     await this.writeRecord(record);
 
     return record;
+  }
+
+  async listSessions(input: ListOidcSessionsInput = {}): Promise<OidcSessionRecord[]> {
+    const requestedLimit = Math.floor(input.limit ?? 100);
+    const limit = Math.max(1, Math.min(500, requestedLimit));
+    const subject = input.subject?.trim();
+    const status = input.status;
+    const records: OidcSessionRecord[] = [];
+    const client = await this.getClient();
+    let cursor = '0';
+
+    do {
+      const [nextCursor, keys] = await client.scan(cursor, 'MATCH', `${SESSION_KEY_PREFIX}*`, 'COUNT', 200);
+      cursor = nextCursor;
+
+      if (keys.length > 0) {
+        const values = await client.mget(...keys);
+        for (const value of values) {
+          if (value === null) {
+            continue;
+          }
+
+          const parsed = deserializeOidcSessionRecord(value);
+          if (parsed === null) {
+            continue;
+          }
+
+          if (subject !== undefined && parsed.subject !== subject) {
+            continue;
+          }
+
+          if (status !== undefined && parsed.status !== status) {
+            continue;
+          }
+
+          records.push(parsed);
+          if (records.length >= limit) {
+            break;
+          }
+        }
+      }
+    } while (cursor !== '0' && records.length < limit);
+
+    records.sort((left, right) => right.lastSeenAt.getTime() - left.lastSeenAt.getTime());
+    return records;
+  }
+
+  async invalidateSessionsBySubject(
+    input: InvalidateOidcSessionsBySubjectInput,
+  ): Promise<InvalidateOidcSessionsBySubjectResult> {
+    const limit = Math.max(1, Math.min(500, Math.floor(input.limit ?? 200)));
+    const subject = input.subject.trim();
+    const sessions = await this.listSessions({
+      subject,
+      status: 'active',
+      limit: limit + 1,
+    });
+
+    let invalidatedCount = 0;
+    const targetSessions = sessions.slice(0, limit);
+    for (const session of targetSessions) {
+      const updated = await this.invalidateSession({
+        sessionId: session.sessionId,
+        invalidatedAt: input.invalidatedAt,
+      });
+      if (updated !== null) {
+        invalidatedCount += 1;
+      }
+    }
+
+    return {
+      invalidatedCount,
+      truncated: sessions.length > limit,
+    };
   }
 
   private async writeRecord(record: OidcSessionRecord): Promise<void> {
@@ -231,6 +326,46 @@ export class InMemoryOidcSessionRepository implements OidcSessionRepositoryPort 
     return {
       ...record,
       clientIds: [...record.clientIds],
+    };
+  }
+
+  async listSessions(input: ListOidcSessionsInput = {}): Promise<OidcSessionRecord[]> {
+    const limit = Math.max(1, Math.min(500, Math.floor(input.limit ?? 100)));
+    const subject = input.subject?.trim();
+    const status = input.status;
+    const records = [...this.records.values()]
+      .filter((record) => (subject === undefined ? true : record.subject === subject))
+      .filter((record) => (status === undefined ? true : record.status === status))
+      .sort((left, right) => right.lastSeenAt.getTime() - left.lastSeenAt.getTime())
+      .slice(0, limit)
+      .map((record) => ({
+        ...record,
+        clientIds: [...record.clientIds],
+      }));
+
+    return records;
+  }
+
+  async invalidateSessionsBySubject(
+    input: InvalidateOidcSessionsBySubjectInput,
+  ): Promise<InvalidateOidcSessionsBySubjectResult> {
+    const limit = Math.max(1, Math.min(500, Math.floor(input.limit ?? 200)));
+    const subject = input.subject.trim();
+    const candidateSessions = [...this.records.values()]
+      .filter((record) => record.subject === subject && record.status === 'active')
+      .sort((left, right) => right.lastSeenAt.getTime() - left.lastSeenAt.getTime());
+
+    let invalidatedCount = 0;
+    for (const session of candidateSessions.slice(0, limit)) {
+      session.status = 'invalidated';
+      session.invalidatedAt = input.invalidatedAt;
+      this.records.set(session.sessionId, session);
+      invalidatedCount += 1;
+    }
+
+    return {
+      invalidatedCount,
+      truncated: candidateSessions.length > limit,
     };
   }
 }

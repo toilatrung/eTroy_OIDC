@@ -1,5 +1,6 @@
 import { config } from '../../config/config.js';
 import { mailService, type MailService } from '../../infrastructure/mail/index.js';
+import { logger } from '../../infrastructure/logger/index.js';
 import { BaseError } from '../../shared/errors/index.js';
 import {
   TOKEN_PURPOSE_PASSWORD_RESET,
@@ -79,7 +80,7 @@ export class PasswordResetService {
 
     await this.users.changePassword(validatedToken.userId, {
       newPassword: normalizedNewPassword,
-    });
+    }, { requireCurrentPassword: false });
     await this.tokens.consumeToken(validatedToken.tokenId);
 
     return successResponse();
@@ -91,7 +92,7 @@ export class PasswordResetService {
         user.sub,
         TOKEN_PURPOSE_PASSWORD_RESET,
       );
-      const resetUrl = new URL('/reset-password', config.app.baseUrl);
+      const resetUrl = new URL('/reset-password', config.app.publicUiBaseUrl);
       resetUrl.searchParams.set('token', generatedToken.rawToken);
       const link = resetUrl.toString();
 
@@ -101,8 +102,18 @@ export class PasswordResetService {
         text: `Reset your password by opening this link: ${link}`,
         html: `<p>Reset your password by opening this link:</p><p><a href="${link}">${link}</a></p>`,
       });
-    } catch {
-      // Suppress side-effect errors to preserve anti-enumeration response behavior.
+    } catch (error: unknown) {
+      logger.warn(
+        {
+          module: 'password-reset',
+          operation: 'dispatch_reset_email',
+          outcome: 'failure',
+          reasonCode: 'PASSWORD_RESET_EMAIL_SEND_FAILED',
+          errorName: error instanceof Error ? error.name : 'UnknownError',
+          errorCode: 'PASSWORD_RESET_EMAIL_SEND_FAILED',
+        },
+        'Password reset email dispatch failed.',
+      );
     }
   }
 }
