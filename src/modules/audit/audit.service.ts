@@ -637,7 +637,11 @@ const summarizeValidationError = (error: unknown): { reason: string; code: strin
   };
 };
 
-const normalizeListParameter = (value: unknown, fieldName: string, defaultValue: number): number => {
+const normalizeListParameter = (
+  value: unknown,
+  fieldName: string,
+  defaultValue: number,
+): number => {
   if (value === undefined) {
     return defaultValue;
   }

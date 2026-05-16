@@ -57,10 +57,7 @@ export const confirmPasswordResetHandler = async (
   }
 };
 
-export const passwordResetLinkRedirectHandler = (
-  request: Request,
-  response: Response,
-): void => {
+export const passwordResetLinkRedirectHandler = (request: Request, response: Response): void => {
   const target = new URL('/reset-password', config.app.publicUiBaseUrl);
   const token = request.query.token;
 

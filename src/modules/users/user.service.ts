@@ -163,7 +163,11 @@ const normalizeEmail = (value: unknown): string => {
   return email;
 };
 
-const normalizeNonNegativeInteger = (value: unknown, fieldName: string, defaultValue: number): number => {
+const normalizeNonNegativeInteger = (
+  value: unknown,
+  fieldName: string,
+  defaultValue: number,
+): number => {
   if (value === undefined) {
     return defaultValue;
   }

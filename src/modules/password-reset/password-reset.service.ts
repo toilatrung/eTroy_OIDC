@@ -78,9 +78,13 @@ export class PasswordResetService {
       TOKEN_PURPOSE_PASSWORD_RESET,
     );
 
-    await this.users.changePassword(validatedToken.userId, {
-      newPassword: normalizedNewPassword,
-    }, { requireCurrentPassword: false });
+    await this.users.changePassword(
+      validatedToken.userId,
+      {
+        newPassword: normalizedNewPassword,
+      },
+      { requireCurrentPassword: false },
+    );
     await this.tokens.consumeToken(validatedToken.tokenId);
 
     return successResponse();

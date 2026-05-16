@@ -58,10 +58,7 @@ export const confirmVerificationHandler = async (
   }
 };
 
-export const verificationLinkRedirectHandler = (
-  request: Request,
-  response: Response,
-): void => {
+export const verificationLinkRedirectHandler = (request: Request, response: Response): void => {
   const target = new URL('/verify-email/result', config.app.publicUiBaseUrl);
   const token = request.query.token;
 

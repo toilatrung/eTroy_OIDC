@@ -170,7 +170,13 @@ export class OidcSessionRepository implements OidcSessionRepositoryPort {
     let cursor = '0';
 
     do {
-      const [nextCursor, keys] = await client.scan(cursor, 'MATCH', `${SESSION_KEY_PREFIX}*`, 'COUNT', 200);
+      const [nextCursor, keys] = await client.scan(
+        cursor,
+        'MATCH',
+        `${SESSION_KEY_PREFIX}*`,
+        'COUNT',
+        200,
+      );
       cursor = nextCursor;
 
       if (keys.length > 0) {

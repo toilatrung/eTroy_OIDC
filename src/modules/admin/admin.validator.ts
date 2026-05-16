@@ -144,7 +144,12 @@ const optionalIntegerFromQuery = (fieldName: string, max: number) =>
 
       return value;
     },
-    z.number().int().min(0, `${fieldName} must be >= 0`).max(max, `${fieldName} is too large`).optional(),
+    z
+      .number()
+      .int()
+      .min(0, `${fieldName} must be >= 0`)
+      .max(max, `${fieldName} is too large`)
+      .optional(),
   );
 
 const adminListQuerySchema = z
