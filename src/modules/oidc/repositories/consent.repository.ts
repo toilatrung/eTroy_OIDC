@@ -48,9 +48,10 @@ export class OidcConsentRepository {
     return record === null ? null : toEntity(record);
   }
 
-  async listBySubject(subject: string): Promise<OidcConsentEntity[]> {
+  async listActiveBySubject(subject: string): Promise<OidcConsentEntity[]> {
     const records = await OidcConsentModel.find({
       subject,
+      status: 'active',
     })
       .sort({ updatedAt: -1 })
       .exec();
