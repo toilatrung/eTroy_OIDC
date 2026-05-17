@@ -95,7 +95,7 @@ export class OidcConsentService {
     subject: string,
     resolveClientName: (clientId: string) => Promise<string> | string,
   ): Promise<ConnectedApplicationView[]> {
-    const consents = await this.repository.listBySubject(subject);
+    const consents = await this.repository.listActiveBySubject(subject);
     const views = await Promise.all(
       consents.map(async (consent) =>
         toConnectedApplicationView(consent, await resolveClientName(consent.clientId)),
